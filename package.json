@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "hooks": "husky install"
+    "hooks": "husky install",
+    "postinstall": "pnpm hooks"
   },
   "jest": {
     "preset": "jest-expo"
