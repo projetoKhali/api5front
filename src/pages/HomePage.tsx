@@ -1,11 +1,11 @@
 import React from 'react';
-import { SafeAreaView, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-const App: React.FC = () => {
+const HomePage: React.FC = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>API5 FRONT-END</Text>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.text}>Home Page</Text>
+    </View>
   );
 };
 
@@ -15,11 +15,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   text: {
     fontSize: 20,
     fontWeight: 'bold',
   },
 });
 
-export default App;
+export default HomePage;
