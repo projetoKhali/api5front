@@ -1,33 +1,11 @@
 import React from 'react';
-import AppNavigation from './navigation/AppNavigation';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <AppNavigation />
+    <View>
+      <Dashboard/>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 24,
-  },
-  main: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 960,
-    marginHorizontal: 'auto',
-  },
-  title: {
-    fontSize: 64,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 36,
-    color: '#38434D',
-  },
-});

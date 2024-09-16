@@ -1,34 +1,23 @@
-import { StyleSheet, Text, View } from "react-native";
+import App from "@/src/App";
+import { View } from "react-native";
+import { StyleSheet, Dimensions } from 'react-native';
+import React from 'react';
 
 export default function Page() {
   return (
     <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.title}>Hello World</Text>
-        <Text style={styles.subtitle}>This is the first page of your app.</Text>
-      </View>
+      <App/>
     </View>
   );
 }
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 24,
-  },
-  main: {
-    flex: 1,
-    justifyContent: "center",
-    maxWidth: 960,
-    marginHorizontal: "auto",
-  },
-  title: {
-    fontSize: 64,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 36,
-    color: "#38434D",
-  },
+    backgroundColor: '#DCDADA',
+    width: width,
+    height: height,
+    alignItems: 'center',
+  }
 });
