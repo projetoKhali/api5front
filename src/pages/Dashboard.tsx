@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Filter from '../components/filter';
+import Card from '../components/Card';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -42,6 +43,15 @@ const Dashboard = () => {
           <Text style={styles.buttonText}>Filtrar</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.cardSection}>
+        <Card titleCard="Candidatos" valueCard="120" />
+        <Card titleCard="Vagas Abertas" valueCard="25" />
+        <Card titleCard="Processos Ativos" valueCard="3" />
+        <Card titleCard="Candidatos" valueCard="120" />
+        <Card titleCard="Vagas Abertas" valueCard="25" />
+        <Card titleCard="Processos Ativos" valueCard="3" />
+
+      </View>
     </View>
   );
 };
@@ -79,6 +89,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center'
+  },
+  cardSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: 20,
+    borderRadius: 10,
   },
 });
 
