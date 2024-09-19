@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Filter from '../components/filter';
+import BarChart from '../components/barChart'; 
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
   const [vacancy, setVacancy] = useState<string>('');
   const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
   const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
+
+  // Dados para o gráfico de barras
+  const chartData = [
+    { month: 'Jan', duration: '10:23:40' },
+    { month: 'Fev', duration: '12:23:00' },
+    { month: 'Mar', duration: '8:23:15' },
+    { month: 'Abr', duration: '15:12:09' },
+    { month: 'Mai', duration: '7:40:00' },
+    { month: 'Jun', duration: '11:15:30' },
+  ];
 
   const handleFilter = () => {
     console.log('Processo Seletivo:', hiringProcess);
@@ -42,6 +53,11 @@ const Dashboard = () => {
           <Text style={styles.buttonText}>Filtrar</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.graph}>
+        <View style={styles.chartSection}>
+          <BarChart data={chartData} />
+        </View>
+      </View>
     </View>
   );
 };
@@ -72,13 +88,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginHorizontal: 5,
-    width: 100
+    width: 100,
   },
   buttonText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+  },
+  chartSection: {
+    width: width * 0.4,
+    height: height * 0.4,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start', 
+    paddingVertical: 20,
+  },
+  graph: {
+    width: width,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
 });
 
