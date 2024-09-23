@@ -9,6 +9,16 @@ const Dashboard = () => {
   const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
   const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
 
+  // Dados para o gráfico de barras
+  const chartData = [
+    { month: 'Jan', duration: '10:23:40' },
+    { month: 'Fev', duration: '12:23:00' },
+    { month: 'Mar', duration: '8:23:15' },
+    { month: 'Abr', duration: '15:12:09' },
+    { month: 'Mai', duration: '7:40:00' },
+    { month: 'Jun', duration: '11:15:30' },
+  ];
+
   const handleFilter = () => {
     console.log('Processo Seletivo:', hiringProcess);
     console.log('Vaga:', vacancy);
@@ -82,7 +92,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginHorizontal: 5,
-    width: 100
+    width: 100,
   },
   buttonText: {
     color: '#fff',
