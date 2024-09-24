@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Filter from '../components/filter';
-import BarChart from '../components/barChart'; 
+import Card from '../components/Card';
+import BarChart from '../components/barChart';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -53,6 +54,14 @@ const Dashboard = () => {
           <Text style={styles.buttonText}>Filtrar</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.cardSection}>
+        <Card titleCard="Candidatos" valueCard="120" />
+        <Card titleCard="Vagas Abertas" valueCard="25" />
+        <Card titleCard="Processos Ativos" valueCard="3" />
+        <Card titleCard="Candidatos" valueCard="120" />
+        <Card titleCard="Vagas Abertas" valueCard="25" />
+        <Card titleCard="Processos Ativos" valueCard="3" />
+      </View>
       <View style={styles.graph}>
         <View style={styles.chartSection}>
           <BarChart data={chartData} />
@@ -81,6 +90,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: width,
     paddingVertical: 10,
+    zIndex: 10,
   },
   button: {
     backgroundColor: '#F28727',
@@ -109,6 +119,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 20,
+  },
+  cardSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: 20,
+    borderRadius: 10,
   },
 });
 

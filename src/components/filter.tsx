@@ -26,7 +26,7 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
           <DatePicker
             selected={date}
             onChange={handleDateChange}
-            dateFormat="yyyy-MM-dd"
+            dateFormat="dd/MM/yyyy"
             placeholderText={placeholder}
             className="react-datepicker-wrapper"
             wrapperClassName="react-datepicker-container"

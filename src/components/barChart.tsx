@@ -2,13 +2,11 @@ import React from 'react';
 import { View } from 'react-native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryTheme, VictoryLabel } from 'victory-native';
 
-// Função para converter 'hh:mm:ss' para segundos
 const timeToSeconds = (time: string): number => {
   const [hours, minutes, seconds] = time.split(':').map(Number);
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-// Dados do gráfico
 type DataItem = {
   month: string;
   duration: string;
