@@ -1,7 +1,12 @@
 import App from "@/src/App";
-import { View } from "react-native";
+import { LogBox, View } from "react-native";
 import { StyleSheet, Dimensions } from 'react-native';
 import React from 'react';
+
+LogBox.ignoreLogs([
+  'accessibilityHint', // Especifica o texto do warning para ignorar
+]);
+
 
 export default function Page() {
   return (

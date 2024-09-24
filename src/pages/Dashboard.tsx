@@ -1,31 +1,59 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
+import { getMockDashboardData} from '../service/Dashboard';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
   const [vacancy, setVacancy] = useState<string>('');
   const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
   const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
+  const [chartData, setChartData] = useState<{ month: string; duration: string }[]>([]);
 
-  // Dados para o gráfico de barras
-  const chartData = [
-    { month: 'Jan', duration: '10:23:40' },
-    { month: 'Fev', duration: '12:23:00' },
-    { month: 'Mar', duration: '8:23:15' },
-    { month: 'Abr', duration: '15:12:09' },
-    { month: 'Mai', duration: '7:40:00' },
-    { month: 'Jun', duration: '11:15:30' },
-  ];
+  const buildUrlWithFilters = () => {
+    let url = 'https://example.com/api/dashboard?';
+
+    if (hiringProcess) url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
+    if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
+    if (dateStartFiltro) url += `startDate=${encodeURIComponent(dateStartFiltro)}&`;
+    if (dateEndtFiltro) url += `endDate=${encodeURIComponent(dateEndtFiltro)}&`;
+
+    return url.endsWith('&') ? url.slice(0, -1) : url;
+  };
+
+  const fetchMockDashboard = async () => {
+    const url = buildUrlWithFilters();
+    console.log('URL da requisição:', url);
+
+    try {
+      const dashboardData = await getMockDashboardData();
+      // const dashboard = await getDashboardData(url);
+      // console.log(dashboard);
+
+      const { months } = dashboardData;
+
+      const formattedChartData = Object.keys(months).map((month) => ({
+        month: capitalize(month),
+        duration: months[month as keyof typeof months],
+      }));
+
+      setChartData(formattedChartData);
+    } catch (error) {
+      console.error('Erro ao buscar dados do mock:', error);
+    }
+  };
 
   const handleFilter = () => {
-    console.log('Processo Seletivo:', hiringProcess);
-    console.log('Vaga:', vacancy);
-    console.log('Data Inicio:', dateStartFiltro);
-    console.log('Data Final:', dateEndtFiltro);
+    fetchMockDashboard();
   };
+
+  const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
+  useEffect(() => {
+    fetchMockDashboard();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -107,8 +135,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   chartSection: {
-    width: width * 0.4,
-    height: height * 0.4,
+    width: width * 0.7,
     justifyContent: 'flex-start',
     alignItems: 'flex-start', 
     paddingVertical: 20,
