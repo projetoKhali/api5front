@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [vacancy, setVacancy] = useState<string>('');
   const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
   const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
-  const [chartData, setChartData] = useState<{ month: string; duration: string }[]>([]);
+  const [chartData, setChartData] = useState<{ month: string; duration: number }[]>([]);
 
   const buildUrlWithFilters = () => {
     let url = 'https://example.com/api/dashboard?';
@@ -94,6 +94,9 @@ const Dashboard = () => {
         <View style={styles.chartSection}>
           <BarChart data={chartData} />
         </View>
+        <View style={styles.chartSection}>
+          <BarChart data={chartData} />
+        </View>
       </View>
     </View>
   );
@@ -134,18 +137,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  chartSection: {
-    width: width * 0.7,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start', 
-    paddingVertical: 20,
-  },
   graph: {
-    width: width,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    width: '100%',
+    height: height * 0.4,
+  },
+  chartSection: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    width: width * 0.2,
   },
   cardSection: {
     flexDirection: 'row',

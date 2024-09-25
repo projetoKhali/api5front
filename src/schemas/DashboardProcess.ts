@@ -14,18 +14,18 @@ interface Cards {
 }
 
 interface Months {
-  january: string;
-  february: string;
-  march: string;
-  april: string;
-  may: string;
-  june: string;
-  july: string;
-  august: string;
-  september: string;
-  october: string;
-  november: string;
-  december: string;
+  january: number;
+  february: number;
+  march: number;
+  april: number;
+  may: number;
+  june: number;
+  july: number;
+  august: number;
+  september: number;
+  october: number;
+  november: number;
+  december: number;
 }
 
 export default interface DashboardResponse {

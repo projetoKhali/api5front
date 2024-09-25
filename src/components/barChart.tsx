@@ -1,15 +1,10 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Text} from 'react-native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryTheme, VictoryLabel } from 'victory-native';
-
-const timeToSeconds = (time: string): number => {
-  const [hours, minutes, seconds] = time.split(':').map(Number);
-  return hours * 3600 + minutes * 60 + seconds;
-};
 
 type DataItem = {
   month: string;
-  duration: string;
+  duration: number;
 };
 
 type BarChartProps = {
@@ -18,12 +13,12 @@ type BarChartProps = {
 
 export default function BarChart({ data }: BarChartProps) {
   return (
-    <View style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
+    <View style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10, alignItems: 'center'}}>
+       <Text> Tempo médio de contratação (Em dias)</Text>
       <VictoryChart
         theme={VictoryTheme.material}
         domainPadding={20}
       >
-        {/* Eixo X */}
         <VictoryAxis
           style={{
             axis: { stroke: "#756f6a" },
@@ -37,7 +32,7 @@ export default function BarChart({ data }: BarChartProps) {
         <VictoryAxis
           dependentAxis
           style={{
-            axis: { stroke: "none" }, // Remove o traço do eixo
+            axis: { stroke: "none" },
             tickLabels: { fill: "none" }, // Remove os rótulos dos ticks
             grid: { stroke: "none" }, // Remove as linhas de grade
           }}
@@ -46,8 +41,8 @@ export default function BarChart({ data }: BarChartProps) {
         <VictoryBar 
           data={data.map(item => ({
             month: item.month,
-            durationInSeconds: timeToSeconds(item.duration),
-            duration: item.duration
+            durationInSeconds: item.duration,
+            duration: item.duration.toString()
           }))}
           x="month"
           y="durationInSeconds"

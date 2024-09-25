@@ -29,18 +29,18 @@ export async function getMockDashboardData(): Promise<DashboardResponse> {
       totalCandidates: 425
     },
     months: {
-      january: "20:00:00",
-      february: "21:00:00",
-      march: "22:00:00",
-      april: "23:00:00",
-      may: "00:00:00",
-      june: "01:00:00",
-      july: "02:00:00",
-      august: "03:00:00",
-      september: "04:00:00",
-      october: "05:00:00",
-      november: "06:00:00",
-      december: "07:00:00",
+      january: 23.4,
+      february: 14,
+      march: 16,
+      april: 31,
+      may: 13,
+      june: 20,
+      july: 11,
+      august: 5,
+      september: 8,
+      october: 12.7,
+      november: 11,
+      december: 10,
     }
   };
 
