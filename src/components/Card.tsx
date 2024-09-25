@@ -1,13 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 interface CardProps {
   titleCard: string;
-  valueCard: number | string;
+  valueCard: string;
 }
 
 const Card = ({ titleCard, valueCard }: CardProps) => {
-  if (typeof valueCard === 'number' && valueCard < 0) {
+
+  const numericValue = parseFloat(valueCard);
+  if (isNaN(numericValue)) {
+    console.warn('O valor do card não é um número válido');
+    return null;
+  }
+
+  if (numericValue < 0) {
     console.warn('O valor do card não pode ser menor do que zero');
     return null;
   }
@@ -20,7 +27,6 @@ const Card = ({ titleCard, valueCard }: CardProps) => {
   );
 };
 
-const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -29,26 +35,24 @@ const styles = StyleSheet.create({
     padding: 5,
     margin: 5,
     height: 135,
-    width: 175,
-    borderRadius: 8,
+    width: '15%',
+    minWidth: 150,
+    borderRadius: 10,
     shadowOffset: { width: 3, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    
   },
 
   value: {
     fontSize: 48,
-    fontFamily: 'Inter',
     textAlign: 'center',
-    color: '#333',
+    color: 'black',
   },
   
   title: {
     fontSize: 18,
-    fontFamily: 'Inter',
     textAlign: 'center',
-    color: '#666',
+    color: 'black',
     marginTop: 10,
   }
 });
