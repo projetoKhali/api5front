@@ -1,61 +1,60 @@
-import React from "react";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
-type CardProps = {
-    titleCard: string;
-    valueCard: string;
+interface CardProps {
+  titleCard: string;
+  valueCard: string;
 }
 
-const Card: React.FC<CardProps> = ({ titleCard, valueCard }) => {
+const Card = ({ titleCard, valueCard }: CardProps) => {
 
-    const numericValue = parseFloat(valueCard);
+  const numericValue = parseFloat(valueCard);
+  if (isNaN(numericValue)) {
+    console.warn('O valor do card não é um número válido');
+    return null;
+  }
 
-    if (!titleCard || !valueCard) {
-        throw new Error("Título e valor não podem ser nulos.");
-    }
+  if (numericValue < 0) {
+    console.warn('O valor do card não pode ser menor do que zero');
+    return null;
+  }
 
-    if (isNaN(numericValue) || numericValue < 0) {
-        throw new Error("O valor do card deve ser um número válido maior ou igual a 0.");
-    }
+  return (
+    <View style={styles.cardContainer}>
+      <Text style={styles.value}>{valueCard}</Text>
+      <Text style={styles.title}>{titleCard}</Text>
+    </View>
+  );
+};
 
-    return (
-        <div style={styles.cardContainer}>
-          <div style={styles.value}>{valueCard}</div>
-          <div style={styles.title}>{titleCard}</div>
-        </div>
-      );
 
-    };
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: '#fff',
+    flexDirection: 'column',
+    padding: 5,
+    margin: 5,
+    height: 135,
+    width: '15%',
+    minWidth: 150,
+    borderRadius: 10,
+    shadowOffset: { width: 3, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
 
-    const styles = {
-        cardContainer: {
-          width: '100%',
-          height: '100%',
-          
-          display: 'flex',
-          flexDirection: 'column' as const,
-          justifyContent: 'center',
-          alignItems: 'center',
-          border: '1px solid #ccc',
-          borderRadius: '10px',
-          padding: '16px',
-          boxSizing: 'border-box' as const,
+  value: {
+    fontSize: 48,
+    textAlign: 'center',
+    color: 'black',
+  },
+  
+  title: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: 'black',
+    marginTop: 10,
+  }
+});
 
-          margin: '0 10px',
-          backgroundColor: 'white',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        },
-
-        value: {
-          fontSize: '48px',
-          fontFamily: 'Inter, sans-serif',
-          marginBottom: 'auto',
-        },
-
-        title: {
-          fontSize: '18px',
-          fontFamily: 'Inter, sans-serif',
-          alignSelf: 'center'
-        },
-      };      
-      
-      export default Card;
+export default Card;
