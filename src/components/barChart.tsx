@@ -2,11 +2,13 @@ import React from 'react';
 import { View } from 'react-native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryTheme, VictoryLabel } from 'victory-native';
 
+// Função para converter 'hh:mm:ss' para segundos
 const timeToSeconds = (time: string): number => {
   const [hours, minutes, seconds] = time.split(':').map(Number);
   return hours * 3600 + minutes * 60 + seconds;
 };
 
+// Dados do gráfico
 type DataItem = {
   month: string;
   duration: string;
@@ -28,7 +30,7 @@ export default function BarChart({ data }: BarChartProps) {
           style={{
             axis: { stroke: "#756f6a" },
             ticks: { stroke: "grey", size: 5 },
-            tickLabels: { fontSize: 22, padding: 10, fill: '#333' },
+            tickLabels: { fontSize: 32, padding: 10, fill: '#333' },
             grid: { stroke: "none" },
           }}
         />
@@ -56,10 +58,10 @@ export default function BarChart({ data }: BarChartProps) {
           style={{
             data: { 
               fill: "#F28727",
-              width: 40,
+              width: 50,
               borderRadius: 4,
             },
-            labels: { fontSize: 22, fill: '#333' }
+            labels: { fontSize: 32, fill: '#333' }
           }}
           animate={{
             duration: 1000,
