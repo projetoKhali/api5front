@@ -1,23 +1,21 @@
 import App from "@/src/App";
-import { View } from "react-native";
-import { StyleSheet, Dimensions } from 'react-native';
+import { ScrollView } from "react-native";
+import { StyleSheet } from 'react-native';
 import React from 'react';
 
 export default function Page() {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <App/>
-    </View>
+    </ScrollView>
   );
 }
-
-const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#DCDADA',
-    width: width,
-    height: height,
+    width: '100%',
+    minHeight: '100%',
     alignItems: 'center',
   }
 });

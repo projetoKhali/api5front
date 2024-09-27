@@ -1,17 +1,11 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Text, Dimensions } from 'react-native';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryTheme, VictoryLabel } from 'victory-native';
 
-// Função para converter 'hh:mm:ss' para segundos
-const timeToSeconds = (time: string): number => {
-  const [hours, minutes, seconds] = time.split(':').map(Number);
-  return hours * 3600 + minutes * 60 + seconds;
-};
-
-// Dados do gráfico
 type DataItem = {
   month: string;
-  duration: string;
+  duration: number;
 };
 
 type BarChartProps = {
@@ -19,49 +13,58 @@ type BarChartProps = {
 };
 
 export default function BarChart({ data }: BarChartProps) {
+  const { width } = Dimensions.get('window');
+
+  const labelAngle = width < 400 ? -45 : 0;
+  
   return (
-    <View style={{ backgroundColor: '#f9f9f9', padding: 20, borderRadius: 10 }}>
+    <View style={{ backgroundColor: '#fff', paddingTop: RFPercentage(2), borderRadius: 10, alignItems: 'center', height: '100%', justifyContent: 'center', paddingBottom: RFPercentage(2) }}>
+      <Text style={{ fontSize: RFPercentage(1.5) }}> Tempo médio de contratação (Em dias)</Text>
       <VictoryChart
         theme={VictoryTheme.material}
-        domainPadding={20}
+        domainPadding={{ x: RFPercentage(2), y: RFPercentage(1) }}
+        height={RFPercentage(25)}
       >
-        {/* Eixo X */}
         <VictoryAxis
           style={{
             axis: { stroke: "#756f6a" },
             ticks: { stroke: "grey", size: 5 },
-            tickLabels: { fontSize: 32, padding: 10, fill: '#333' },
+            tickLabels: {
+              fontSize: RFPercentage(1.2),
+              fill: '#333',
+              angle: labelAngle,
+              textAnchor: labelAngle === 0 ? 'middle' : 'end',
+            },
             grid: { stroke: "none" },
           }}
         />
-        
-        {/* Eixo Y removido */}
+
         <VictoryAxis
           dependentAxis
           style={{
-            axis: { stroke: "none" }, // Remove o traço do eixo
-            tickLabels: { fill: "none" }, // Remove os rótulos dos ticks
-            grid: { stroke: "none" }, // Remove as linhas de grade
+            axis: { stroke: "none" },
+            tickLabels: { fill: "none" },
+            grid: { stroke: "none" },
           }}
         />
 
-        <VictoryBar 
+        <VictoryBar
           data={data.map(item => ({
             month: item.month,
-            durationInSeconds: timeToSeconds(item.duration),
-            duration: item.duration
+            durationInSeconds: item.duration,
+            duration: item.duration.toString().slice(0, 3),
           }))}
           x="month"
           y="durationInSeconds"
           labels={({ datum }) => datum.duration}
           labelComponent={<VictoryLabel dy={-10} />}
           style={{
-            data: { 
+            data: {
               fill: "#F28727",
-              width: 50,
+              width: RFPercentage(2),
               borderRadius: 4,
             },
-            labels: { fontSize: 32, fill: '#333' }
+            labels: { fontSize: RFPercentage(1.5), fill: '#333' },
           }}
           animate={{
             duration: 1000,

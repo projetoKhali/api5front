@@ -26,7 +26,6 @@ const Dashboard = () => {
     fechado: 0,
   });
 
-
   const buildUrlWithFilters = () => {
     let url = 'https://example.com/api/dashboard?';
 
@@ -44,16 +43,11 @@ const Dashboard = () => {
 
     try {
       const dashboardData = await getMockDashboardData();
-      // const dashboard = await getDashboardData(url);
-      // console.log(dashboard);
-
       const { months, cards, status } = dashboardData;
       const formattedChartData = Object.keys(months).map((month) => ({
         month: capitalize(month),
         duration: months[month as keyof typeof months],
-
-      })
-      );
+      }));
 
       setChartData(formattedChartData);
       setCardsData({
@@ -72,7 +66,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Erro ao buscar dados do mock:', error);
     }
-
   };
 
   const handleFilter = () => {
@@ -139,17 +132,18 @@ const Dashboard = () => {
   );
 };
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-
   container: {
     backgroundColor: '#DCDADA',
     width: '100%',
     height: '100%',
     alignItems: 'center',
+    paddingBottom: 20
   },
   filterSection: {
+    flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: '#EDE7E7',
     borderBottomWidth: 1,
@@ -176,21 +170,20 @@ const styles = StyleSheet.create({
   },
   chartSection: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     flexWrap: 'wrap',
     width: '100%',
-    padding: '1%',
-    paddingHorizontal: '1%',
+    paddingHorizontal: '3%',
     gap: 10
-
   },
   graph: {
-    width: '70%',
-    height: '100%',
+    width: '68%',
+    minWidth: 350,
+    minHeight: 200,
   },
   pieChart: {
-    width: '25%',
-    height: '100%',
+    width: '30%',
+    minWidth: 350,
   },
   cardSection: {
     flexDirection: 'row',
@@ -199,8 +192,7 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: '1%',
     paddingHorizontal: '1%',
-    gap:10,
-
+    gap: 10,
   },
 });
 
