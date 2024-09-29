@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { VictoryPie } from 'victory-native';
+import { RFPercentage } from 'react-native-responsive-fontsize';
 
 interface PieChartProps {
   title: string;
@@ -50,8 +51,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: RFPercentage(1.6),
     color: 'black',
+    paddingTop: 10
   },
 });
 
