@@ -5,7 +5,7 @@ const API_URL: string = 'http://localhost:8080';
 
 export async function getDashboardData(param: string): Promise<DashboardResponse> {
   try {
-    const response = await axios.get<DashboardResponse>(`${API_URL}/dashboard/${param}`);
+    const response = await axios.get<DashboardResponse>(`${API_URL}/api/v1/hiring-process/dashboard/${param}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);
@@ -16,31 +16,31 @@ export async function getDashboardData(param: string): Promise<DashboardResponse
 
 export async function getMockDashboardData(): Promise<DashboardResponse> {
   const mockResponse: DashboardResponse = {
-    status: {
-      open: 10,
-      expired: 7,
-      hired: 3,
+    vacancyStatus: {
+      open: Math.round(Math.random() * 100),
+      analyzing: Math.round(Math.random() * 100),
+      closed: Math.round(Math.random() * 100),
     },
     cards: {
-      processOpen: 2,
-      processOverdue: 1,
-      processCloseToExpiring: 2,
-      processClosed: 4,
-      totalCandidates: 425,
+      openProcess: Math.round(Math.random() * 100),
+      expirededProcess: Math.round(Math.random() * 100),
+      approachingDeadlineProcess: Math.round(Math.random() * 100),
+      closeProcess: Math.round(Math.random() * 100),
+      averageHiringTime: Math.round(Math.random() * 100),
     },
-    months: {
-      january: 23.4,
-      february: 14,
-      march: 16,
-      april: 31,
-      may: 13,
-      june: 20,
-      july: 11,
-      august: 5,
-      september: 8,
-      october: 12.7,
-      november: 11,
-      december: 10,
+    averageHiringTime: {
+      january: Math.round(Math.random() * 100),
+      february: Math.round(Math.random() * 100),
+      march: Math.round(Math.random() * 100),
+      april: Math.round(Math.random() * 100),
+      may: Math.round(Math.random() * 100),
+      june: Math.round(Math.random() * 100),
+      july: Math.round(Math.random() * 100),
+      august: Math.round(Math.random() * 100),
+      september: Math.round(Math.random() * 100),
+      october: Math.round(Math.random() * 100),
+      november: Math.round(Math.random() * 100),
+      december: Math.round(Math.random() * 100),
     }
   };
 

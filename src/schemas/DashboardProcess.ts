@@ -1,18 +1,18 @@
-interface Status {
+interface vacancyStatus {
   open: number;
-  expired: number;
-  hired: number;
+  analyzing: number;
+  closed: number;
 }
 
-interface Cards {
-  processOpen: number,
-  processOverdue: number,
-  processCloseToExpiring: number,
-  processClosed: number,
-  totalCandidates: number,
+interface cards {
+  openProcess: number,
+  expirededProcess: number,
+  approachingDeadlineProcess: number,
+  closeProcess: number,
+  averageHiringTime: number,
 }
 
-interface Months {
+interface averageHiringTime {
   january: number;
   february: number;
   march: number;
@@ -28,7 +28,7 @@ interface Months {
 }
 
 export default interface DashboardResponse {
-  status: Status;
-  cards: Cards;
-  months: Months;
+  vacancyStatus: vacancyStatus;
+  cards: cards;
+  averageHiringTime: averageHiringTime;
 }
