@@ -5,7 +5,7 @@ const API_URL: string = 'http://localhost:8080';
 
 export async function getDashboardData(param: string): Promise<DashboardResponse> {
   try {
-    const response = await axios.get<DashboardResponse>(`${API_URL}/dashboard/${param}`);
+    const response = await axios.get<DashboardResponse>(`${API_URL}/api/v1/hiring-process/dashboard/${param}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);
@@ -16,19 +16,19 @@ export async function getDashboardData(param: string): Promise<DashboardResponse
 
 export async function getMockDashboardData(): Promise<DashboardResponse> {
   const mockResponse: DashboardResponse = {
-    status: {
+    vacancyStatus: {
       open: Math.round(Math.random() * 100),
-      expired: Math.round(Math.random() * 100),
-      hired: Math.round(Math.random() * 100),
+      analyzing: Math.round(Math.random() * 100),
+      closed: Math.round(Math.random() * 100),
     },
     cards: {
-      processOpen: Math.round(Math.random() * 100),
-      processOverdue: Math.round(Math.random() * 100),
-      processCloseToExpiring: Math.round(Math.random() * 100),
-      processClosed: Math.round(Math.random() * 100),
-      totalCandidates: Math.round(Math.random() * 100),
+      openProcess: Math.round(Math.random() * 100),
+      expirededProcess: Math.round(Math.random() * 100),
+      approachingDeadlineProcess: Math.round(Math.random() * 100),
+      closeProcess: Math.round(Math.random() * 100),
+      averageHiringTime: Math.round(Math.random() * 100),
     },
-    months: {
+    averageHiringTime: {
       january: Math.round(Math.random() * 100),
       february: Math.round(Math.random() * 100),
       march: Math.round(Math.random() * 100),
