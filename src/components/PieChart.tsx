@@ -19,7 +19,7 @@ const PieChart = ({ title, aberto, concluido, fechado }: PieChartProps) => {
 
   const data = [
     { x: 'Abertos', y: aberto },
-    { x: 'Concluídos', y: concluido },
+    { x: 'Em analise', y: concluido },
     { x: 'Fechados', y: fechado },
   ];
 

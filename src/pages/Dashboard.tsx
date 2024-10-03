@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-nati
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
-import { getMockDashboardData } from '../service/Dashboard';
+import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 
 const Dashboard = () => {
@@ -27,7 +27,7 @@ const Dashboard = () => {
   });
 
   const buildUrlWithFilters = () => {
-    let url = 'https://example.com/api/dashboard?';
+    let url = '?';
 
     if (hiringProcess) url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
     if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
@@ -42,25 +42,25 @@ const Dashboard = () => {
     console.log('URL da requisição:', url);
 
     try {
-      const dashboardData = await getMockDashboardData();
-      const { months, cards, status } = dashboardData;
-      const formattedChartData = Object.keys(months).map((month) => ({
+      const dashboardData = await getDashboardData(url);
+      const { averageHiringTime, cards, vacancyStatus } = dashboardData;
+      const formattedChartData = Object.keys(averageHiringTime).map((month) => ({
         month: capitalize(month),
-        duration: months[month as keyof typeof months],
+        duration: averageHiringTime[month as keyof typeof averageHiringTime],
       }));
 
       setChartData(formattedChartData);
       setCardsData({
-        processOpen: cards.processOpen.toString(),
-        processOverdue: cards.processOverdue.toString(),
-        processCloseToExpiring: cards.processCloseToExpiring.toString(),
-        processClosed: cards.processClosed.toString(),
-        totalCandidates: cards.totalCandidates.toString(),
+        processOpen: cards.openProcess.toString(),
+        processOverdue: cards.expirededProcess.toString(),
+        processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
+        processClosed: cards.closeProcess.toString(),
+        totalCandidates: cards.averageHiringTime.toString(),
       });
       setPieData({
-        aberto: status.open,
-        concluido: status.hired,
-        fechado: status.expired,
+        aberto: vacancyStatus.open,
+        concluido: vacancyStatus.analyzing,
+        fechado: vacancyStatus.closed,
       });
 
     } catch (error) {
