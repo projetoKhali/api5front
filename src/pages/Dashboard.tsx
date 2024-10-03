@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
@@ -9,9 +15,11 @@ import PieChart from '../components/PieChart';
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
   const [vacancy, setVacancy] = useState<string>('');
-  const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
-  const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
-  const [chartData, setChartData] = useState<{ month: string; duration: number }[]>([]);
+  const [dateStartFilter, setDateStartFilter] = useState<string>('');
+  const [dateEndtFilter, setDateEndFilter] = useState<string>('');
+  const [chartData, setChartData] = useState<
+    { month: string; duration: number }[]
+  >([]);
   const [cardsData, setCardsData] = useState<{
     processOpen: string;
     processOverdue: string;
@@ -20,7 +28,11 @@ const Dashboard = () => {
     totalCandidates: string;
   } | null>(null);
 
-  const [pieData, setPieData] = useState<{ aberto: number; concluido: number; fechado: number }>({
+  const [pieData, setPieData] = useState<{
+    aberto: number;
+    concluido: number;
+    fechado: number;
+  }>({
     aberto: 0,
     concluido: 0,
     fechado: 0,
@@ -29,10 +41,12 @@ const Dashboard = () => {
   const buildUrlWithFilters = () => {
     let url = '?';
 
-    if (hiringProcess) url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
+    if (hiringProcess)
+      url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
     if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
-    if (dateStartFiltro) url += `startDate=${encodeURIComponent(dateStartFiltro)}&`;
-    if (dateEndtFiltro) url += `endDate=${encodeURIComponent(dateEndtFiltro)}&`;
+    if (dateStartFilter)
+      url += `startDate=${encodeURIComponent(dateStartFilter)}&`;
+    if (dateEndtFilter) url += `endDate=${encodeURIComponent(dateEndtFilter)}&`;
 
     return url.endsWith('&') ? url.slice(0, -1) : url;
   };
@@ -44,7 +58,7 @@ const Dashboard = () => {
     try {
       const dashboardData = await getDashboardData(url);
       const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-      const formattedChartData = Object.keys(averageHiringTime).map((month) => ({
+      const formattedChartData = Object.keys(averageHiringTime).map(month => ({
         month: capitalize(month),
         duration: averageHiringTime[month as keyof typeof averageHiringTime],
       }));
@@ -62,7 +76,6 @@ const Dashboard = () => {
         concluido: vacancyStatus.analyzing,
         fechado: vacancyStatus.closed,
       });
-
     } catch (error) {
       console.error('Erro ao buscar dados do mock:', error);
     }
@@ -72,7 +85,8 @@ const Dashboard = () => {
     fetchMockDashboard();
   };
 
-  const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+  const capitalize = (text: string) =>
+    text.charAt(0).toUpperCase() + text.slice(1);
 
   useEffect(() => {
     fetchMockDashboard();
@@ -80,27 +94,26 @@ const Dashboard = () => {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.filterSection}>
         <Filter
           placeholder="Filtro de Processos Seletivos"
           type="text"
-          onChange={(text) => setHiringProcess(text)}
+          onChange={text => setHiringProcess(text)}
         />
         <Filter
           placeholder="Filtro de vagas"
           type="text"
-          onChange={(text) => setVacancy(text)}
+          onChange={text => setVacancy(text)}
         />
         <Filter
           placeholder="Data Inicial"
           type="date"
-          onChange={(date) => setDateStartFiltro(date)}
+          onChange={date => setDateStartFilter(date)}
         />
         <Filter
           placeholder="Data Final"
           type="date"
-          onChange={(date) => setDateEndFiltro(date)}
+          onChange={date => setDateEndFilter(date)}
         />
         <TouchableOpacity style={styles.button} onPress={handleFilter}>
           <Text style={styles.buttonText}>Filtrar</Text>
@@ -108,11 +121,26 @@ const Dashboard = () => {
       </View>
 
       <View style={styles.cardSection}>
-        <Card titleCard="Processos Abertos" valueCard={cardsData?.processOpen ?? ''} />
-        <Card titleCard="Processos Vencidos" valueCard={cardsData?.processOverdue ?? ''} />
-        <Card titleCard="Processos a Vencer" valueCard={cardsData?.processCloseToExpiring ?? ''} />
-        <Card titleCard="Processos Encerrados" valueCard={cardsData?.processClosed ?? ''} />
-        <Card titleCard="Total de Candidaturas" valueCard={cardsData?.totalCandidates ?? ''} />
+        <Card
+          titleCard="Processos Abertos"
+          valueCard={cardsData?.processOpen ?? ''}
+        />
+        <Card
+          titleCard="Processos Vencidos"
+          valueCard={cardsData?.processOverdue ?? ''}
+        />
+        <Card
+          titleCard="Processos a Vencer"
+          valueCard={cardsData?.processCloseToExpiring ?? ''}
+        />
+        <Card
+          titleCard="Processos Encerrados"
+          valueCard={cardsData?.processClosed ?? ''}
+        />
+        <Card
+          titleCard="Total de Candidaturas"
+          valueCard={cardsData?.totalCandidates ?? ''}
+        />
       </View>
 
       <View style={styles.chartSection}>
@@ -124,10 +152,10 @@ const Dashboard = () => {
             title={'Processo Seletivo'}
             aberto={pieData.aberto}
             concluido={pieData.concluido}
-            fechado={pieData.fechado} />
+            fechado={pieData.fechado}
+          />
         </View>
       </View>
-
     </View>
   );
 };
@@ -140,7 +168,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     alignItems: 'center',
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   filterSection: {
     flexWrap: 'wrap',
@@ -174,7 +202,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     width: '100%',
     paddingHorizontal: '3%',
-    gap: 10
+    gap: 10,
   },
   graph: {
     width: '68%',
