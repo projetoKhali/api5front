@@ -22,6 +22,15 @@ export default function BarChart({ data }: BarChartProps) {
   const { width } = Dimensions.get('window');
 
   const labelAngle = width < 400 ? -45 : 0;
+
+  if (!data || !data.length) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.chartTitle}>Nenhum dado disponível</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.chartTitle}>
