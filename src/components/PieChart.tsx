@@ -5,38 +5,38 @@ import { RFPercentage } from 'react-native-responsive-fontsize';
 
 interface PieChartProps {
   title: string;
-  aberto: number;
-  concluido: number;
-  fechado: number;
+  data: {
+    abertos: number;
+    emAnálise: number;
+    fechados: number;
+  };
 }
 
-const PieChart = ({ title, aberto, concluido, fechado }: PieChartProps) => {
-
-  if (aberto < 0 || concluido < 0 || fechado < 0) {
-    console.warn('Os valores não podem ser menores que zero');
-    return null;
-  }
-
-  const data = [
-    { x: 'Abertos', y: aberto },
-    { x: 'Em analise', y: concluido },
-    { x: 'Fechados', y: fechado },
-  ];
+const PieChart = ({ title, data }: PieChartProps) => {
+  const formattedData = Object.entries(data)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value > 0)
+    .map(([key, value]) => ({
+      x: key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/(^\w|\b[A-Z])/g, char => char.toUpperCase()),
+      y: Math.max(value, 0),
+    }));
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-        <VictoryPie
-          data={data}
-          colorScale={['#4f8ef7', '#f76c5e', '#ffaf42']}
-          labels={({ datum }) => `${datum.x}: ${datum.y}`}
-          width={400}
-          height={250}
-          labelRadius={100}
-          style={{
-            labels: { fontSize: 15, fill: 'black' },
-          }}
-        />
+      <VictoryPie
+        data={formattedData}
+        colorScale={['#4f8ef7', '#f76c5e', '#ffaf42']}
+        labels={({ datum }) => `${datum.x}: ${datum.y}`}
+        width={400}
+        height={250}
+        labelRadius={100}
+        style={{
+          labels: { fontSize: 15, fill: 'black' },
+        }}
+      />
     </View>
   );
 };
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: RFPercentage(1.6),
     color: 'black',
-    paddingTop: 10
+    paddingTop: 10,
   },
 });
 
