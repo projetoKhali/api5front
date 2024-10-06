@@ -13,7 +13,6 @@ export async function getDashboardData(param: string): Promise<DashboardResponse
   }
 }
 
-
 export async function getMockDashboardData(): Promise<DashboardResponse> {
   const mockResponse: DashboardResponse = {
     vacancyStatus: {
@@ -41,12 +40,12 @@ export async function getMockDashboardData(): Promise<DashboardResponse> {
       october: Math.round(Math.random() * 100),
       november: Math.round(Math.random() * 100),
       december: Math.round(Math.random() * 100),
-    }
+    },
   };
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       resolve(mockResponse);
-    }, 500); 
+    }, 500);
   });
 }
