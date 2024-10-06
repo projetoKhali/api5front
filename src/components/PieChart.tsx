@@ -23,12 +23,22 @@ const PieChart = ({ title, data }: PieChartProps) => {
       y: Math.max(value, 0),
     }));
 
+  const colors = {
+    abertos: '#4f8ef7',
+    emAnálise: '#f76c5e',
+    fechados: '#ffaf42',
+  };
+
+  const colorsArray = (Object.keys(data) as Array<keyof typeof data>)
+    .filter(key => data[key] > 0)
+    .map(key => colors[key]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <VictoryPie
         data={formattedData}
-        colorScale={['#4f8ef7', '#f76c5e', '#ffaf42']}
+        colorScale={colorsArray}
         labels={({ datum }) => `${datum.x}: ${datum.y}`}
         width={400}
         height={250}
