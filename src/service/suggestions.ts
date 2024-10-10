@@ -17,7 +17,7 @@ export async function postSuggestionsProcess(ids: number[]): Promise<Suggestions
     try {
       const response = await axios.post<SuggestionsSchema[]>(`${API_URL}/api/v1/suggestions/process`, ids, {
         headers: {
-          'Content-Type': 'application/json' // Adiciona o cabeçalho correto
+          'Content-Type': 'application/json'
         }
       });
       return response.data;
