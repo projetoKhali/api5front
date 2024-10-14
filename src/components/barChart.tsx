@@ -67,7 +67,7 @@ export default function BarChart({ data }: BarChartProps) {
         <VictoryBar
           data={data.map(item => ({
             month: item.month,
-            durationInSeconds: item.duration,
+            durationInSeconds: item.duration || 0,
             duration: item.duration.toString().slice(0, 3),
           }))}
           x="month"

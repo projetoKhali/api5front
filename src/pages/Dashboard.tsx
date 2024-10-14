@@ -11,12 +11,15 @@ import Card from '../components/Card';
 import BarChart from '../components/barChart';
 import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
+import { Suggestion } from '../schemas/Suggestion';
+import MultiselectFilter from '../components/MultiselectFilter';
 
 const Dashboard = () => {
-  const [hiringProcess, setHiringProcess] = useState<string>('');
-  const [vacancy, setVacancy] = useState<string>('');
+  const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
+  const [hiringProcesses, setHiringProcesses] = useState<Suggestion[]>([]);
+  const [vacancies, setVacancies] = useState<Suggestion[]>([]);
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
-  const [dateEndtFilter, setDateEndFilter] = useState<string>('');
+  const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
   >([]);
@@ -29,81 +32,141 @@ const Dashboard = () => {
   } | null>(null);
 
   const [pieData, setPieData] = useState<{
-    aberto: number;
-    concluido: number;
-    fechado: number;
+    abertos: number;
+    emAnálise: number;
+    fechados: number;
   }>({
-    aberto: 0,
-    concluido: 0,
-    fechado: 0,
+    abertos: 0,
+    emAnálise: 0,
+    fechados: 0,
   });
 
-  const buildUrlWithFilters = () => {
-    let url = '?';
-
-    if (hiringProcess)
-      url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
-    if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
-    if (dateStartFilter)
-      url += `startDate=${encodeURIComponent(dateStartFilter)}&`;
-    if (dateEndtFilter) url += `endDate=${encodeURIComponent(dateEndtFilter)}&`;
-
-    return url.endsWith('&') ? url.slice(0, -1) : url;
-  };
-
-  const fetchMockDashboard = async () => {
-    const url = buildUrlWithFilters();
-    console.log('URL da requisição:', url);
-
-    try {
-      const dashboardData = await getDashboardData(url);
-      const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-      const formattedChartData = Object.keys(averageHiringTime).map(month => ({
-        month: capitalize(month),
-        duration: averageHiringTime[month as keyof typeof averageHiringTime],
-      }));
-
-      setChartData(formattedChartData);
-      setCardsData({
-        processOpen: cards.openProcess.toString(),
-        processOverdue: cards.expirededProcess.toString(),
-        processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-        processClosed: cards.closeProcess.toString(),
-        totalCandidates: cards.averageHiringTime.toString(),
-      });
-      setPieData({
-        aberto: vacancyStatus.open,
-        concluido: vacancyStatus.analyzing,
-        fechado: vacancyStatus.closed,
-      });
-    } catch (error) {
-      console.error('Erro ao buscar dados do mock:', error);
+  const toggleRecruiters = (recruiter: Suggestion) => {
+    for (let i = 0; i < recruiters.length; i++) {
+      if (recruiters[i].id === recruiter.id) {
+        recruiters.splice(i, 1);
+        setRecruiters(recruiters);
+        return;
+      }
     }
   };
 
+  const toggleHiringProcesses = (hiringProcess: Suggestion) => {
+    for (let i = 0; i < hiringProcesses.length; i++) {
+      if (hiringProcesses[i].id === hiringProcess.id) {
+        hiringProcesses.splice(i, 1);
+        setHiringProcesses(hiringProcesses);
+        return;
+      }
+    }
+  };
+
+  const toggleVacancies = (vacancy: Suggestion) => {
+    for (let i = 0; i < vacancies.length; i++) {
+      if (vacancies[i].id === vacancy.id) {
+        vacancies.splice(i, 1);
+        setVacancies(vacancies);
+        return;
+      }
+    }
+  };
+
+  const fetchDashboard = async () => {
+    const dashboardData = await getDashboardData({
+      recruiters: recruiters.map(recruiter => recruiter.id),
+      hiringProcesses: hiringProcesses.map(hiringProcess => hiringProcess.id),
+      vacancies: vacancies.map(vacancy => vacancy.id),
+      dateRange: {
+        dateStartFilter,
+        dateEndFilter,
+      },
+    });
+    const { averageHiringTime, cards, vacancyStatus } = dashboardData;
+    const formattedChartData = Object.keys(averageHiringTime).map(month => ({
+      month: capitalize(month),
+      duration: averageHiringTime[month as keyof typeof averageHiringTime],
+    }));
+
+    setChartData(formattedChartData);
+    setCardsData({
+      processOpen: cards.openProcess.toString(),
+      processOverdue: cards.expirededProcess.toString(),
+      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
+      processClosed: cards.closeProcess.toString(),
+      totalCandidates: cards.averageHiringTime.toString(),
+    });
+    setPieData({
+      abertos: vacancyStatus.open,
+      emAnálise: vacancyStatus.analyzing,
+      fechados: vacancyStatus.closed,
+    });
+  };
+
   const handleFilter = () => {
-    fetchMockDashboard();
+    fetchDashboard();
   };
 
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1);
 
   useEffect(() => {
-    fetchMockDashboard();
+    fetchDashboard();
   }, []);
+
+  const vacancyOptions: Suggestion[] = [
+    { id: 0, title: 'vacancy 0' },
+    { id: 1, title: 'vacancy 1' },
+    { id: 2, title: 'vacancy 2' },
+    { id: 3, title: 'vacancy 3' },
+    { id: 4, title: 'vacancy 4' },
+    { id: 5, title: 'vacancy 5' },
+    { id: 6, title: 'vacancy 6' },
+    { id: 7, title: 'vacancy 7' },
+    { id: 8, title: 'vacancy 8' },
+    { id: 9, title: 'vacancy 9' },
+    { id: 10, title: 'vacancy 10' },
+    { id: 11, title: 'vacancy 11' },
+    { id: 12, title: 'vacancy 12' },
+    { id: 13, title: 'vacancy 13' },
+    { id: 14, title: 'vacancy 14' },
+    { id: 15, title: 'vacancy 15' },
+    { id: 16, title: 'vacancy 16' },
+    { id: 17, title: 'vacancy 17' },
+    { id: 18, title: 'vacancy 18' },
+    { id: 19, title: 'vacancy 19' },
+    { id: 20, title: 'vacancy 20' },
+    { id: 21, title: 'vacancy 21' },
+    { id: 22, title: 'vacancy 22' },
+    { id: 23, title: 'vacancy 23' },
+    { id: 24, title: 'vacancy 24' },
+    { id: 25, title: 'vacancy 25' },
+    { id: 26, title: 'vacancy 26' },
+    { id: 27, title: 'vacancy 27' },
+    { id: 28, title: 'vacancy 28' },
+    { id: 29, title: 'vacancy 29' },
+    { id: 30, title: 'vacancy 30' },
+    { id: 31, title: 'vacancy 31' },
+    { id: 32, title: 'vacancy 32' },
+    { id: 33, title: 'vacancy 33' },
+  ];
 
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-        <Filter
-          placeholder="Filtro de Processos Seletivos"
-          type="text"
-          onChange={text => setHiringProcess(text)}
+        <MultiselectFilter
+          placeholder="Recrutadores"
+          options={[]}
+          onChange={suggestion => toggleRecruiters(suggestion)}
         />
-        <Filter
-          placeholder="Filtro de vagas"
-          type="text"
-          onChange={text => setVacancy(text)}
+        <MultiselectFilter
+          placeholder="Processos Seletivos"
+          options={[]}
+          onChange={suggestion => toggleHiringProcesses(suggestion)}
+        />
+        <MultiselectFilter
+          placeholder="Vagas"
+          options={vacancyOptions}
+          onChange={suggestion => toggleVacancies(suggestion)}
         />
         <Filter
           placeholder="Data Inicial"
@@ -148,12 +211,7 @@ const Dashboard = () => {
           <BarChart data={chartData} />
         </View>
         <View style={styles.pieChart}>
-          <PieChart
-            title={'Processo Seletivo'}
-            aberto={pieData.aberto}
-            concluido={pieData.concluido}
-            fechado={pieData.fechado}
-          />
+          <PieChart title={'Processo Seletivo'} data={pieData} />
         </View>
       </View>
     </View>
