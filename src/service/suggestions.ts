@@ -26,4 +26,17 @@ export async function postSuggestionsProcess(ids: number[]): Promise<Suggestions
       throw error;
     }
   }
-  
+
+  export async function postSuggestionsVacancy(ids: number[]): Promise<SuggestionsSchema[]> {
+    try {
+      const response = await axios.post<SuggestionsSchema[]>(`${API_URL}/api/v1/suggestions/vacancies`, ids, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao enviar os dados:', error);
+      throw error;
+    }
+  }
