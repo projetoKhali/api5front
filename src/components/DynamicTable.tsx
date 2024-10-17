@@ -54,7 +54,7 @@ const DynamicTable: React.FC<TableProps> = ({ tableData }) => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        width:'100%',
         backgroundColor: 'white',
         borderRadius: 10,
     },
