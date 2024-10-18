@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
-import { getDashboardData} from '../service/Dashboard';
+import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 
 const Dashboard = () => {
@@ -101,7 +101,7 @@ const Dashboard = () => {
           placeholder="Data Final"
           type="date"
           onChange={(date) => setDateEndFiltro(date)}
-        /> 
+        />
         <TouchableOpacity style={styles.button} onPress={handleFilter}>
           <Text style={styles.buttonText}>Filtrar</Text>
         </TouchableOpacity>
@@ -112,7 +112,7 @@ const Dashboard = () => {
         <Card titleCard="Processos Vencidos" valueCard={cardsData?.processOverdue ?? ''} />
         <Card titleCard="Processos a Vencer" valueCard={cardsData?.processCloseToExpiring ?? ''} />
         <Card titleCard="Processos Encerrados" valueCard={cardsData?.processClosed ?? ''} />
-        <Card titleCard="Tempo médio contratação" valueCard={cardsData?.totalCandidates ?? ''} />
+        <Card titleCard="Total de Candidaturas" valueCard={cardsData?.totalCandidates ?? ''} />
       </View>
 
       <View style={styles.chartSection}>
@@ -121,7 +121,7 @@ const Dashboard = () => {
         </View>
         <View style={styles.pieChart}>
           <PieChart
-            title={'Status das vagas'}
+            title={'Processo Seletivo'}
             aberto={pieData.aberto}
             concluido={pieData.concluido}
             fechado={pieData.fechado} />
@@ -143,7 +143,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20
   },
   filterSection: {
-    minHeight: 0,
     flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: '#EDE7E7',
