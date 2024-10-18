@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import BarChart from '../components/barChart';
 import { getDashboardData} from '../service/Dashboard';
 import PieChart from '../components/PieChart';
+import { postSuggestionsVacancy } from '../service/suggestions';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -43,6 +44,9 @@ const Dashboard = () => {
 
     try {
       const dashboardData = await getDashboardData(url);
+      const test = await postSuggestionsVacancy([]);
+
+      console.log("Resultado do teste", test)
       const { averageHiringTime, cards, vacancyStatus } = dashboardData;
       const formattedChartData = Object.keys(averageHiringTime).map((month) => ({
         month: capitalize(month),
