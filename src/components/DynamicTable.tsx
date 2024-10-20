@@ -1,13 +1,20 @@
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, FlatList } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, Text, View, ScrollView, FlatList, LayoutChangeEvent } from 'react-native';
 
 type TableProps = {
     tableData: Array<Record<string, any>>;
 };
 
 const DynamicTable: React.FC<TableProps> = ({ tableData }) => {
-
+    const [tableWidth, setTableWidth] = useState<number>(0);
     const columns = tableData.length > 0 ? Object.keys(tableData[0]) : [];
+    const columnWidth = tableWidth / columns.length || 1;
+
+    const handleLayout = useCallback((event: LayoutChangeEvent) => {
+        const { width } = event.nativeEvent.layout;
+        setTableWidth(width);
+    }, []);
+    
     const formatColumnName = (columnName: string) => {
         return columnName
             .replace(/([A-Z])/g, ' $1')
@@ -19,7 +26,7 @@ const DynamicTable: React.FC<TableProps> = ({ tableData }) => {
     const renderHeader = () => (
         <View style={styles.headerRow}>
             {formattedColumns.map((col, index) => (
-                <Text key={index} style={[styles.headerCell, styles.column, ]}>
+                <Text key={index} style={[styles.headerCell, { width: columnWidth }]}>
                     {col}
                 </Text>
             ))}
@@ -28,7 +35,7 @@ const DynamicTable: React.FC<TableProps> = ({ tableData }) => {
     const renderRow = ({ item }: { item: Record<string, any> }) => (
         <View style={styles.row}>
             {columns.map((col, index) => (
-                <Text key={index} style={[styles.cell]}>
+                <Text key={index} style={[styles.cell, { width: columnWidth }]}>
                     {item[col]}
                 </Text>
             ))}
@@ -36,7 +43,7 @@ const DynamicTable: React.FC<TableProps> = ({ tableData }) => {
     );
 
     return (
-        <ScrollView  horizontal style={styles.container}>
+        <ScrollView horizontal style={styles.container} onLayout={handleLayout}>
             <View>
                 {renderHeader()}
                 <View style={styles.body}>
