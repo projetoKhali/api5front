@@ -3,8 +3,13 @@ import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-nati
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
-import { getDashboardData } from '../service/Dashboard';
+import { getDashboardData, getMockDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
+import DynamicTable from '../components/DynamicTable';
+import { postTableDashboardData } from '../service/TableDashboard';
+import { TableRequest } from '../schemas/TableRequest';
+
+
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -19,12 +24,12 @@ const Dashboard = () => {
     processClosed: string;
     totalCandidates: string;
   } | null>(null);
-
   const [pieData, setPieData] = useState<{ aberto: number; concluido: number; fechado: number }>({
     aberto: 0,
     concluido: 0,
     fechado: 0,
   });
+  const [tableData, setTableData] = useState<any[]>([]);
 
   const buildUrlWithFilters = () => {
     let url = '?';
@@ -36,6 +41,7 @@ const Dashboard = () => {
 
     return url.endsWith('&') ? url.slice(0, -1) : url;
   };
+
 
   const fetchMockDashboard = async () => {
     const url = buildUrlWithFilters();
@@ -68,14 +74,32 @@ const Dashboard = () => {
     }
   };
 
-  const handleFilter = () => {
-    fetchMockDashboard();
-  };
+
+  
 
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
+  const handleFilter = async () => {
+    try {
+      await fetchMockDashboard(); 
+
+
+    } catch (error) {
+      console.error('Erro ao aplicar filtro:', error);
+    }
+  };
+
   useEffect(() => {
-    fetchMockDashboard();
+    const initializeDashboard = async () => {
+      try {
+        await fetchMockDashboard();
+
+      } catch (error) {
+        console.error('Erro ao inicializar o dashboard:', error);
+      }
+    };
+
+    initializeDashboard();
   }, []);
 
   return (
@@ -126,6 +150,15 @@ const Dashboard = () => {
             concluido={pieData.concluido}
             fechado={pieData.fechado} />
         </View>
+
+        <View style={styles.tableSection}>
+          {tableData && tableData.length > 0 ? (
+            <DynamicTable tableData={tableData} />
+          ) : (
+            <Text>Nenhum dado disponível</Text>
+          )}
+        </View>
+
       </View>
 
     </View>
@@ -193,6 +226,10 @@ const styles = StyleSheet.create({
     padding: '1%',
     paddingHorizontal: '1%',
     gap: 10,
+  },
+  tableSection: {
+    width: '100%',
+    paddingTop: '1%',
   },
 });
 
