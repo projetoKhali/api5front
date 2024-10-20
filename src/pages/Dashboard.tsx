@@ -74,7 +74,33 @@ const Dashboard = () => {
     }
   };
 
+  const fetchTableData = async () => {
+    const requestPayload: TableRequest = {
+      recruiters: [],
+      processes: [],
+      vacancies: [],
+      dateRange: {
+        startDate: dateStartFiltro,
+        endDate: dateEndtFiltro,
+      },
+      processStatus: [],
+      vacancyStatus: [],
+    };
+  
+    try {
+      const response = await postTableDashboardData(requestPayload);
+      
+      if (Array.isArray(response)) {
+        setTableData(response);
+      } else {
+        console.warn('Resposta inválida ou dados ausentes:', response);
+        setTableData([]);
+      }
 
+    } catch (error) {
+      console.error('Erro ao buscar dados da tabela:', error);
+    }
+  };
   
 
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
@@ -82,7 +108,7 @@ const Dashboard = () => {
   const handleFilter = async () => {
     try {
       await fetchMockDashboard(); 
-
+      await fetchTableData();
 
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
@@ -93,7 +119,7 @@ const Dashboard = () => {
     const initializeDashboard = async () => {
       try {
         await fetchMockDashboard();
-
+        await fetchTableData();
       } catch (error) {
         console.error('Erro ao inicializar o dashboard:', error);
       }
