@@ -1,12 +1,8 @@
-export interface TableRow { // Interface para as linhas da tabela, permitindo dados flexíveis.
+
+interface TableRow {
     [key: string]: any;
 }
 
-export interface TableRequest { // Interface genérica para requisições com filtros dinâmicos.
-    [key: string]: any;
-}
-
-export default interface TableRowResponse { // Interface para a resposta contendo os dados da tabela.
+export default interface TableRowResponse {
     tableData: TableRow[];
 }
-
