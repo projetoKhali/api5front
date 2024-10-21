@@ -30,7 +30,7 @@ export default function MultiselectFilter({
     function addSelectedOption(option: Suggestion) {
       selectedOptions.push(option);
       selectedOptions.sort((a, b) =>
-        a.title.localeCompare(b.title, 'en', { numeric: true }),
+        a?.title.localeCompare(b?.title, 'en', { numeric: true }),
       );
       suggestions.splice(suggestions.indexOf(option), 1);
     },
@@ -38,7 +38,7 @@ export default function MultiselectFilter({
       selectedOptions.splice(selectedOptions.indexOf(option), 1);
       suggestions.push(option);
       suggestions.sort((a, b) =>
-        a.title.localeCompare(b.title, 'en', { numeric: true }),
+        a?.title.localeCompare(b?.title, 'en', { numeric: true }),
       );
     },
   ];

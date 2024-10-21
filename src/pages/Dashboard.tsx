@@ -57,23 +57,23 @@ const Dashboard = () => {
 
   const fetchProcesses = async () => {
     setProcesses(
-      await getSuggestionsProcess(recruiters.map(recruiter => recruiter.id)),
+      await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
     );
   };
 
   const fetchVacancies = async () => {
     setVacancies(
       await getSuggestionsVacancy(
-        processes.map(hiringProcess => hiringProcess.id),
+        processes?.map(hiringProcess => hiringProcess.id),
       ),
     );
   };
 
   const fetchDashboard = async () => {
     const dashboardData = await getDashboardData({
-      recruiters: recruiters.map(recruiter => recruiter.id),
-      hiringProcesses: processes.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies.map(vacancy => vacancy.id),
+      recruiters: recruiters?.map(recruiter => recruiter.id),
+      hiringProcesses: processes?.map(hiringProcess => hiringProcess.id),
+      vacancies: vacancies?.map(vacancy => vacancy.id),
       dateRange: {
         dateStartFilter,
         dateEndFilter,
@@ -102,9 +102,9 @@ const Dashboard = () => {
 
   const fetchTableData = async () => {
     const requestPayload: TableRequest = {
-      recruiters: recruiters.map(recruiter => recruiter.id),
-      processes: processes.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies.map(vacancy => vacancy.id),
+      recruiters: recruiters?.map(recruiter => recruiter.id),
+      processes: processes?.map(hiringProcess => hiringProcess.id),
+      vacancies: vacancies?.map(vacancy => vacancy.id),
       dateRange: {
         startDate: dateStartFilter,
         endDate: dateEndFilter,
