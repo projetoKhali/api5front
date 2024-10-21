@@ -17,13 +17,15 @@ import { TableRequest } from '../schemas/TableRequest';
 import { Suggestion } from '../schemas/Suggestion';
 import MultiselectFilter from '../components/MultiselectFilter';
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
+import {
+  getSuggestionsRecruiter,
+  getSuggestionsProcess,
+  getSuggestionsVacancy,
+} from '../service/Suggestions';
 
 const Dashboard = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [hiringProcesses, setHiringProcesses] = useState<Suggestion[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
@@ -49,10 +51,28 @@ const Dashboard = () => {
   });
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
 
+  const fetchRecruiters = async () => {
+    setRecruiters(await getSuggestionsRecruiter());
+  };
+
+  const fetchProcesses = async () => {
+    setProcesses(
+      await getSuggestionsProcess(recruiters.map(recruiter => recruiter.id)),
+    );
+  };
+
+  const fetchVacancies = async () => {
+    setVacancies(
+      await getSuggestionsVacancy(
+        processes.map(hiringProcess => hiringProcess.id),
+      ),
+    );
+  };
+
   const fetchDashboard = async () => {
     const dashboardData = await getDashboardData({
       recruiters: recruiters.map(recruiter => recruiter.id),
-      hiringProcesses: hiringProcesses.map(hiringProcess => hiringProcess.id),
+      hiringProcesses: processes.map(hiringProcess => hiringProcess.id),
       vacancies: vacancies.map(vacancy => vacancy.id),
       dateRange: {
         dateStartFilter,
@@ -83,7 +103,7 @@ const Dashboard = () => {
   const fetchTableData = async () => {
     const requestPayload: TableRequest = {
       recruiters: recruiters.map(recruiter => recruiter.id),
-      processes: hiringProcesses.map(hiringProcess => hiringProcess.id),
+      processes: processes.map(hiringProcess => hiringProcess.id),
       vacancies: vacancies.map(vacancy => vacancy.id),
       dateRange: {
         startDate: dateStartFilter,
@@ -121,92 +141,25 @@ const Dashboard = () => {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      await Promise.all([fetchDashboard(), fetchTableData()]);
+      await Promise.all([
+        fetchDashboard(),
+        fetchTableData(),
+        fetchRecruiters(),
+        fetchProcesses(),
+        fetchVacancies(),
+      ]);
     };
 
     initializeDashboard();
   }, []);
-
-  const processOptions: Suggestion[] = [
-    { id: 0, title: 'process 0' },
-    { id: 1, title: 'process 1' },
-    { id: 2, title: 'process 2' },
-    { id: 3, title: 'process 3' },
-    { id: 4, title: 'process 4' },
-    { id: 5, title: 'process 5' },
-    { id: 6, title: 'process 6' },
-    { id: 7, title: 'process 7' },
-    { id: 8, title: 'process 8' },
-    { id: 9, title: 'process 9' },
-    { id: 10, title: 'process 10' },
-    { id: 11, title: 'process 11' },
-    { id: 12, title: 'process 12' },
-    { id: 13, title: 'process 13' },
-    { id: 14, title: 'process 14' },
-    { id: 15, title: 'process 15' },
-    { id: 16, title: 'process 16' },
-    { id: 17, title: 'process 17' },
-    { id: 18, title: 'process 18' },
-    { id: 19, title: 'process 19' },
-    { id: 20, title: 'process 20' },
-    { id: 21, title: 'process 21' },
-    { id: 22, title: 'process 22' },
-    { id: 23, title: 'process 23' },
-    { id: 24, title: 'process 24' },
-    { id: 25, title: 'process 25' },
-    { id: 26, title: 'process 26' },
-    { id: 27, title: 'process 27' },
-    { id: 28, title: 'process 28' },
-    { id: 29, title: 'process 29' },
-    { id: 30, title: 'process 30' },
-    { id: 31, title: 'process 31' },
-    { id: 32, title: 'process 32' },
-  ];
-
-  const vacancyOptions: Suggestion[] = [
-    { id: 0, title: 'vacancy 0' },
-    { id: 1, title: 'vacancy 1' },
-    { id: 2, title: 'vacancy 2' },
-    { id: 3, title: 'vacancy 3' },
-    { id: 4, title: 'vacancy 4' },
-    { id: 5, title: 'vacancy 5' },
-    { id: 6, title: 'vacancy 6' },
-    { id: 7, title: 'vacancy 7' },
-    { id: 8, title: 'vacancy 8' },
-    { id: 9, title: 'vacancy 9' },
-    { id: 10, title: 'vacancy 10' },
-    { id: 11, title: 'vacancy 11' },
-    { id: 12, title: 'vacancy 12' },
-    { id: 13, title: 'vacancy 13' },
-    { id: 14, title: 'vacancy 14' },
-    { id: 15, title: 'vacancy 15' },
-    { id: 16, title: 'vacancy 16' },
-    { id: 17, title: 'vacancy 17' },
-    { id: 18, title: 'vacancy 18' },
-    { id: 19, title: 'vacancy 19' },
-    { id: 20, title: 'vacancy 20' },
-    { id: 21, title: 'vacancy 21' },
-    { id: 22, title: 'vacancy 22' },
-    { id: 23, title: 'vacancy 23' },
-    { id: 24, title: 'vacancy 24' },
-    { id: 25, title: 'vacancy 25' },
-    { id: 26, title: 'vacancy 26' },
-    { id: 27, title: 'vacancy 27' },
-    { id: 28, title: 'vacancy 28' },
-    { id: 29, title: 'vacancy 29' },
-    { id: 30, title: 'vacancy 30' },
-    { id: 31, title: 'vacancy 31' },
-    { id: 32, title: 'vacancy 32' },
-    { id: 33, title: 'vacancy 33' },
-  ];
 
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
         {[
           { title: 'Recrutadores', options: recruiters },
-          { title: 'Processos Seletivos', options: processOptions },
-          { title: 'Vagas', options: vacancyOptions },
+          { title: 'Processos Seletivos', options: processes },
+          { title: 'Vagas', options: vacancies },
         ].map((filter, index) => (
           <MultiselectFilter
             key={index}
