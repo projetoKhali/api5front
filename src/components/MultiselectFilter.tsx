@@ -125,7 +125,7 @@ export default function MultiselectFilter({
           elevation: 100,
           zIndex: 100,
           position: 'absolute',
-          backgroundColor: 'rgba(255, 0, 255, 0.133)',
+          cursor: 'auto',
           top: 0,
           height: 100 * vh,
           minHeight: 100 * vh,
