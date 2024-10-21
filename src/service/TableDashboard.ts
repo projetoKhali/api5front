@@ -12,7 +12,7 @@ export async function getDashboardTableData(
 ): Promise<FormattedDashboardTableRow[]> {
   try {
     const response = await axios.post<DashboardTableRow[]>(
-      `${API_URL}/api/v1/table/dashboard`,
+      `${API_URL}/api/v1/hiring-process/table`,
       tableRequest,
     );
     console.log('Dados recebidos da API:', response.data);
