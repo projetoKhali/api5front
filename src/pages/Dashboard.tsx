@@ -29,13 +29,13 @@ const Dashboard = () => {
   } | null>(null);
 
   const [pieData, setPieData] = useState<{
-    aberto: number;
-    concluido: number;
-    fechado: number;
+    abertos: number;
+    emAnálise: number;
+    fechados: number;
   }>({
-    aberto: 0,
-    concluido: 0,
-    fechado: 0,
+    abertos: 0,
+    emAnálise: 0,
+    fechados: 0,
   });
 
   const buildUrlWithFilters = () => {
@@ -72,9 +72,9 @@ const Dashboard = () => {
         totalCandidates: cards.averageHiringTime.toString(),
       });
       setPieData({
-        aberto: vacancyStatus.open,
-        concluido: vacancyStatus.analyzing,
-        fechado: vacancyStatus.closed,
+        abertos: vacancyStatus.open,
+        emAnálise: vacancyStatus.analyzing,
+        fechados: vacancyStatus.closed,
       });
     } catch (error) {
       console.error('Erro ao buscar dados do mock:', error);
@@ -148,12 +148,7 @@ const Dashboard = () => {
           <BarChart data={chartData} />
         </View>
         <View style={styles.pieChart}>
-          <PieChart
-            title={'Processo Seletivo'}
-            aberto={pieData.aberto}
-            concluido={pieData.concluido}
-            fechado={pieData.fechado}
-          />
+          <PieChart title={'Processo Seletivo'} data={pieData} />
         </View>
       </View>
     </View>
