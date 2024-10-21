@@ -27,14 +27,14 @@ export default function MultiselectFilter({
     removeSelectedOption,
   ] = [
     ...useState<Suggestion[]>([]),
-    (option: Suggestion) => {
+    function addSelectedOption(option: Suggestion) {
       selectedOptions.push(option);
       selectedOptions.sort((a, b) =>
         a.title.localeCompare(b.title, 'en', { numeric: true }),
       );
       suggestions.splice(suggestions.indexOf(option), 1);
     },
-    (option: Suggestion) => {
+    function removeSelectedOption(option: Suggestion) {
       selectedOptions.splice(selectedOptions.indexOf(option), 1);
       suggestions.push(option);
       suggestions.sort((a, b) =>
