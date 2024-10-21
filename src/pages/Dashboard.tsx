@@ -69,6 +69,23 @@ const Dashboard = () => {
     );
   };
 
+  const handleRecruiterSuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setRecruiters(selectedOptions);
+
+    fetchProcesses();
+    fetchVacancies();
+  };
+
+  const handleProcessSuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setProcesses(selectedOptions);
+
+    fetchVacancies();
+  };
+
+  const handleVacancySuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setVacancies(selectedOptions);
+  };
+
   const fetchDashboard = async () => {
     const dashboardData = await getDashboardData({
       recruiters: recruiters?.map(recruiter => recruiter.id),
@@ -160,21 +177,26 @@ const Dashboard = () => {
           {
             title: 'Recrutadores',
             getOptions: () => recruiters,
+            onChange: handleRecruiterSuggestionsChange,
           },
           {
             title: 'Processos Seletivos',
             getOptions: () => processes,
+            onChange: handleProcessSuggestionsChange,
           },
           {
             title: 'Vagas',
             getOptions: () => vacancies,
+            onChange: handleVacancySuggestionsChange,
           },
         ].map((filter, index) => (
           <MultiselectFilter
             key={index}
             placeholder={filter.title}
-            onChange={() => {}}
             getOptions={filter.getOptions}
+            onChange={selectedOptions => {
+              filter.onChange(selectedOptions);
+            }}
           />
         ))}
         <Filter
