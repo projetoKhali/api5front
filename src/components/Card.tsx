@@ -8,10 +8,9 @@ interface CardProps {
 }
 
 const Card = ({ titleCard, valueCard }: CardProps) => {
-
   const numericValue = parseFloat(valueCard);
   if (isNaN(numericValue)) {
-    console.warn('O valor do card não é um número válido');
+    console.warn('O valor do card não é um número válido:', numericValue);
     return null;
   }
 
@@ -28,8 +27,8 @@ const Card = ({ titleCard, valueCard }: CardProps) => {
   );
 };
 
-const dynamicFontSizeValue = Math.min( RFPercentage(6), 40);
-const dynamicFontSizeTitle = Math.min( RFPercentage(2), 19);
+const dynamicFontSizeValue = Math.min(RFPercentage(6), 40);
+const dynamicFontSizeTitle = Math.min(RFPercentage(2), 19);
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -45,8 +44,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     alignItems: 'center',
-    justifyContent: 'center'
-
+    justifyContent: 'center',
   },
 
   value: {
@@ -54,13 +52,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'black',
   },
-  
+
   title: {
     fontSize: dynamicFontSizeTitle,
     textAlign: 'center',
     color: 'black',
     marginTop: 10,
-  }
+  },
 });
 
 export default Card;

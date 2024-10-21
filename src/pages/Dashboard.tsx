@@ -1,22 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Filter from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
-import { getDashboardData, getMockDashboardData } from '../service/Dashboard';
+import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
-import { postTableDashboardData } from '../service/TableDashboard';
-import { TableRequest } from '../schemas/TableRequest';
-
-
+import { getDashboardTableData } from '../service/TableDashboard';
+import { Suggestion } from '../schemas/Suggestion';
+import MultiselectFilter from '../components/MultiselectFilter';
+import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
+import {
+  getSuggestionsRecruiter,
+  getSuggestionsProcess,
+  getSuggestionsVacancy,
+} from '../service/Suggestions';
+import { DashboardFilter } from '../schemas/Dashboard';
 
 const Dashboard = () => {
-  const [hiringProcess, setHiringProcess] = useState<string>('');
-  const [vacancy, setVacancy] = useState<string>('');
-  const [dateStartFiltro, setDateStartFiltro] = useState<string>('');
-  const [dateEndtFiltro, setDateEndFiltro] = useState<string>('');
-  const [chartData, setChartData] = useState<{ month: string; duration: number }[]>([]);
+  const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
+  const [processes, setProcesses] = useState<Suggestion[]>([]);
+  const [vacancies, setVacancies] = useState<Suggestion[]>([]);
+  const [dateStartFilter, setDateStartFilter] = useState<string>('');
+  const [dateEndFilter, setDateEndFilter] = useState<string>('');
+  const [chartData, setChartData] = useState<
+    { month: string; duration: number }[]
+  >([]);
   const [cardsData, setCardsData] = useState<{
     processOpen: string;
     processOverdue: string;
@@ -24,92 +39,112 @@ const Dashboard = () => {
     processClosed: string;
     totalCandidates: string;
   } | null>(null);
-  const [pieData, setPieData] = useState<{ aberto: number; concluido: number; fechado: number }>({
-    aberto: 0,
-    concluido: 0,
-    fechado: 0,
+
+  const [pieData, setPieData] = useState<{
+    abertos: number;
+    emAnálise: number;
+    fechados: number;
+  }>({
+    abertos: 0,
+    emAnálise: 0,
+    fechados: 0,
   });
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
 
-  const buildUrlWithFilters = () => {
-    let url = '?';
-
-    if (hiringProcess) url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
-    if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
-    if (dateStartFiltro) url += `startDate=${encodeURIComponent(dateStartFiltro)}&`;
-    if (dateEndtFiltro) url += `endDate=${encodeURIComponent(dateEndtFiltro)}&`;
-
-    return url.endsWith('&') ? url.slice(0, -1) : url;
+  const fetchRecruiters = async () => {
+    setRecruiters(await getSuggestionsRecruiter());
   };
 
-
-  const fetchMockDashboard = async () => {
-    const url = buildUrlWithFilters();
-    console.log('URL da requisição:', url);
-
-    try {
-      const dashboardData = await getDashboardData(url);
-      const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-      const formattedChartData = Object.keys(averageHiringTime).map((month) => ({
-        month: capitalize(month),
-        duration: averageHiringTime[month as keyof typeof averageHiringTime],
-      }));
-
-      setChartData(formattedChartData);
-      setCardsData({
-        processOpen: cards.openProcess.toString(),
-        processOverdue: cards.expirededProcess.toString(),
-        processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-        processClosed: cards.closeProcess.toString(),
-        totalCandidates: cards.averageHiringTime.toString(),
-      });
-      setPieData({
-        aberto: vacancyStatus.open,
-        concluido: vacancyStatus.analyzing,
-        fechado: vacancyStatus.closed,
-      });
-
-    } catch (error) {
-      console.error('Erro ao buscar dados do mock:', error);
-    }
+  const fetchProcesses = async () => {
+    setProcesses(
+      await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
+    );
   };
 
-  const fetchTableData = async () => {
-    const requestPayload: TableRequest = {
-      recruiters: [],
-      processes: [],
-      vacancies: [],
+  const fetchVacancies = async () => {
+    setVacancies(
+      await getSuggestionsVacancy(
+        processes?.map(hiringProcess => hiringProcess.id),
+      ),
+    );
+  };
+
+  const handleRecruiterSuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setRecruiters(selectedOptions);
+
+    fetchProcesses();
+    fetchVacancies();
+  };
+
+  const handleProcessSuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setProcesses(selectedOptions);
+
+    fetchVacancies();
+  };
+
+  const handleVacancySuggestionsChange = (selectedOptions: Suggestion[]) => {
+    setVacancies(selectedOptions);
+  };
+
+  const createFilterBody = (): DashboardFilter => {
+    return {
+      recruiters: recruiters?.map(recruiter => recruiter.id),
+      processes: processes?.map(hiringProcess => hiringProcess.id),
+      vacancies: vacancies?.map(vacancy => vacancy.id),
       dateRange: {
-        startDate: dateStartFiltro,
-        endDate: dateEndtFiltro,
+        startDate: dateStartFilter,
+        endDate: dateEndFilter,
       },
       processStatus: [],
       vacancyStatus: [],
     };
-  
+  };
+
+  const fetchDashboard = async () => {
+    const dashboardData = await getDashboardData(createFilterBody());
+    const { averageHiringTime, cards, vacancyStatus } = dashboardData;
+    const formattedChartData = Object.keys(averageHiringTime).map(month => ({
+      month: capitalize(month),
+      duration: averageHiringTime[month as keyof typeof averageHiringTime],
+    }));
+
+    setChartData(formattedChartData);
+    setCardsData({
+      processOpen: cards.openProcess.toString(),
+      processOverdue: cards.expirededProcess.toString(),
+      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
+      processClosed: cards.closeProcess.toString(),
+      totalCandidates: cards.averageHiringTime.toString(),
+    });
+    setPieData({
+      abertos: vacancyStatus.open,
+      emAnálise: vacancyStatus.analyzing,
+      fechados: vacancyStatus.closed,
+    });
+  };
+
+  const fetchTableData = async () => {
     try {
-      const response = await postTableDashboardData(requestPayload);
-      
+      const response = await getDashboardTableData(createFilterBody());
+
       if (Array.isArray(response)) {
         setTableData(response);
       } else {
         console.warn('Resposta inválida ou dados ausentes:', response);
         setTableData([]);
       }
-
     } catch (error) {
       console.error('Erro ao buscar dados da tabela:', error);
     }
   };
-  
 
-  const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+  const capitalize = (text: string) =>
+    text.charAt(0).toUpperCase() + text.slice(1);
 
   const handleFilter = async () => {
     try {
-      await fetchMockDashboard(); 
+      await fetchDashboard();
       await fetchTableData();
-
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
     }
@@ -117,12 +152,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      try {
-        await fetchMockDashboard();
-        await fetchTableData();
-      } catch (error) {
-        console.error('Erro ao inicializar o dashboard:', error);
-      }
+      await Promise.all([
+        fetchDashboard(),
+        fetchTableData(),
+        fetchRecruiters(),
+        fetchProcesses(),
+        fetchVacancies(),
+      ]);
     };
 
     initializeDashboard();
@@ -130,27 +166,42 @@ const Dashboard = () => {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.filterSection}>
-        <Filter
-          placeholder="Filtro de Processos Seletivos"
-          type="text"
-          onChange={(text) => setHiringProcess(text)}
-        />
-        <Filter
-          placeholder="Filtro de vagas"
-          type="text"
-          onChange={(text) => setVacancy(text)}
-        />
+        {[
+          {
+            title: 'Recrutadores',
+            getOptions: () => recruiters,
+            onChange: handleRecruiterSuggestionsChange,
+          },
+          {
+            title: 'Processos Seletivos',
+            getOptions: () => processes,
+            onChange: handleProcessSuggestionsChange,
+          },
+          {
+            title: 'Vagas',
+            getOptions: () => vacancies,
+            onChange: handleVacancySuggestionsChange,
+          },
+        ].map((filter, index) => (
+          <MultiselectFilter
+            key={index}
+            placeholder={filter.title}
+            getOptions={filter.getOptions}
+            onChange={selectedOptions => {
+              filter.onChange(selectedOptions);
+            }}
+          />
+        ))}
         <Filter
           placeholder="Data Inicial"
           type="date"
-          onChange={(date) => setDateStartFiltro(date)}
+          onChange={date => setDateStartFilter(date)}
         />
         <Filter
           placeholder="Data Final"
           type="date"
-          onChange={(date) => setDateEndFiltro(date)}
+          onChange={date => setDateEndFilter(date)}
         />
         <TouchableOpacity style={styles.button} onPress={handleFilter}>
           <Text style={styles.buttonText}>Filtrar</Text>
@@ -158,11 +209,26 @@ const Dashboard = () => {
       </View>
 
       <View style={styles.cardSection}>
-        <Card titleCard="Processos Abertos" valueCard={cardsData?.processOpen ?? ''} />
-        <Card titleCard="Processos Vencidos" valueCard={cardsData?.processOverdue ?? ''} />
-        <Card titleCard="Processos a Vencer" valueCard={cardsData?.processCloseToExpiring ?? ''} />
-        <Card titleCard="Processos Encerrados" valueCard={cardsData?.processClosed ?? ''} />
-        <Card titleCard="Total de Candidaturas" valueCard={cardsData?.totalCandidates ?? ''} />
+        <Card
+          titleCard="Processos Abertos"
+          valueCard={cardsData?.processOpen ?? ''}
+        />
+        <Card
+          titleCard="Processos Vencidos"
+          valueCard={cardsData?.processOverdue ?? ''}
+        />
+        <Card
+          titleCard="Processos a Vencer"
+          valueCard={cardsData?.processCloseToExpiring ?? ''}
+        />
+        <Card
+          titleCard="Processos Encerrados"
+          valueCard={cardsData?.processClosed ?? ''}
+        />
+        <Card
+          titleCard="Total de Candidaturas"
+          valueCard={cardsData?.totalCandidates ?? ''}
+        />
       </View>
 
       <View style={styles.chartSection}>
@@ -170,11 +236,7 @@ const Dashboard = () => {
           <BarChart data={chartData} />
         </View>
         <View style={styles.pieChart}>
-          <PieChart
-            title={'Processo Seletivo'}
-            aberto={pieData.aberto}
-            concluido={pieData.concluido}
-            fechado={pieData.fechado} />
+          <PieChart title={'Processo Seletivo'} data={pieData} />
         </View>
 
         <View style={styles.tableSection}>
@@ -184,9 +246,7 @@ const Dashboard = () => {
             <Text>Nenhum dado disponível</Text>
           )}
         </View>
-
       </View>
-
     </View>
   );
 };
@@ -199,7 +259,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     alignItems: 'center',
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   filterSection: {
     flexWrap: 'wrap',
@@ -233,7 +293,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     width: '100%',
     paddingHorizontal: '3%',
-    gap: 10
+    gap: 10,
   },
   graph: {
     width: '68%',

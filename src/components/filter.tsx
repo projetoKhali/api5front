@@ -1,4 +1,3 @@
-// Filter.tsx
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import DatePicker from 'react-datepicker';
@@ -43,7 +42,7 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
         style={styles.input}
         placeholder={placeholder}
         value={text}
-        onChangeText={(text) => {
+        onChangeText={text => {
           setText(text);
           onChange(text);
         }}
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 14,
     alignContent: 'center',
-    color: '#515151'
+    color: '#515151',
   },
   datePickerContainer: {
     borderColor: '#ddd',
@@ -78,7 +77,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     height: 32,
-    color: '#3c3c3c'
+    color: '#3c3c3c',
   },
 });
 
