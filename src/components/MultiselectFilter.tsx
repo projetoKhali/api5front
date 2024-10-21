@@ -9,7 +9,7 @@ type ListOperation = 'ADDED' | 'REMOVED';
 type MultiselectFilterProps = {
   placeholder: string;
   options: Suggestion[];
-  onChange: (operation: ListOperation, option: Suggestion) => void;
+  onChange: (selectedOptions: Suggestion[]) => void;
 };
 
 export default function MultiselectFilter({
@@ -108,7 +108,7 @@ export default function MultiselectFilter({
 
     setSearchText('');
 
-    onChange(operation, option);
+    onChange(selectedOptions);
     setIsEditing(false);
     updateSelectedText();
   };
