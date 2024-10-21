@@ -3,9 +3,25 @@ import DashboardResponse from '../schemas/DashboardProcess';
 
 const API_URL: string = 'http://localhost:8080';
 
-export async function getDashboardData(param: string): Promise<DashboardResponse> {
+export interface DashboardRequestParams {
+  recruiters: number[];
+  hiringProcesses: number[];
+  vacancies: number[];
+  dateRange: {
+    dateStartFilter: string;
+    dateEndFilter: string;
+  };
+}
+
+export async function getDashboardData(
+  params: DashboardRequestParams,
+): Promise<DashboardResponse> {
   try {
-    const response = await axios.get<DashboardResponse>(`${API_URL}/api/v1/hiring-process/dashboard/${param}`);
+    const response = await axios.post<DashboardResponse>(
+      `${API_URL}/api/v1/hiring-process/dashboard`,
+      params,
+    );
+
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);

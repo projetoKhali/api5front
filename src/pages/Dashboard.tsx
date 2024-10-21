@@ -14,15 +14,13 @@ import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
 import { TableRequest } from '../schemas/TableRequest';
-
-
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
   const [vacancy, setVacancy] = useState<string>('');
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
-  const [dateEndtFilter, setDateEndFilter] = useState<string>('');
+  const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
   >([]);
@@ -43,50 +41,37 @@ const Dashboard = () => {
     emAnálise: 0,
     fechados: 0,
   });
-
-  const buildUrlWithFilters = () => {
-    let url = '?';
-
-    if (hiringProcess)
-      url += `hiringProcess=${encodeURIComponent(hiringProcess)}&`;
-    if (vacancy) url += `vacancy=${encodeURIComponent(vacancy)}&`;
-    if (dateStartFilter)
-      url += `startDate=${encodeURIComponent(dateStartFilter)}&`;
-    if (dateEndtFilter) url += `endDate=${encodeURIComponent(dateEndtFilter)}&`;
-
-    return url.endsWith('&') ? url.slice(0, -1) : url;
-  };
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
 
+  const fetchDashboard = async () => {
+    const dashboardData = await getDashboardData({
+      recruiters: recruiters.map(recruiter => recruiter.id),
+      hiringProcesses: hiringProcesses.map(hiringProcess => hiringProcess.id),
+      vacancies: vacancies.map(vacancy => vacancy.id),
+      dateRange: {
+        dateStartFilter,
+        dateEndFilter,
+      },
+    });
+    const { averageHiringTime, cards, vacancyStatus } = dashboardData;
+    const formattedChartData = Object.keys(averageHiringTime).map(month => ({
+      month: capitalize(month),
+      duration: averageHiringTime[month as keyof typeof averageHiringTime],
+    }));
 
-  const fetchMockDashboard = async () => {
-    const url = buildUrlWithFilters();
-    console.log('URL da requisição:', url);
-
-    try {
-      const dashboardData = await getDashboardData(url);
-      const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-      const formattedChartData = Object.keys(averageHiringTime).map(month => ({
-        month: capitalize(month),
-        duration: averageHiringTime[month as keyof typeof averageHiringTime],
-      }));
-
-      setChartData(formattedChartData);
-      setCardsData({
-        processOpen: cards.openProcess.toString(),
-        processOverdue: cards.expirededProcess.toString(),
-        processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-        processClosed: cards.closeProcess.toString(),
-        totalCandidates: cards.averageHiringTime.toString(),
-      });
-      setPieData({
-        abertos: vacancyStatus.open,
-        emAnálise: vacancyStatus.analyzing,
-        fechados: vacancyStatus.closed,
-      });
-    } catch (error) {
-      console.error('Erro ao buscar dados do mock:', error);
-    }
+    setChartData(formattedChartData);
+    setCardsData({
+      processOpen: cards.openProcess.toString(),
+      processOverdue: cards.expirededProcess.toString(),
+      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
+      processClosed: cards.closeProcess.toString(),
+      totalCandidates: cards.averageHiringTime.toString(),
+    });
+    setPieData({
+      abertos: vacancyStatus.open,
+      emAnálise: vacancyStatus.analyzing,
+      fechados: vacancyStatus.closed,
+    });
   };
 
   const fetchTableData = async () => {
@@ -121,7 +106,7 @@ const Dashboard = () => {
 
   const handleFilter = async () => {
     try {
-      await fetchMockDashboard();
+      await fetchDashboard();
       await fetchTableData();
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
@@ -130,7 +115,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      await Promise.all([fetchMockDashboard(), fetchTableData()]);
+      await Promise.all([fetchDashboard(), fetchTableData()]);
     };
 
     initializeDashboard();
