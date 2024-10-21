@@ -11,6 +11,11 @@ import Card from '../components/Card';
 import BarChart from '../components/barChart';
 import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
+import DynamicTable from '../components/DynamicTable';
+import { postTableDashboardData } from '../service/TableDashboard';
+import { TableRequest } from '../schemas/TableRequest';
+
+
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -37,6 +42,7 @@ const Dashboard = () => {
     emAnálise: 0,
     fechados: 0,
   });
+  const [tableData, setTableData] = useState<any[]>([]);
 
   const buildUrlWithFilters = () => {
     let url = '?';
@@ -50,6 +56,7 @@ const Dashboard = () => {
 
     return url.endsWith('&') ? url.slice(0, -1) : url;
   };
+
 
   const fetchMockDashboard = async () => {
     const url = buildUrlWithFilters();
@@ -81,15 +88,59 @@ const Dashboard = () => {
     }
   };
 
-  const handleFilter = () => {
-    fetchMockDashboard();
+  const fetchTableData = async () => {
+    const requestPayload: TableRequest = {
+      recruiters: [],
+      processes: [],
+      vacancies: [],
+      dateRange: {
+        startDate: dateStartFilter,
+        endDate: dateEndtFilter,
+      },
+      processStatus: [],
+      vacancyStatus: [],
+    };
+
+    try {
+      const response = await postTableDashboardData(requestPayload);
+
+      if (Array.isArray(response)) {
+        setTableData(response);
+      } else {
+        console.warn('Resposta inválida ou dados ausentes:', response);
+        setTableData([]);
+      }
+
+    } catch (error) {
+      console.error('Erro ao buscar dados da tabela:', error);
+    }
   };
+
 
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1);
 
+  const handleFilter = async () => {
+    try {
+      await fetchMockDashboard();
+      await fetchTableData();
+
+    } catch (error) {
+      console.error('Erro ao aplicar filtro:', error);
+    }
+  };
+
   useEffect(() => {
-    fetchMockDashboard();
+    const initializeDashboard = async () => {
+      try {
+        await fetchMockDashboard();
+        await fetchTableData();
+      } catch (error) {
+        console.error('Erro ao inicializar o dashboard:', error);
+      }
+    };
+
+    initializeDashboard();
   }, []);
 
   return (
@@ -150,6 +201,15 @@ const Dashboard = () => {
         <View style={styles.pieChart}>
           <PieChart title={'Processo Seletivo'} data={pieData} />
         </View>
+
+        <View style={styles.tableSection}>
+          {tableData && tableData.length > 0 ? (
+            <DynamicTable tableData={tableData} />
+          ) : (
+            <Text>Nenhum dado disponível</Text>
+          )}
+        </View>
+
       </View>
     </View>
   );
@@ -216,6 +276,10 @@ const styles = StyleSheet.create({
     padding: '1%',
     paddingHorizontal: '1%',
     gap: 10,
+  },
+  tableSection: {
+    width: '100%',
+    paddingTop: '1%',
   },
 });
 
