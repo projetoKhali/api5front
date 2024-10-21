@@ -8,13 +8,13 @@ type ListOperation = 'ADDED' | 'REMOVED';
 
 type MultiselectFilterProps = {
   placeholder: string;
-  options: Suggestion[];
+  getOptions: () => Suggestion[];
   onChange: (selectedOptions: Suggestion[]) => void;
 };
 
 export default function MultiselectFilter({
   placeholder,
-  options,
+  getOptions,
   onChange,
 }: MultiselectFilterProps) {
   const [searchText, setSearchText] = useState<string>('');
@@ -42,7 +42,7 @@ export default function MultiselectFilter({
       );
     },
   ];
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(options);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(getOptions());
   const [isListOpen, setIsListOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -58,7 +58,7 @@ export default function MultiselectFilter({
 
   const updateSuggestions = (text: string) => {
     setSuggestions(
-      options.filter(option =>
+      getOptions().filter(option =>
         option.title.toLowerCase().includes(text.toLowerCase()),
       ),
     );
@@ -71,6 +71,8 @@ export default function MultiselectFilter({
   };
 
   const inputOnFocus = () => {
+    setSuggestions(getOptions());
+
     setIsEditing(true);
     setIsListOpen(true);
     updateSelectedText();

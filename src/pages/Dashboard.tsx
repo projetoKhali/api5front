@@ -157,15 +157,24 @@ const Dashboard = () => {
     <View style={styles.container}>
       <View style={styles.filterSection}>
         {[
-          { title: 'Recrutadores', options: recruiters },
-          { title: 'Processos Seletivos', options: processes },
-          { title: 'Vagas', options: vacancies },
+          {
+            title: 'Recrutadores',
+            getOptions: () => recruiters,
+          },
+          {
+            title: 'Processos Seletivos',
+            getOptions: () => processes,
+          },
+          {
+            title: 'Vagas',
+            getOptions: () => vacancies,
+          },
         ].map((filter, index) => (
           <MultiselectFilter
             key={index}
             placeholder={filter.title}
-            options={filter.options}
             onChange={() => {}}
+            getOptions={filter.getOptions}
           />
         ))}
         <Filter
