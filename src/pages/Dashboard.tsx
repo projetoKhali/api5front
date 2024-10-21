@@ -13,7 +13,6 @@ import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
-import { TableRequest } from '../schemas/TableRequest';
 import { Suggestion } from '../schemas/Suggestion';
 import MultiselectFilter from '../components/MultiselectFilter';
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
@@ -22,6 +21,7 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
+import { DashboardFilter } from '../schemas/Dashboard';
 
 const Dashboard = () => {
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
@@ -86,16 +86,22 @@ const Dashboard = () => {
     setVacancies(selectedOptions);
   };
 
-  const fetchDashboard = async () => {
-    const dashboardData = await getDashboardData({
+  const createFilterBody = (): DashboardFilter => {
+    return {
       recruiters: recruiters?.map(recruiter => recruiter.id),
-      hiringProcesses: processes?.map(hiringProcess => hiringProcess.id),
+      processes: processes?.map(hiringProcess => hiringProcess.id),
       vacancies: vacancies?.map(vacancy => vacancy.id),
       dateRange: {
-        dateStartFilter,
-        dateEndFilter,
+        startDate: dateStartFilter,
+        endDate: dateEndFilter,
       },
-    });
+      processStatus: [],
+      vacancyStatus: [],
+    };
+  };
+
+  const fetchDashboard = async () => {
+    const dashboardData = await getDashboardData(createFilterBody());
     const { averageHiringTime, cards, vacancyStatus } = dashboardData;
     const formattedChartData = Object.keys(averageHiringTime).map(month => ({
       month: capitalize(month),
@@ -118,20 +124,8 @@ const Dashboard = () => {
   };
 
   const fetchTableData = async () => {
-    const requestPayload: TableRequest = {
-      recruiters: recruiters?.map(recruiter => recruiter.id),
-      processes: processes?.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies?.map(vacancy => vacancy.id),
-      dateRange: {
-        startDate: dateStartFilter,
-        endDate: dateEndFilter,
-      },
-      processStatus: [],
-      vacancyStatus: [],
-    };
-
     try {
-      const response = await getDashboardTableData(requestPayload);
+      const response = await getDashboardTableData(createFilterBody());
 
       if (Array.isArray(response)) {
         setTableData(response);

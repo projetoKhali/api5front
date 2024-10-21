@@ -1,20 +1,10 @@
 import axios from 'axios';
-import DashboardResponse from '../schemas/DashboardProcess';
+import DashboardResponse, { DashboardFilter } from '../schemas/Dashboard';
 
 const API_URL: string = 'http://localhost:8080';
 
-export interface DashboardRequestParams {
-  recruiters: number[];
-  hiringProcesses: number[];
-  vacancies: number[];
-  dateRange: {
-    dateStartFilter: string;
-    dateEndFilter: string;
-  };
-}
-
 export async function getDashboardData(
-  params: DashboardRequestParams,
+  params: DashboardFilter,
 ): Promise<DashboardResponse> {
   try {
     const response = await axios.post<DashboardResponse>(

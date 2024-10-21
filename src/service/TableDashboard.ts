@@ -1,14 +1,14 @@
 import axios from 'axios';
-import { TableRequest } from '../schemas/TableRequest';
 import {
   DashboardTableRow,
   FormattedDashboardTableRow,
 } from '../schemas/TableDashboard';
+import { DashboardFilter } from '../schemas/Dashboard';
 
 const API_URL: string = 'http://localhost:8080';
 
 export async function getDashboardTableData(
-  tableRequest: TableRequest,
+  tableRequest: DashboardFilter,
 ): Promise<FormattedDashboardTableRow[]> {
   try {
     const response = await axios.post<DashboardTableRow[]>(
