@@ -1,19 +1,32 @@
 import axios from 'axios';
-import TableRowResponse from '../schemas/TableDashboard';
 import { TableRequest } from '../schemas/TableRequest';
+import {
+  DashboardTableRow,
+  FormattedDashboardTableRow,
+} from '../schemas/TableDashboard';
 
 const API_URL: string = 'http://localhost:8080';
 
-export async function postTableDashboardData(
+export async function getDashboardTableData(
   tableRequest: TableRequest,
-): Promise<TableRowResponse> {
+): Promise<FormattedDashboardTableRow[]> {
   try {
-    const response = await axios.post<TableRowResponse>(
+    const response = await axios.post<DashboardTableRow[]>(
       `${API_URL}/api/v1/table/dashboard`,
       tableRequest,
     );
     console.log('Dados recebidos da API:', response.data);
-    return response.data;
+
+    return response.data.map(row => ({
+      'Nome da vaga': row.title,
+      'Total das vagas': row.numPositions,
+      'Total de candidatos': row.numCandidates,
+      'Taxa de concorrencia': row.competitionRate,
+      'Total de entrevistados': row.numInterviewed,
+      'Total contratados': row.numHired,
+      'Tempo médio de contratação': row.averageHiringTime,
+      'Total de feedbacks': row.numFeedback,
+    }));
   } catch (error) {
     console.error('Erro ao buscar dados da tabela:', error);
     throw error;
@@ -62,4 +75,3 @@ export async function getMockDashboardTableData(): Promise<
     }, 500);
   });
 }
-

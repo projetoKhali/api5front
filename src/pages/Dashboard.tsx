@@ -12,10 +12,11 @@ import BarChart from '../components/barChart';
 import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
-import { postTableDashboardData } from '../service/TableDashboard';
+import { getDashboardTableData } from '../service/TableDashboard';
 import { TableRequest } from '../schemas/TableRequest';
 
 
+import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 
 const Dashboard = () => {
   const [hiringProcess, setHiringProcess] = useState<string>('');
@@ -42,7 +43,6 @@ const Dashboard = () => {
     emAnálise: 0,
     fechados: 0,
   });
-  const [tableData, setTableData] = useState<any[]>([]);
 
   const buildUrlWithFilters = () => {
     let url = '?';
@@ -56,6 +56,7 @@ const Dashboard = () => {
 
     return url.endsWith('&') ? url.slice(0, -1) : url;
   };
+  const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
 
 
   const fetchMockDashboard = async () => {
@@ -95,14 +96,14 @@ const Dashboard = () => {
       vacancies: [],
       dateRange: {
         startDate: dateStartFilter,
-        endDate: dateEndtFilter,
+        endDate: dateEndFilter,
       },
       processStatus: [],
       vacancyStatus: [],
     };
 
     try {
-      const response = await postTableDashboardData(requestPayload);
+      const response = await getDashboardTableData(requestPayload);
 
       if (Array.isArray(response)) {
         setTableData(response);
@@ -110,12 +111,10 @@ const Dashboard = () => {
         console.warn('Resposta inválida ou dados ausentes:', response);
         setTableData([]);
       }
-
     } catch (error) {
       console.error('Erro ao buscar dados da tabela:', error);
     }
   };
-
 
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1);
@@ -124,7 +123,6 @@ const Dashboard = () => {
     try {
       await fetchMockDashboard();
       await fetchTableData();
-
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
     }
@@ -132,12 +130,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      try {
-        await fetchMockDashboard();
-        await fetchTableData();
-      } catch (error) {
-        console.error('Erro ao inicializar o dashboard:', error);
-      }
+      await Promise.all([fetchMockDashboard(), fetchTableData()]);
     };
 
     initializeDashboard();
@@ -209,7 +202,6 @@ const Dashboard = () => {
             <Text>Nenhum dado disponível</Text>
           )}
         </View>
-
       </View>
     </View>
   );
