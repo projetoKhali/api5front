@@ -49,7 +49,7 @@ export default function MultiselectFilter({
   const updateSelectedText = () => {
     setDisplayText(
       isEditing
-        ? searchText
+        ? ''
         : !selectedOptions || !selectedOptions.length
           ? ''
           : `${selectedOptions.length} selecionados`,
@@ -158,7 +158,9 @@ export default function MultiselectFilter({
               borderWidth: 2,
             },
           ]}
-          value={displayText}
+          value={
+            !!displayText && !!displayText.length ? displayText : searchText
+          }
           onChangeText={inputOnTextChange}
           onFocus={inputOnFocus}
           onSubmitEditing={inputOnConfirm}
