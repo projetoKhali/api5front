@@ -180,33 +180,42 @@ export default function MultiselectFilter({
               },
             ]}
           >
-            {selectedOptions.concat(suggestions).map(option => {
-              const isEnabled = selectedOptions.includes(option);
-
-              return (
-                <Pressable
-                  id="suggestionPressable"
-                  style={styles.suggestionPressable}
-                  key={`${isEnabled ? 'S_' : ''}${option.id}`}
-                >
-                  <BouncyCheckbox
-                    id="bouncyCheckbox"
-                    style={styles.suggestionCheckbox}
-                    textStyle={{
-                      color: 'black',
-                      textDecorationLine: 'none',
-                    }}
-                    isChecked={isEnabled}
-                    text={option.title}
-                    size={16}
-                    fillColor="green"
-                    unFillColor="white"
-                    innerIconStyle={{ borderWidth: 2 }}
-                    onPress={() => handleOptionChange(option)}
-                  />
-                </Pressable>
-              );
-            })}
+            {selectedOptions
+              .map(option => ({
+                selected: true,
+                option,
+              }))
+              .concat(
+                suggestions.map(option => ({
+                  selected: false,
+                  option,
+                })),
+              )
+              .map(option => {
+                return (
+                  <Pressable
+                    id="suggestionPressable"
+                    style={styles.suggestionPressable}
+                    key={`${option.selected ? 'S_' : ''}${option.option.id}`}
+                  >
+                    <BouncyCheckbox
+                      id="bouncyCheckbox"
+                      style={styles.suggestionCheckbox}
+                      textStyle={{
+                        color: 'black',
+                        textDecorationLine: 'none',
+                      }}
+                      isChecked={option.selected}
+                      text={`${option.option.title}`}
+                      size={16}
+                      fillColor="green"
+                      unFillColor="white"
+                      innerIconStyle={{ borderWidth: 2 }}
+                      onPress={() => handleOptionChange(option.option)}
+                    />
+                  </Pressable>
+                );
+              })}
           </View>
         )}
       </View>
