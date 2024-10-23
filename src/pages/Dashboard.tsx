@@ -24,9 +24,36 @@ import {
 import { DashboardFilter } from '../schemas/Dashboard';
 
 const Dashboard = () => {
-  const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
-  const [processes, setProcesses] = useState<Suggestion[]>([]);
-  const [vacancies, setVacancies] = useState<Suggestion[]>([]);
+  const [
+    recruiters, //
+    setRecruiters,
+    selectedRecruiters,
+    setSelectedRecruiters,
+  ] = [
+    ...useState<Suggestion[]>([]), //
+    ...useState<Suggestion[]>([]),
+  ];
+
+  const [
+    processes, //
+    setProcesses,
+    selectedProcesses,
+    setSelectedProcesses,
+  ] = [
+    ...useState<Suggestion[]>([]), //
+    ...useState<Suggestion[]>([]),
+  ];
+
+  const [
+    vacancies, //
+    setVacancies,
+    selectedVacancies,
+    setSelectedVacancies,
+  ] = [
+    ...useState<Suggestion[]>([]), //
+    ...useState<Suggestion[]>([]),
+  ];
+
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [chartData, setChartData] = useState<
@@ -57,40 +84,47 @@ const Dashboard = () => {
 
   const fetchProcesses = async () => {
     setProcesses(
-      await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
+      await getSuggestionsProcess(
+        selectedRecruiters?.map(recruiter => recruiter.id) ?? [],
+      ),
     );
   };
 
   const fetchVacancies = async () => {
     setVacancies(
       await getSuggestionsVacancy(
-        processes?.map(hiringProcess => hiringProcess.id),
+        selectedProcesses?.map(process => process.id) ?? [],
       ),
     );
   };
 
-  const handleRecruiterSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setRecruiters(selectedOptions);
+  const handleRecruiterSuggestionsChange = async (
+    selectedOptions: Suggestion[],
+  ) => {
+    setSelectedRecruiters(selectedOptions);
 
-    fetchProcesses();
-    fetchVacancies();
+    await fetchProcesses();
+    await fetchVacancies();
   };
 
-  const handleProcessSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setProcesses(selectedOptions);
+  const handleProcessSuggestionsChange = async (
+    selectedOptions: Suggestion[],
+  ) => {
+    setSelectedProcesses(selectedOptions);
 
-    fetchVacancies();
+    await fetchVacancies();
   };
 
   const handleVacancySuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setVacancies(selectedOptions);
+    setSelectedVacancies(selectedOptions);
   };
 
   const createFilterBody = (): DashboardFilter => {
     return {
-      recruiters: recruiters?.map(recruiter => recruiter.id),
-      processes: processes?.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies?.map(vacancy => vacancy.id),
+      recruiters: selectedRecruiters?.map(recruiter => recruiter.id) ?? [],
+      processes:
+        selectedProcesses?.map(hiringProcess => hiringProcess.id) ?? [],
+      vacancies: selectedVacancies?.map(vacancy => vacancy.id) ?? [],
       dateRange: {
         startDate: dateStartFilter,
         endDate: dateEndFilter,
