@@ -1,3 +1,15 @@
+export interface DashboardFilter {
+  recruiters: number[];
+  processes: number[];
+  vacancies: number[];
+  dateRange: {
+    startDate: string;
+    endDate: string;
+  };
+  processStatus: number[];
+  vacancyStatus: number[];
+}
+
 interface vacancyStatus {
   open: number;
   analyzing: number;
@@ -5,11 +17,11 @@ interface vacancyStatus {
 }
 
 interface cards {
-  openProcess: number,
-  expirededProcess: number,
-  approachingDeadlineProcess: number,
-  closeProcess: number,
-  averageHiringTime: number,
+  openProcess: number;
+  expirededProcess: number;
+  approachingDeadlineProcess: number;
+  closeProcess: number;
+  averageHiringTime: number;
 }
 
 interface averageHiringTime {
