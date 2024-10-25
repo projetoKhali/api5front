@@ -226,7 +226,7 @@ const Dashboard = () => {
           valueCard={cardsData?.processClosed ?? ''}
         />
         <Card
-          titleCard="Total de Candidaturas"
+          titleCard="Tempo médio contratação (Dias)"
           valueCard={cardsData?.totalCandidates ?? ''}
         />
       </View>
@@ -236,7 +236,7 @@ const Dashboard = () => {
           <BarChart data={chartData} />
         </View>
         <View style={styles.pieChart}>
-          <PieChart title={'Processo Seletivo'} data={pieData} />
+          <PieChart title={'Status das vagas'} data={pieData} />
         </View>
 
         <View style={styles.tableSection}>
