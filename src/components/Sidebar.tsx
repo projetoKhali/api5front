@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import { Link } from 'react-router-dom';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GoGraph } from "react-icons/go";
 import { GoHome } from "react-icons/go";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-import Logo from "../../assets/images/Logo-pro4tech.png";
+
 
 interface SidebarProps {
   closeSidebar: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
+
   return (
     <LinearGradient
       colors={['#F18523', '#F3AE71']}
@@ -24,9 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
       </View>
 
       <View style={styles.image}>
-        <View style={styles.image}>
-          <Logo width={100} height={100} />
-        </View>
+        <Image source={require('../../assets/images/Logo-pro4tech.png')} style={styles.logo} />
       </View>
       
       <View style={styles.menu}>
@@ -100,7 +99,12 @@ const styles = StyleSheet.create({
   image: {
     display: 'flex',
     width: '100%',
-    height: '20%'
+    height: '15%',
+    alignItems: 'center'
+  },
+  logo: {
+    width: '50%',
+    height: '100%'
   }
 });
 
