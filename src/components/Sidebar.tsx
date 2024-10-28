@@ -5,12 +5,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GoGraph } from "react-icons/go";
 import { GoHome } from "react-icons/go";
 import { HiOutlineDocumentReport } from "react-icons/hi";
+import { LuPanelLeftClose  } from "react-icons/lu";
+
 
 
 interface SidebarProps {
   closeSidebar: () => void;
 }
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 
   return (
@@ -20,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
     >
       <View style={styles.viewButtonClose}>
         <TouchableOpacity onPress={closeSidebar}>
-          <Text style={styles.closeButton}>X</Text>
+          <LuPanelLeftClose  style={styles.closeButton} />
         </TouchableOpacity>
       </View>
 
@@ -61,9 +64,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     color: 'white',
-    fontSize: 18,
-    textAlign: 'right',
-    fontWeight: 'bold'
+    fontSize: 26,
   },
   menu: {
     marginTop: 50,
@@ -95,6 +96,7 @@ const styles = StyleSheet.create({
     height: '4%',
     display: 'flex',
     justifyContent: 'flex-end',
+    alignItems: 'flex-end'
   },
   image: {
     display: 'flex',
