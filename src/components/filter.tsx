@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
-import DatePicker from 'react-datepicker';
+import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import {ptBR} from 'date-fns/locale'
+
+registerLocale('pt-BR', ptBR);
 
 type FilterProps = {
   placeholder: string;
@@ -25,8 +28,9 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
           <DatePicker
             selected={date}
             onChange={handleDateChange}
-            dateFormat="yyyy-MM-dd"
+            dateFormat="dd/MM/yyyy"
             placeholderText={placeholder}
+            locale="pt-BR"
             className="react-datepicker-wrapper"
             wrapperClassName="react-datepicker-container"
             popperClassName="react-datepicker-popper"
