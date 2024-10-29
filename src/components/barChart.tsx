@@ -18,6 +18,24 @@ type BarChartProps = {
   data: DataItem[];
 };
 
+const translateMonth = (month: string) => {
+  const monthTranslations: { [key: string]: string } = {
+    January: 'Janeiro',
+    February: 'Fevereiro',
+    March: 'Março',
+    April: 'Abril',
+    May: 'Maio',
+    June: 'Junho',
+    July: 'Julho',
+    August: 'Agosto',
+    September: 'Setembro',
+    October: 'Outubro',
+    November: 'Novembro',
+    December: 'Dezembro',
+  };
+  return monthTranslations[month] || month;
+};
+
 export default function BarChart({ data }: BarChartProps) {
   const { width } = Dimensions.get('window');
 
@@ -53,6 +71,7 @@ export default function BarChart({ data }: BarChartProps) {
             },
             grid: { stroke: 'none' },
           }}
+          tickFormat={(t) => translateMonth(t)}
         />
 
         <VictoryAxis
