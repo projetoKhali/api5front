@@ -1,4 +1,3 @@
-// Definindo a interface para os itens individuais no array "factHiringProcess"
 interface FactHiringProcessItem {
   title: string;
   numPositions: number;
@@ -11,11 +10,10 @@ interface FactHiringProcessItem {
 }
 
 export interface DashboardTableRow {
-  factHiringProcess: FactHiringProcessItem[];  // Array de objetos conforme a requisição
-  numMaxPages: number;  // Adicionado o número de páginas máximas conforme a request
+  factHiringProcess: FactHiringProcessItem[];  
+  numMaxPages: number;
 }
 
-// Definindo a interface formatada para exibir os dados em um formato específico (opcional, caso precise de transformação)
 export interface FormattedDashboardTableRow {
   'Nome da vaga': string;
   'Total das vagas': number;

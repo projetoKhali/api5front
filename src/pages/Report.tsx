@@ -14,7 +14,7 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { getDashboardTableData } from '../service/TableDashboard';
+import { fetchAllPagesData, generateCSV, getDashboardTableData } from '../service/TableDashboard';
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
 import DynamicTable from '../components/DynamicTable';
@@ -26,6 +26,7 @@ const Report = () => {
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
+  const [allData, setAllData] = useState<FormattedDashboardTableRow[]>([]);
   const [page] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
@@ -38,6 +39,15 @@ const Report = () => {
     setProcesses(
       await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
     );
+  };
+
+  const handleExportCSV = async () => {
+    await setAllData(await fetchAllPagesData(createFilterBody()))
+    if (allData.length > 0) {
+      generateCSV(allData); 
+    } else {
+      console.warn('Nenhum dado disponível para exportar.');
+    }
   };
 
   const fetchVacancies = async () => {
@@ -72,6 +82,7 @@ const Report = () => {
         fetchRecruiters(),
         fetchProcesses(),
         fetchVacancies(),
+        setAllData(await fetchAllPagesData(createFilterBody()))
       ]);
     };
 
@@ -97,6 +108,7 @@ const Report = () => {
   const handleFilter = async () => {
     try {
       await fetchTableData();
+      setAllData(await fetchAllPagesData(createFilterBody()))
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
     }
@@ -158,6 +170,10 @@ const Report = () => {
         />
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText} onPress={handleFilter}>Filtrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={handleExportCSV}>
+          <Text style={styles.buttonText}>Exportar CSV</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.tableSection}>
