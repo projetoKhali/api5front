@@ -8,6 +8,8 @@ export interface DashboardFilter {
   };
   processStatus: number[];
   vacancyStatus: number[];
+  page: number,
+  pageSize: number
 }
 
 interface vacancyStatus {

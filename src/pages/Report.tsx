@@ -7,51 +7,28 @@ import {
   Dimensions,
 } from 'react-native';
 import Filter from '../components/filter';
-import Card from '../components/Card';
-import BarChart from '../components/barChart';
-import { getDashboardData } from '../service/Dashboard';
-import PieChart from '../components/PieChart';
-import DynamicTable from '../components/DynamicTable';
-import { getDashboardTableData } from '../service/TableDashboard';
 import { Suggestion } from '../schemas/Suggestion';
 import MultiselectFilter from '../components/MultiselectFilter';
-import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
+import { getDashboardTableData } from '../service/TableDashboard';
+import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
+import DynamicTable from '../components/DynamicTable';
 
-const Dashboard = () => {
+const Report = () => {
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
   const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
-  const [page] = useState<number>(1);
-  const [pageSize] = useState<number>(5);
-  const [chartData, setChartData] = useState<
-    { month: string; duration: number }[]
-  >([]);
-  const [cardsData, setCardsData] = useState<{
-    processOpen: string;
-    processOverdue: string;
-    processCloseToExpiring: string;
-    processClosed: string;
-    totalCandidates: string;
-  } | null>(null);
-
-  const [pieData, setPieData] = useState<{
-    abertos: number;
-    emAnálise: number;
-    fechados: number;
-  }>({
-    abertos: 0,
-    emAnálise: 0,
-    fechados: 0,
-  });
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
+  const [page] = useState<number>(1);
+  const [pageSize] = useState<number>(10);
+
 
   const fetchRecruiters = async () => {
     setRecruiters(await getSuggestionsRecruiter());
@@ -88,6 +65,19 @@ const Dashboard = () => {
     setVacancies(selectedOptions);
   };
 
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      await Promise.all([
+        fetchTableData(),
+        fetchRecruiters(),
+        fetchProcesses(),
+        fetchVacancies(),
+      ]);
+    };
+
+    initializeDashboard();
+  }, []);
+
   const createFilterBody = (): DashboardFilter => {
     return {
       recruiters: recruiters?.map(recruiter => recruiter.id),
@@ -104,27 +94,12 @@ const Dashboard = () => {
     };
   };
 
-  const fetchDashboard = async () => {
-    const dashboardData = await getDashboardData(createFilterBody());
-    const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-    const formattedChartData = Object.keys(averageHiringTime).map(month => ({
-      month: capitalize(month),
-      duration: averageHiringTime[month as keyof typeof averageHiringTime],
-    }));
-
-    setChartData(formattedChartData);
-    setCardsData({
-      processOpen: cards.openProcess.toString(),
-      processOverdue: cards.expirededProcess.toString(),
-      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-      processClosed: cards.closeProcess.toString(),
-      totalCandidates: cards.averageHiringTime.toString(),
-    });
-    setPieData({
-      abertos: vacancyStatus.open,
-      emAnálise: vacancyStatus.analyzing,
-      fechados: vacancyStatus.closed,
-    });
+  const handleFilter = async () => {
+    try {
+      await fetchTableData();
+    } catch (error) {
+      console.error('Erro ao aplicar filtro:', error);
+    }
   };
 
   const fetchTableData = async () => {
@@ -141,32 +116,6 @@ const Dashboard = () => {
       console.error('Erro ao buscar dados da tabela:', error);
     }
   };
-
-  const capitalize = (text: string) =>
-    text.charAt(0).toUpperCase() + text.slice(1);
-
-  const handleFilter = async () => {
-    try {
-      await fetchDashboard();
-      await fetchTableData();
-    } catch (error) {
-      console.error('Erro ao aplicar filtro:', error);
-    }
-  };
-
-  useEffect(() => {
-    const initializeDashboard = async () => {
-      await Promise.all([
-        fetchDashboard(),
-        fetchTableData(),
-        fetchRecruiters(),
-        fetchProcesses(),
-        fetchVacancies(),
-      ]);
-    };
-
-    initializeDashboard();
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -207,50 +156,17 @@ const Dashboard = () => {
           type="date"
           onChange={date => setDateEndFilter(date)}
         />
-        <TouchableOpacity style={styles.button} onPress={handleFilter}>
-          <Text style={styles.buttonText}>Filtrar</Text>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText} onPress={handleFilter}>Filtrar</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.cardSection}>
-        <Card
-          titleCard="Processos Abertos"
-          valueCard={cardsData?.processOpen ?? ''}
-        />
-        <Card
-          titleCard="Processos Vencidos"
-          valueCard={cardsData?.processOverdue ?? ''}
-        />
-        <Card
-          titleCard="Processos a Vencer"
-          valueCard={cardsData?.processCloseToExpiring ?? ''}
-        />
-        <Card
-          titleCard="Processos Encerrados"
-          valueCard={cardsData?.processClosed ?? ''}
-        />
-        <Card
-          titleCard="Tempo médio contratação (Dias)"
-          valueCard={cardsData?.totalCandidates ?? ''}
-        />
-      </View>
-
-      <View style={styles.chartSection}>
-        <View style={styles.graph}>
-          <BarChart data={chartData} />
-        </View>
-        <View style={styles.pieChart}>
-          <PieChart title={'Status das vagas'} data={pieData} />
-        </View>
-
-        <View style={styles.tableSection}>
+      <View style={styles.tableSection}>
           {tableData && tableData.length > 0 ? (
             <DynamicTable tableData={tableData} />
           ) : (
             <Text>Nenhum dado disponível</Text>
           )}
         </View>
-      </View>
     </View>
   );
 };
@@ -319,8 +235,9 @@ const styles = StyleSheet.create({
   },
   tableSection: {
     width: '100%',
-    paddingTop: '1%',
+    padding: '1%',
+    height: '80%'
   },
 });
 
-export default Dashboard;
+export default Report;
