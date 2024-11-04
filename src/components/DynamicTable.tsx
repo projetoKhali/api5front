@@ -31,7 +31,7 @@ const DynamicTable = ({ tableData }: TableProps) => {
     <View style={styles.row}>
       {columns.map((col, index) => (
         <Text key={index} style={[styles.cell]}>
-          {item[col]}
+          {typeof item[col] === 'number' ? item[col].toFixed(2) : item[col]}
         </Text>
       ))}
     </View>

@@ -28,7 +28,7 @@ const Report = () => {
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
   const [allData, setAllData] = useState<FormattedDashboardTableRow[]>([]);
   const [page] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
+  const [pageSize] = useState<number>(13);
 
 
   const fetchRecruiters = async () => {
