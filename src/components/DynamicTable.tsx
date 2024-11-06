@@ -39,7 +39,7 @@ const DynamicTable = ({ tableData }: TableProps) => {
 
   return (
     <ScrollView horizontal style={styles.container}>
-      <View>
+      <View style={styles.container}>
         {renderHeader()}
         <View style={styles.body}>
           <FlatList
@@ -55,26 +55,27 @@ const DynamicTable = ({ tableData }: TableProps) => {
 
 const styles = StyleSheet.create({
   container: {
+    display: "flex",
     width: '100%',
     backgroundColor: 'white',
     borderRadius: 10,
   },
   body: {
     maxHeight: 200,
-    width: '100%',
+    width: '200%',
     backgroundColor: 'white',
   },
   column: {
     minWidth: 160,
   },
   headerRow: {
-    width: '100%',
+    width: '200%',
     flexDirection: 'row',
     backgroundColor: '#FF8C00',
     padding: 10,
   },
   headerCell: {
-    width: '100%',
+    width: '200%',
     fontWeight: 'bold',
     textAlign: 'center',
     color: 'white',
