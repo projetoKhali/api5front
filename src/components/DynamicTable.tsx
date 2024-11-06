@@ -31,7 +31,7 @@ const DynamicTable = ({ tableData }: TableProps) => {
     <View style={styles.row}>
       {columns.map((col, index) => (
         <Text key={index} style={[styles.cell]}>
-          {item[col]}
+          {typeof item[col] === 'number' ? item[col].toFixed(2) : item[col]}
         </Text>
       ))}
     </View>
@@ -56,17 +56,19 @@ const DynamicTable = ({ tableData }: TableProps) => {
 const styles = StyleSheet.create({
   container: {
     display: "flex",
+    height: '100%',
     width: '100%',
     backgroundColor: 'white',
     borderRadius: 10,
   },
   body: {
-    maxHeight: 200,
     width: '200%',
     backgroundColor: 'white',
+    height: '100%',
   },
   column: {
     minWidth: 160,
+    height: '100%',
   },
   headerRow: {
     width: '200%',
@@ -79,17 +81,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: 'white',
+    height: '100%',
   },
   row: {
     flexDirection: 'row',
     padding: 5,
     borderBottomWidth: 1,
     borderBottomColor: '#DCDADA',
+    height: '100%',
   },
   cell: {
     width: '100%',
     textAlign: 'center',
     padding: 5,
+    height: '100%',
   },
 });
 

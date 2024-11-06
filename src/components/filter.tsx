@@ -58,12 +58,12 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
 const styles = StyleSheet.create({
   container: {
     margin: 10,
-    width: '20%',
+    width: '15%',
     paddingHorizontal: 10,
-    minWidth: 300,
+    minWidth: 250,
   },
   input: {
-    height: 32,
+    height: 40,
     borderColor: '#ddd',
     borderWidth: 2,
     paddingHorizontal: 10,
@@ -80,8 +80,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    height: 32,
+    height: 40,
+    width: '100%',
     color: '#3c3c3c',
+    display: 'flex',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center'
   },
 });
 

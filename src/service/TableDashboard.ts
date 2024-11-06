@@ -11,21 +11,23 @@ export async function getDashboardTableData(
   tableRequest: DashboardFilter,
 ): Promise<FormattedDashboardTableRow[]> {
   try {
-    const response = await axios.post<DashboardTableRow[]>(
+    const response = await axios.post<DashboardTableRow>(
       `${API_URL}/api/v1/hiring-process/table`,
       tableRequest,
     );
     console.log('Dados recebidos da API:', response.data);
 
-    return response.data.map(row => ({
-      'Nome da vaga': row.title,
-      'Total das vagas': row.numPositions,
-      'Total de candidatos': row.numCandidates,
-      'Taxa de concorrencia': row.competitionRate,
-      'Total de entrevistados': row.numInterviewed,
-      'Total contratados': row.numHired,
-      'Tempo médio de contratação': row.averageHiringTime,
-      'Total de feedbacks': row.numFeedback,
+    return response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
+      'Nome da vaga': item.title,
+      'Total das vagas': item.numPositions,
+      'Total de candidatos': item.numCandidates,
+      'Taxa de concorrencia': item.competitionRate,
+      'Total de entrevistados': item.numInterviewed,
+      'Total contratados': item.numHired,
+      'Tempo médio de contratação': item.averageHiringTime != null 
+        ? parseFloat(item.averageHiringTime.toFixed(2))
+        : 0,
+      'Total de feedbacks': item.numFeedback,
     }));
   } catch (error) {
     console.error('Erro ao buscar dados da tabela:', error);
@@ -33,45 +35,71 @@ export async function getDashboardTableData(
   }
 }
 
-export async function getMockDashboardTableData(): Promise<
-  FormattedDashboardTableRow[]
-> {
-  const mockResponse: FormattedDashboardTableRow[] = [
-    {
-      'Nome da vaga': 'Desenvolvedor Frontend',
-      'Total das vagas': 5,
-      'Total de candidatos': 50,
-      'Taxa de concorrencia': 10,
-      'Total de entrevistados': 20,
-      'Total contratados': 3,
-      'Tempo médio de contratação': 30, // em dias
-      'Total de feedbacks': 15,
-    },
-    {
-      'Nome da vaga': 'Gerente de Projetos',
-      'Total das vagas': 2,
-      'Total de candidatos': 15,
-      'Taxa de concorrencia': 7.5,
-      'Total de entrevistados': 10,
-      'Total contratados': 1,
-      'Tempo médio de contratação': 45, // em dias
-      'Total de feedbacks': 8,
-    },
-    {
-      'Nome da vaga': 'Analista de Dados',
-      'Total das vagas': 3,
-      'Total de candidatos': 30,
-      'Taxa de concorrencia': 10,
-      'Total de entrevistados': 12,
-      'Total contratados': 2,
-      'Tempo médio de contratação': 40, // em dias
-      'Total de feedbacks': 10,
-    },
-  ];
+export async function fetchAllPagesData(
+  tableRequest: DashboardFilter
+): Promise<FormattedDashboardTableRow[]> {
+  let currentPage = 1;
+  const allData: FormattedDashboardTableRow[] = [];
 
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(mockResponse);
-    }, 500);
+  try {
+    while (true) {
+      const pageRequest = { ...tableRequest, page: currentPage };
+      const response = await axios.post<DashboardTableRow>(`${API_URL}/api/v1/hiring-process/table`, pageRequest);
+      
+      allData.push(
+        ...response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
+          'Nome da vaga': item.title,
+          'Total das vagas': item.numPositions,
+          'Total de candidatos': item.numCandidates,
+          'Taxa de concorrencia': item.competitionRate,
+          'Total de entrevistados': item.numInterviewed,
+          'Total contratados': item.numHired,
+          'Tempo médio de contratação': item.averageHiringTime != null
+            ? parseFloat(item.averageHiringTime.toFixed(2))
+            : 0,
+          'Total de feedbacks': item.numFeedback,
+        }))
+      );
+
+      if (currentPage >= response.data.numMaxPages) break;
+      
+      currentPage++;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar todas as páginas:', error);
+    throw error;
+  }
+
+  return allData;
+}
+
+// Função para gerar o arquivo CSV a partir dos dados
+export function generateCSV(data: FormattedDashboardTableRow[]): void {
+  const csvRows: string[] = [];
+
+  // Cria o cabeçalho do CSV
+  const headers = Object.keys(data[0]) as Array<keyof FormattedDashboardTableRow>;
+  csvRows.push(headers.join(','));
+
+  // Adiciona cada linha dos dados no formato CSV
+  data.forEach(row => {
+    const values = headers.map(header => JSON.stringify(row[header]));
+    csvRows.push(values.join(','));
   });
+
+  // Cria o blob CSV e inicia o download
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  
+  // Cria um link temporário para download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'dashboard_data.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Libera o objeto de URL
+  window.URL.revokeObjectURL(url);
 }

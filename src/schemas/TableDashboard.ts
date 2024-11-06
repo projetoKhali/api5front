@@ -1,12 +1,17 @@
-export interface DashboardTableRow {
+interface FactHiringProcessItem {
   title: string;
   numPositions: number;
   numCandidates: number;
   competitionRate: number;
   numInterviewed: number;
   numHired: number;
-  averageHiringTime: number;
+  averageHiringTime: number | null;
   numFeedback: number;
+}
+
+export interface DashboardTableRow {
+  factHiringProcess: FactHiringProcessItem[];  
+  numMaxPages: number;
 }
 
 export interface FormattedDashboardTableRow {
@@ -16,6 +21,6 @@ export interface FormattedDashboardTableRow {
   'Taxa de concorrencia': number;
   'Total de entrevistados': number;
   'Total contratados': number;
-  'Tempo médio de contratação': number;
+  'Tempo médio de contratação': number | null;
   'Total de feedbacks': number;
 }
