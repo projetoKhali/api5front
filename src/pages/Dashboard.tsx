@@ -22,6 +22,7 @@ import {
   getSuggestionsVacancy,
 } from '../service/Suggestions';
 import { DashboardFilter } from '../schemas/Dashboard';
+import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const Dashboard = () => {
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
@@ -33,6 +34,13 @@ const Dashboard = () => {
   );
   const [selectedProcesses, setSelectedProcesses] = useState<Suggestion[]>([]);
   const [selectedVacancies, setSelectedVacancies] = useState<Suggestion[]>([]);
+
+  const [selectedProcessStatuses, setSelectedProcessStatuses] = useState<
+    Suggestion[]
+  >([]);
+  const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
+    Suggestion[]
+  >([]);
 
   type SuggestionsGetter = () => Promise<Suggestion[]>;
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
@@ -116,8 +124,8 @@ const Dashboard = () => {
         startDate: dateStartFilter,
         endDate: dateEndFilter,
       },
-      processStatus: [],
-      vacancyStatus: [],
+      processStatus: selectedProcessStatuses?.map(status => status.id) ?? [],
+      vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
     };
   };
 
@@ -199,6 +207,20 @@ const Dashboard = () => {
           placeholder="Data Final"
           type="date"
           onChange={date => setDateEndFilter(date)}
+        />
+        <MultiSelectFilter
+          placeholder={'Status do Processo'}
+          getSuggestions={() => Promise.resolve(vacancyStatuses)}
+          onChange={(selected: Suggestion[]) =>
+            setSelectedProcessStatuses(selected)
+          }
+        />
+        <MultiSelectFilter
+          placeholder={'Status da Vaga'}
+          getSuggestions={() => Promise.resolve(processStatuses)}
+          onChange={(selected: Suggestion[]) =>
+            setSelectedVacancyStatuses(selected)
+          }
         />
         <TouchableOpacity style={styles.button} onPress={handleFilter}>
           <Text style={styles.buttonText}>Filtrar</Text>
