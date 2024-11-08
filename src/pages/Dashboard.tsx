@@ -29,6 +29,8 @@ const Dashboard = () => {
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
+  const [page] = useState<number>(1);
+  const [pageSize] = useState<number>(5);
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
   >([]);
@@ -97,6 +99,8 @@ const Dashboard = () => {
       },
       processStatus: [],
       vacancyStatus: [],
+      page: page,
+      pageSize: pageSize
     };
   };
 

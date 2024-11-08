@@ -58,20 +58,29 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
 const styles = StyleSheet.create({
   container: {
     margin: 10,
-    width: '20%',
+    width: '12%',
     paddingHorizontal: 10,
+    elevation: 2,
     minWidth: 300,
+    zIndex: 2,
+    display: 'flex',
+    alignContent: 'flex-start',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
   },
   input: {
-    height: 32,
+    height: 40,
     borderColor: '#ddd',
     borderWidth: 2,
     paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: '#fff',
     fontSize: 14,
-    alignContent: 'center',
     color: '#515151',
+    display: 'flex',
+    alignContent: 'flex-start',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
   },
   datePickerContainer: {
     borderColor: '#ddd',
@@ -80,8 +89,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    height: 32,
+    height: 40,
+    width: '100%',
     color: '#3c3c3c',
+    display: 'flex',
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'flex-start'
   },
 });
 
