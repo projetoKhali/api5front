@@ -4,11 +4,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import Filter from '../components/filter';
 import { Suggestion } from '../schemas/Suggestion';
-import MultiselectFilter from '../components/MultiselectFilter';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,
@@ -18,28 +16,62 @@ import { fetchAllPagesData, generateCSV, getDashboardTableData } from '../servic
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
 import DynamicTable from '../components/DynamicTable';
+import MultiSelectFilter from '../components/MultiselectFilter';
+import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const Report = () => {
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
   const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
-  const [dateStartFilter, setDateStartFilter] = useState<string>('');
-  const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
   const [allData, setAllData] = useState<FormattedDashboardTableRow[]>([]);
+
+  const [selectedRecruiters, setSelectedRecruiters] = useState<Suggestion[]>(
+    [],
+  );
+  const [selectedProcesses, setSelectedProcesses] = useState<Suggestion[]>([]);
+  const [selectedVacancies, setSelectedVacancies] = useState<Suggestion[]>([]);
+
+  const [selectedProcessStatuses, setSelectedProcessStatuses] = useState<
+    Suggestion[]
+  >([]);
+  const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
+    Suggestion[]
+  >([]);
+
+  type SuggestionsGetter = () => Promise<Suggestion[]>;
+  const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
+    useState<SuggestionsGetter>(() => async () => recruiters);
+  const [getSuggestionsProcesses, setGetSuggestionsProcesses] =
+    useState<SuggestionsGetter>(() => async () => processes);
+  const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
+    useState<SuggestionsGetter>(() => async () => vacancies);
+
+  useEffect(() => {
+    setGetSuggestionsRecruiters(() => async () => recruiters);
+  }, [recruiters]);
+
+  useEffect(() => {
+    setGetSuggestionsProcesses(() => async () => processes);
+  }, [processes]);
+
+  useEffect(() => {
+    setGetSuggestionsVacancies(() => async () => vacancies);
+  }, [vacancies]);
+
+  useEffect(() => {
+    fetchProcesses();
+    fetchVacancies();
+  }, [selectedRecruiters]);
+
+  useEffect(() => {
+    fetchVacancies();
+  }, [selectedProcesses]);
+
+  const [dateStartFilter, setDateStartFilter] = useState<string>('');
+  const [dateEndFilter, setDateEndFilter] = useState<string>('');
   const [page] = useState<number>(1);
-  const [pageSize] = useState<number>(13);
-
-
-  const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
-  };
-
-  const fetchProcesses = async () => {
-    setProcesses(
-      await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
-    );
-  };
+  const [pageSize] = useState<number>(2);
 
   const handleExportCSV = async () => {
     await setAllData(await fetchAllPagesData(createFilterBody()))
@@ -50,29 +82,43 @@ const Report = () => {
     }
   };
 
-  const fetchVacancies = async () => {
-    setVacancies(
-      await getSuggestionsVacancy(
-        processes?.map(hiringProcess => hiringProcess.id),
-      ),
+  const fetchRecruiters = async () => {
+    setRecruiters(await getSuggestionsRecruiter());
+  };
+
+  const fetchProcesses = async () => {
+    setProcesses(
+      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
     );
   };
 
-  const handleRecruiterSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setRecruiters(selectedOptions);
-
-    fetchProcesses();
-    fetchVacancies();
+  const fetchVacancies = async () => {
+    setVacancies(
+      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
+    );
   };
 
-  const handleProcessSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setProcesses(selectedOptions);
-
-    fetchVacancies();
+  const createFilterBody = (): DashboardFilter => {
+    return {
+      recruiters: selectedRecruiters?.map(recruiter => recruiter.id) ?? [],
+      processes:
+        selectedProcesses?.map(hiringProcess => hiringProcess.id) ?? [],
+      vacancies: selectedVacancies?.map(vacancy => vacancy.id) ?? [],
+      dateRange: {
+        startDate: dateStartFilter,
+        endDate: dateEndFilter,
+      },
+      page: page,
+      pageSize: pageSize,
+      processStatus: selectedProcessStatuses?.map(status => status.id) ?? [],
+      vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
+    };
   };
 
-  const handleVacancySuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setVacancies(selectedOptions);
+  const fetchTableData = async () => {
+    setTableData(
+      (await getDashboardTableData(createFilterBody())) || [],
+    );
   };
 
   useEffect(() => {
@@ -82,28 +128,11 @@ const Report = () => {
         fetchRecruiters(),
         fetchProcesses(),
         fetchVacancies(),
-        setAllData(await fetchAllPagesData(createFilterBody()))
       ]);
     };
 
     initializeDashboard();
   }, []);
-
-  const createFilterBody = (): DashboardFilter => {
-    return {
-      recruiters: recruiters?.map(recruiter => recruiter.id),
-      processes: processes?.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies?.map(vacancy => vacancy.id),
-      dateRange: {
-        startDate: dateStartFilter,
-        endDate: dateEndFilter,
-      },
-      processStatus: [],
-      vacancyStatus: [],
-      page: page,
-      pageSize: pageSize
-    };
-  };
 
   const handleFilter = async () => {
     try {
@@ -114,50 +143,24 @@ const Report = () => {
     }
   };
 
-  const fetchTableData = async () => {
-    try {
-      const response = await getDashboardTableData(createFilterBody());
-
-      if (Array.isArray(response)) {
-        setTableData(response);
-      } else {
-        console.warn('Resposta inválida ou dados ausentes:', response);
-        setTableData([]);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados da tabela:', error);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-        {[
-          {
-            title: 'Recrutadores',
-            getOptions: () => recruiters,
-            onChange: handleRecruiterSuggestionsChange,
-          },
-          {
-            title: 'Processos Seletivos',
-            getOptions: () => processes,
-            onChange: handleProcessSuggestionsChange,
-          },
-          {
-            title: 'Vagas',
-            getOptions: () => vacancies,
-            onChange: handleVacancySuggestionsChange,
-          },
-        ].map((filter, index) => (
-          <MultiselectFilter
-            key={index}
-            placeholder={filter.title}
-            getOptions={filter.getOptions}
-            onChange={selectedOptions => {
-              filter.onChange(selectedOptions);
-            }}
-          />
-        ))}
+      <MultiSelectFilter
+          placeholder={'Recrutadores'}
+          getSuggestions={getSuggestionsRecruiters}
+          onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
+        />
+        <MultiSelectFilter
+          placeholder={'Processos Seletivos'}
+          getSuggestions={getSuggestionsProcesses}
+          onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
+        />
+        <MultiSelectFilter
+          placeholder={'Vagas'}
+          getSuggestions={getSuggestionsVacancies}
+          onChange={(selected: Suggestion[]) => setSelectedVacancies(selected)}
+        />
         <Filter
           placeholder="Data Inicial"
           type="date"
@@ -167,6 +170,20 @@ const Report = () => {
           placeholder="Data Final"
           type="date"
           onChange={date => setDateEndFilter(date)}
+        />
+        <MultiSelectFilter
+          placeholder={'Status do Processo'}
+          getSuggestions={() => Promise.resolve(vacancyStatuses)}
+          onChange={(selected: Suggestion[]) =>
+            setSelectedProcessStatuses(selected)
+          }
+        />
+        <MultiSelectFilter
+          placeholder={'Status da Vaga'}
+          getSuggestions={() => Promise.resolve(processStatuses)}
+          onChange={(selected: Suggestion[]) =>
+            setSelectedVacancyStatuses(selected)
+          }
         />
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText} onPress={handleFilter}>Filtrar</Text>
@@ -187,8 +204,6 @@ const Report = () => {
   );
 };
 
-const { width } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#DCDADA',
@@ -198,6 +213,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   filterSection: {
+    display: 'flex',
     flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: '#EDE7E7',
@@ -205,7 +221,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
-    width: width,
+    width: '100%',
     paddingVertical: 10,
     zIndex: 10,
   },
@@ -216,6 +232,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 5,
     width: '8%',
+    minWidth: 120
   },
   buttonText: {
     color: '#fff',
@@ -250,10 +267,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   tableSection: {
+    display: 'flex',
     width: '100%',
     padding: '1%',
-    height: '80%'
-  },
+  },  
 });
 
 export default Report;

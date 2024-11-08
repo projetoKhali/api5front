@@ -54,9 +54,15 @@ const Filter = ({ placeholder, onChange, type }: FilterProps) => {
 const styles = StyleSheet.create({
   container: {
     margin: 10,
-    width: '15%',
+    width: '12%',
     paddingHorizontal: 10,
-    minWidth: 250,
+    elevation: 2,
+    minWidth: 300,
+    zIndex: 2,
+    display: 'flex',
+    alignContent: 'flex-start',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
   },
   input: {
     height: 40,
@@ -66,8 +72,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fff',
     fontSize: 14,
-    alignContent: 'center',
     color: '#515151',
+    display: 'flex',
+    alignContent: 'flex-start',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
   },
   datePickerContainer: {
     borderColor: '#ddd',
@@ -82,7 +91,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignContent: 'center',
-    alignItems: 'center'
+    alignItems: 'flex-start'
   },
 });
 
