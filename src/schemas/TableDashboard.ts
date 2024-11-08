@@ -1,5 +1,6 @@
 interface FactHiringProcessItem {
-  title: string;
+  processTitle: string;
+  vacancyTitle: string;
   numPositions: number;
   numCandidates: number;
   competitionRate: number;
@@ -15,6 +16,7 @@ export interface DashboardTableRow {
 }
 
 export interface FormattedDashboardTableRow {
+  'Nome do Processo': string;
   'Nome da vaga': string;
   'Total das vagas': number;
   'Total de candidatos': number;

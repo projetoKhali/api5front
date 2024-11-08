@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
+  Button,
 } from 'react-native';
 import Filter from '../components/filter';
 import Card from '../components/Card';
@@ -29,7 +30,7 @@ const Dashboard = () => {
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
-  const [page] = useState<number>(1);
+  const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(5);
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
@@ -52,6 +53,7 @@ const Dashboard = () => {
     fechados: 0,
   });
   const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   const fetchRecruiters = async () => {
     setRecruiters(await getSuggestionsRecruiter());
@@ -131,8 +133,10 @@ const Dashboard = () => {
     try {
       const response = await getDashboardTableData(createFilterBody());
 
-      if (Array.isArray(response)) {
-        setTableData(response);
+      if (response && response.formattedRows) {
+        setTableData(response.formattedRows);
+        setTotalPages(response.numMaxPages)
+
       } else {
         console.warn('Resposta inválida ou dados ausentes:', response);
         setTableData([]);
@@ -154,6 +158,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(prev => prev + 1);
+      fetchTableData();
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(prev => prev - 1);
+      fetchTableData();
+    }
+  };
+
   useEffect(() => {
     const initializeDashboard = async () => {
       await Promise.all([
@@ -163,10 +181,15 @@ const Dashboard = () => {
         fetchProcesses(),
         fetchVacancies(),
       ]);
+      fetchTableData(); 
     };
 
     initializeDashboard();
   }, []);
+
+  useEffect(() => {
+    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+  }, [page]);
 
   return (
     <View style={styles.container}>
@@ -249,6 +272,11 @@ const Dashboard = () => {
           ) : (
             <Text>Nenhum dado disponível</Text>
           )}
+          <View style={styles.pagination}>
+            <Button title="Anterior" onPress={handlePreviousPage} disabled={page === 1} />
+            <Text>Página {page} de {totalPages}</Text>
+            <Button title="Próxima" onPress={handleNextPage} disabled={page === totalPages} />
+          </View>
         </View>
       </View>
     </View>
@@ -320,6 +348,13 @@ const styles = StyleSheet.create({
   tableSection: {
     width: '100%',
     paddingTop: '1%',
+  },
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    marginVertical: 10,
   },
 });
 

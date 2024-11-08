@@ -7,9 +7,14 @@ import { DashboardFilter } from '../schemas/Dashboard';
 
 const API_URL: string = 'http://localhost:8080';
 
+export interface DashboardTableData {
+  formattedRows: FormattedDashboardTableRow[];
+  numMaxPages: number;
+}
+
 export async function getDashboardTableData(
   tableRequest: DashboardFilter,
-): Promise<FormattedDashboardTableRow[]> {
+): Promise<DashboardTableData> {
   try {
     const response = await axios.post<DashboardTableRow>(
       `${API_URL}/api/v1/hiring-process/table`,
@@ -17,8 +22,9 @@ export async function getDashboardTableData(
     );
     console.log('Dados recebidos da API:', response.data);
 
-    return response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
-      'Nome da vaga': item.title,
+    const formattedRows = response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
+      'Nome do Processo' : item.processTitle,
+      'Nome da vaga': item.vacancyTitle,
       'Total das vagas': item.numPositions,
       'Total de candidatos': item.numCandidates,
       'Taxa de concorrencia': item.competitionRate,
@@ -29,6 +35,10 @@ export async function getDashboardTableData(
         : 0,
       'Total de feedbacks': item.numFeedback,
     }));
+    return {
+      formattedRows,
+      numMaxPages: response.data.numMaxPages,
+    };
   } catch (error) {
     console.error('Erro ao buscar dados da tabela:', error);
     throw error;
@@ -48,7 +58,8 @@ export async function fetchAllPagesData(
       
       allData.push(
         ...response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
-          'Nome da vaga': item.title,
+          'Nome do Processo': item.processTitle,
+          'Nome da vaga': item.vacancyTitle,
           'Total das vagas': item.numPositions,
           'Total de candidatos': item.numCandidates,
           'Taxa de concorrencia': item.competitionRate,

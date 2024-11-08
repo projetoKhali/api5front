@@ -49,7 +49,9 @@ const DynamicTable = ({ tableData }: TableProps) => {
           />
         </View>
       </View>
+      
     </ScrollView>
+    
   );
 };
 

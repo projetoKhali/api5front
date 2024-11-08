@@ -14,7 +14,7 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { fetchAllPagesData, generateCSV, getDashboardTableData } from '../service/TableDashboard';
+import { DashboardTableData, fetchAllPagesData, generateCSV, getDashboardTableData } from '../service/TableDashboard';
 import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
 import DynamicTable from '../components/DynamicTable';
@@ -118,8 +118,8 @@ const Report = () => {
     try {
       const response = await getDashboardTableData(createFilterBody());
 
-      if (Array.isArray(response)) {
-        setTableData(response);
+      if (Array.isArray(response.formattedRows)) {
+        setTableData(response.formattedRows);
       } else {
         console.warn('Resposta inválida ou dados ausentes:', response);
         setTableData([]);
