@@ -6,17 +6,12 @@ const API_URL: string = 'http://localhost:8080';
 export async function getDashboardData(
   params: DashboardFilter,
 ): Promise<DashboardResponse> {
-  try {
-    const response = await axios.post<DashboardResponse>(
-      `${API_URL}/api/v1/hiring-process/dashboard`,
-      params,
-    );
+  const response = await axios.post<DashboardResponse>(
+    `${API_URL}/api/v1/hiring-process/dashboard`,
+    params,
+  );
 
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar dados do dashboard:', error);
-    throw error;
-  }
+  return response.data || [];
 }
 
 export async function getMockDashboardData(): Promise<DashboardResponse> {
