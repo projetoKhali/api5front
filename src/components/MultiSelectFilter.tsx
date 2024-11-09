@@ -117,13 +117,17 @@ export default function MultiSelectFilter({
   };
 
   const updateActiveSuggestions = async () => {
+    const unselectedSuggestions = suggestions.filter(
+      option => !listContainsWith(selectedOptions, option, 'id'),
+    );
+
     setActiveSuggestions(
       sort(
-        suggestions.filter(
-          option =>
-            option.title.toLowerCase().includes(searchText.toLowerCase()) &&
-            !listContainsWith(selectedOptions, option, 'id'),
-        ),
+        !!searchText && searchText.length > 0
+          ? unselectedSuggestions.filter(option =>
+              option.title.toLowerCase().includes(searchText.toLowerCase()),
+            )
+          : unselectedSuggestions,
       ),
     );
   };
