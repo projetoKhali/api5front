@@ -250,7 +250,7 @@ export default function MultiSelectFilter({
                     style={styles.suggestionCheckbox}
                     textStyle={{ color: 'black', textDecorationLine: 'none' }}
                     isChecked={option.selected}
-                    text={`${option.id} | ${option.title}`}
+                    text={`${option.title}`}
                     size={16}
                     fillColor="green"
                     unFillColor="white"
