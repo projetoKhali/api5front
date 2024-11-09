@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Filter from '../components/filter';
 import { Suggestion } from '../schemas/Suggestion';
 import {
@@ -12,19 +7,25 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { fetchAllPagesData, generateCSV, getDashboardTableData } from '../service/TableDashboard';
-import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
+import {
+  fetchAllPagesData,
+  generateCSV,
+  getDashboardTableData,
+} from '../service/TableDashboard';
+import { FormattedFactHiringProcessItem } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
 import DynamicTable from '../components/DynamicTable';
-import MultiSelectFilter from '../components/MultiselectFilter';
+import MultiSelectFilter from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const Report = () => {
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
   const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
-  const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
-  const [allData, setAllData] = useState<FormattedDashboardTableRow[]>([]);
+  const [tableData, setTableData] = useState<FormattedFactHiringProcessItem[]>(
+    [],
+  );
+  const [allData, setAllData] = useState<FormattedFactHiringProcessItem[]>([]);
 
   const [selectedRecruiters, setSelectedRecruiters] = useState<Suggestion[]>(
     [],
@@ -74,9 +75,9 @@ const Report = () => {
   const [pageSize] = useState<number>(2);
 
   const handleExportCSV = async () => {
-    await setAllData(await fetchAllPagesData(createFilterBody()))
+    setAllData(await fetchAllPagesData(createFilterBody()));
     if (allData.length > 0) {
-      generateCSV(allData); 
+      generateCSV(allData);
     } else {
       console.warn('Nenhum dado disponível para exportar.');
     }
@@ -117,7 +118,7 @@ const Report = () => {
 
   const fetchTableData = async () => {
     setTableData(
-      (await getDashboardTableData(createFilterBody())) || [],
+      (await getDashboardTableData(createFilterBody())).factHiringProcess || [],
     );
   };
 
@@ -137,7 +138,7 @@ const Report = () => {
   const handleFilter = async () => {
     try {
       await fetchTableData();
-      setAllData(await fetchAllPagesData(createFilterBody()))
+      setAllData(await fetchAllPagesData(createFilterBody()));
     } catch (error) {
       console.error('Erro ao aplicar filtro:', error);
     }
@@ -146,7 +147,7 @@ const Report = () => {
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-      <MultiSelectFilter
+        <MultiSelectFilter
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
           onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
@@ -186,7 +187,9 @@ const Report = () => {
           }
         />
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText} onPress={handleFilter}>Filtrar</Text>
+          <Text style={styles.buttonText} onPress={handleFilter}>
+            Filtrar
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleExportCSV}>
@@ -194,12 +197,12 @@ const Report = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.tableSection}>
-          {tableData && tableData.length > 0 ? (
-            <DynamicTable tableData={tableData} />
-          ) : (
-            <Text>Nenhum dado disponível</Text>
-          )}
-        </View>
+        {tableData && tableData.length > 0 ? (
+          <DynamicTable tableData={tableData} />
+        ) : (
+          <Text>Nenhum dado disponível</Text>
+        )}
+      </View>
     </View>
   );
 };
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 5,
     width: '8%',
-    minWidth: 120
+    minWidth: 120,
   },
   buttonText: {
     color: '#fff',
@@ -270,7 +273,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     width: '100%',
     padding: '1%',
-  },  
+  },
 });
 
 export default Report;
