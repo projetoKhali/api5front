@@ -1,5 +1,16 @@
-interface FactHiringProcessItem {
-  title: string;
+export interface DashboardTablePage {
+  factHiringProcess: FactHiringProcessItem[];
+  numMaxPages: number;
+}
+
+export interface FormattedDashboardTablePage {
+  factHiringProcess: FormattedFactHiringProcessItem[];
+  numMaxPages: number;
+}
+
+export interface FactHiringProcessItem {
+  processTitle: string;
+  vacancyTitle: string;
   numPositions: number;
   numCandidates: number;
   competitionRate: number;
@@ -9,13 +20,9 @@ interface FactHiringProcessItem {
   numFeedback: number;
 }
 
-export interface DashboardTableRow {
-  factHiringProcess: FactHiringProcessItem[];  
-  numMaxPages: number;
-}
-
-export interface FormattedDashboardTableRow {
-  'Nome da vaga': string;
+export interface FormattedFactHiringProcessItem {
+  Processo: string;
+  Vaga: string;
   'Total das vagas': number;
   'Total de candidatos': number;
   'Taxa de concorrencia': number;
