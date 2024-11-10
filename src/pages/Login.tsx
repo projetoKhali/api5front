@@ -29,6 +29,7 @@ const Login = ({ onLogin }: LoginProps) => {
         value={email}
         onChangeText={text => setEmail(text)}
         keyboardType="email-address"
+        placeholderTextColor="#bbb"
       />
       <View style={styles.passwordContainer}>
         <TextInput
@@ -37,6 +38,7 @@ const Login = ({ onLogin }: LoginProps) => {
           value={password}
           secureTextEntry={!showPassword}
           onChangeText={text => setPassword(text)}
+        placeholderTextColor="#bbb"
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.showPasswordButton}>
           {showPassword ? <FiEyeOff size={20} color="#888" /> : <FiEye size={20} color="#888" />}
@@ -82,7 +84,8 @@ const styles = StyleSheet.create({
   },
   showPasswordButton: {
     marginLeft: -30,
-    padding: 5,
+    padding: 4,
+    paddingBottom: 18,
   },
   loginButton: {
     marginTop: 20,
