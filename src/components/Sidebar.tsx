@@ -1,49 +1,48 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { Link } from 'react-router-dom';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GoGraph } from "react-icons/go";
-import { GoHome } from "react-icons/go";
+import { GoGraph, GoHome } from "react-icons/go";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-import { LuPanelLeftClose  } from "react-icons/lu";
-
-
+import { LuPanelLeftClose } from "react-icons/lu";
 
 interface SidebarProps {
   closeSidebar: () => void;
 }
 
-/* eslint-disable @typescript-eslint/no-require-imports */
 const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
+  const screenWidth = Dimensions.get('window').width;
+  const sidebarWidth = screenWidth > 600 ? '20%' : '60%';
 
   return (
     <LinearGradient
       colors={['#F18523', '#F3AE71']}
-      style={styles.sidebar}
+      style={[styles.sidebar, { width: sidebarWidth }]}
     >
       <View style={styles.viewButtonClose}>
         <TouchableOpacity onPress={closeSidebar}>
-          <LuPanelLeftClose  style={styles.closeButton} />
+          <LuPanelLeftClose style={styles.closeButton} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.image}>
         <Image source={require('../../assets/images/Logo-pro4tech.png')} style={styles.logo} />
       </View>
-      
+
       <View style={styles.menu}>
         <Link to="/" onClick={closeSidebar} style={styles.link}>
-          <GoHome  size={30} style={styles.icon} />
+          <GoHome size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Home Page</Text>
         </Link>
 
         <Link to="/dashboard" onClick={closeSidebar} style={styles.link}>
-          <GoGraph size={30} style={styles.icon} />
+          <GoGraph size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Dashboard</Text>
         </Link>
 
         <Link to="/report" onClick={closeSidebar} style={styles.link}>
-          <HiOutlineDocumentReport size={30} style={styles.icon} />
+          <HiOutlineDocumentReport size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Relatório</Text>
         </Link>
       </View>
@@ -54,60 +53,63 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 const styles = StyleSheet.create({
   sidebar: {
     position: 'absolute',
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     top: 0,
     left: 0,
-    width: '20%',
     minWidth: 200,
     height: '100%',
-    padding: 20,
+    paddingVertical: 30,
+    paddingHorizontal: 10,
     zIndex: 10,
   },
   closeButton: {
     color: 'white',
     fontSize: 26,
   },
+  viewButtonClose: {
+    width: '100%',
+    alignItems: 'flex-end',
+    marginBottom: 10,
+  },
+  image: {
+    width: 140,
+    height: 140,
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
   menu: {
-    marginTop: 50,
+    marginTop: 20,
+    alignItems: 'center',
+    width: '100%',
     gap: 20,
-    alignItems: 'center'
+    paddingLeft: 20
   },
   link: {
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 15,
+    alignItems: 'center',
+    marginVertical: 10,
     padding: 10,
-    width: '70%',
-    borderRadius: 8,
+    width: '85%',
     textDecorationLine: 'none',
   },
   menuItem: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     marginLeft: 15,
     fontWeight: 'bold',
-    fontFamily: 'System'
+    fontFamily: 'System',
   },
   icon: {
     color: 'white',
   },
-  viewButtonClose: {
-    width: '100%',
-    height: '4%',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end'
-  },
-  image: {
-    display: 'flex',
-    width: '100%',
-    height: '15%',
-    alignItems: 'center'
-  },
-  logo: {
-    width: '50%',
-    height: '100%'
-  }
 });
 
 export default Sidebar;
