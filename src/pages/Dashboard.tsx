@@ -146,10 +146,10 @@ const Dashboard = () => {
 
     setChartData(formattedChartData);
     setCardsData({
-      processOpen: cards.openProcess.toString(),
-      processOverdue: cards.expirededProcess.toString(),
-      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-      processClosed: cards.closeProcess.toString(),
+      processOpen: cards.open.toString(),
+      processOverdue: cards.inProgress.toString(),
+      processCloseToExpiring: cards.approachingDeadline.toString(),
+      processClosed: cards.closed.toString(),
       totalCandidates: cards.averageHiringTime.toString(),
     });
     setPieData({

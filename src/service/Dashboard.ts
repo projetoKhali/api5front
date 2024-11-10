@@ -22,10 +22,10 @@ export async function getMockDashboardData(): Promise<DashboardResponse> {
       closed: Math.round(Math.random() * 100),
     },
     cards: {
-      openProcess: Math.round(Math.random() * 100),
-      expirededProcess: Math.round(Math.random() * 100),
-      approachingDeadlineProcess: Math.round(Math.random() * 100),
-      closeProcess: Math.round(Math.random() * 100),
+      open: Math.round(Math.random() * 100),
+      inProgress: Math.round(Math.random() * 100),
+      approachingDeadline: Math.round(Math.random() * 100),
+      closed: Math.round(Math.random() * 100),
       averageHiringTime: Math.round(Math.random() * 100),
     },
     averageHiringTime: {
