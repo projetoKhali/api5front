@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Image,
+} from 'react-native';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 type LoginProps = {
@@ -21,7 +28,10 @@ const Login = ({ onLogin }: LoginProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={require('../../assets/images/logo-p4t-navbar.png')} style={styles.logo} />
+        <Image
+          source={require('../../assets/images/logo-p4t-navbar.png')}
+          style={styles.logo}
+        />
       </View>
       <TextInput
         style={styles.input}
@@ -38,10 +48,17 @@ const Login = ({ onLogin }: LoginProps) => {
           value={password}
           secureTextEntry={!showPassword}
           onChangeText={text => setPassword(text)}
-        placeholderTextColor="#bbb"
+          placeholderTextColor="#bbb"
         />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.showPasswordButton}>
-          {showPassword ? <FiEyeOff size={20} color="#888" /> : <FiEye size={20} color="#888" />}
+        <TouchableOpacity
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.showPasswordButton}
+        >
+          {showPassword ? (
+            <FiEyeOff size={20} color="#888" />
+          ) : (
+            <FiEye size={20} color="#888" />
+          )}
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -64,7 +81,7 @@ const styles = StyleSheet.create({
     margin: 'auto',
     elevation: 2,
     display: 'flex',
-    minHeight: 300
+    minHeight: 300,
   },
   input: {
     height: 40,
