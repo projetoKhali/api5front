@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Dimensions, Pressable, Text, TextInput, View } from 'react-native';
 import { Suggestion } from '../schemas/Suggestion';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 export type MultiSelectFilterRef = {
-  update: () => Promise<void>;
+  clear: () => void;
 };
 
 export type MultiselectFilterProps = {
   placeholder: string;
-  getSuggestions: () => Promise<Suggestion[]>;
+  getSuggestions: () => Suggestion[];
   onChange: (selectedOptions: Suggestion[]) => void;
 };
 
@@ -42,11 +47,10 @@ const toDisplayList = (
 ): DisplaySuggestion[] =>
   list.map(option => toDisplaySuggestion(option, selected));
 
-export default function MultiSelectFilter({
-  placeholder,
-  getSuggestions,
-  onChange,
-}: MultiselectFilterProps) {
+const MultiSelectFilter = forwardRef<
+  MultiSelectFilterRef,
+  MultiselectFilterProps
+>(({ placeholder, getSuggestions, onChange }, ref) => {
   const [searchText, setSearchText] = useState<string>('');
   const [displayText, setDisplayText] = useState<string>('');
 
@@ -60,8 +64,27 @@ export default function MultiSelectFilter({
 
   const [displayList, setDisplayList] = useState<DisplaySuggestion[]>([]);
 
+  useImperativeHandle(ref, () => ({
+    clear: () => {
+      setSearchText('');
+      setDisplayText('');
+
+      setIsListOpen(false);
+      setIsEditing(false);
+
+      setSuggestions([]);
+      setActiveSuggestions([]);
+      setSelectedOptions([]);
+
+      setDisplayList([]);
+
+      update();
+    },
+  }));
+
   useEffect(() => {
-    update().then(() => updateDisplayText());
+    update();
+    updateDisplayText();
   }, [getSuggestions]);
 
   useEffect(() => {
@@ -72,12 +95,12 @@ export default function MultiSelectFilter({
     );
   }, [selectedOptions, activeSuggestions]);
 
-  const update = async () => {
-    const newSuggestions = await getSuggestions();
+  const update = () => {
+    const newSuggestions = getSuggestions();
 
-    await updateSelectedOptions(newSuggestions);
-    await updateSuggestions(newSuggestions);
-    await updateActiveSuggestions();
+    updateSelectedOptions(newSuggestions);
+    updateSuggestions(newSuggestions);
+    updateActiveSuggestions();
   };
 
   function addSelectedOption(option: Suggestion) {
@@ -98,7 +121,7 @@ export default function MultiSelectFilter({
     );
   };
 
-  const updateSelectedOptions = async (newSuggestions: Suggestion[]) => {
+  const updateSelectedOptions = (newSuggestions: Suggestion[]) => {
     setSelectedOptions(
       sort(
         selectedOptions.filter(option =>
@@ -108,7 +131,7 @@ export default function MultiSelectFilter({
     );
   };
 
-  const updateSuggestions = async (newSuggestions: Suggestion[]) => {
+  const updateSuggestions = (newSuggestions: Suggestion[]) => {
     setSuggestions(
       newSuggestions.filter(
         option => !listContainsWith(selectedOptions, option, 'id'),
@@ -116,7 +139,7 @@ export default function MultiSelectFilter({
     );
   };
 
-  const updateActiveSuggestions = async () => {
+  const updateActiveSuggestions = () => {
     const unselectedSuggestions = suggestions.filter(
       option => !listContainsWith(selectedOptions, option, 'id'),
     );
@@ -134,12 +157,12 @@ export default function MultiSelectFilter({
 
   const inputOnTextChange = async (text: string) => {
     setSearchText(text);
-    await updateActiveSuggestions();
+    updateActiveSuggestions();
     await updateDisplayText();
   };
 
   const inputOnFocus = async () => {
-    await update();
+    update();
     await updateDisplayText();
     setIsEditing(true);
     setTimeout(() => setIsListOpen(true), 100);
@@ -169,7 +192,7 @@ export default function MultiSelectFilter({
       removeSelectedOption(option);
     }
 
-    await update();
+    update();
 
     setSearchText('');
 
@@ -272,7 +295,7 @@ export default function MultiSelectFilter({
       </View>
     </>
   );
-}
+});
 
 const styles = EStyleSheet.create({
   textInput: {
@@ -298,3 +321,6 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
   },
 });
+
+MultiSelectFilter.displayName = 'MultiSelectFilter';
+export default MultiSelectFilter;
