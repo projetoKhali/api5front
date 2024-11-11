@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
   Text,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
-import Filter from '../components/filter';
+import Filter, { FilterRef } from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
 import { getDashboardData } from '../service/Dashboard';
@@ -14,7 +15,9 @@ import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
 import { Suggestion } from '../schemas/Suggestion';
-import MultiSelectFilter from '../components/MultiSelectFilter';
+import MultiSelectFilter, {
+  MultiSelectFilterRef,
+} from '../components/MultiSelectFilter';
 import { FormattedFactHiringProcessItem } from '../schemas/TableDashboard';
 import {
   getSuggestionsRecruiter,
@@ -25,6 +28,16 @@ import { DashboardFilter } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const Dashboard = () => {
+  const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const processesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const vacanciesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const processStatusesMultiSelectFilterRef =
+    useRef<MultiSelectFilterRef>(null);
+  const vacancyStatusesMultiSelectFilterRef =
+    useRef<MultiSelectFilterRef>(null);
+  const dateStartFilterRef = useRef<FilterRef>(null);
+  const dateEndFilterRef = useRef<FilterRef>(null);
+
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
   const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
@@ -42,24 +55,24 @@ const Dashboard = () => {
     Suggestion[]
   >([]);
 
-  type SuggestionsGetter = () => Promise<Suggestion[]>;
+  type SuggestionsGetter = () => Suggestion[];
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
-    useState<SuggestionsGetter>(() => async () => recruiters);
+    useState<SuggestionsGetter>(() => () => recruiters);
   const [getSuggestionsProcesses, setGetSuggestionsProcesses] =
-    useState<SuggestionsGetter>(() => async () => processes);
+    useState<SuggestionsGetter>(() => () => processes);
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
-    useState<SuggestionsGetter>(() => async () => vacancies);
+    useState<SuggestionsGetter>(() => () => vacancies);
 
   useEffect(() => {
-    setGetSuggestionsRecruiters(() => async () => recruiters);
+    setGetSuggestionsRecruiters(() => () => recruiters);
   }, [recruiters]);
 
   useEffect(() => {
-    setGetSuggestionsProcesses(() => async () => processes);
+    setGetSuggestionsProcesses(() => () => processes);
   }, [processes]);
 
   useEffect(() => {
-    setGetSuggestionsVacancies(() => async () => vacancies);
+    setGetSuggestionsVacancies(() => () => vacancies);
   }, [vacancies]);
 
   useEffect(() => {
@@ -73,6 +86,9 @@ const Dashboard = () => {
 
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const applyFiltersTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [page] = useState<number>(1);
   const [pageSize] = useState<number>(5);
@@ -168,10 +184,80 @@ const Dashboard = () => {
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1);
 
-  const handleFilter = async () => {
+  const clearFilters = async () => {
+    if (!isAnyFilterActive()) return;
+
+    setSelectedRecruiters([]);
+    setSelectedProcesses([]);
+    setSelectedVacancies([]);
+    setSelectedProcessStatuses([]);
+    setSelectedVacancyStatuses([]);
+    setDateStartFilter('');
+    setDateEndFilter('');
+
+    recruitersMultiSelectFilterRef.current?.clear();
+    processesMultiSelectFilterRef.current?.clear();
+    vacanciesMultiSelectFilterRef.current?.clear();
+    processStatusesMultiSelectFilterRef.current?.clear();
+    vacancyStatusesMultiSelectFilterRef.current?.clear();
+    dateStartFilterRef.current?.clear();
+    dateEndFilterRef.current?.clear();
+
+    await applyFilters();
+  };
+
+  const applyFilters = async () => {
     await fetchDashboard();
     await fetchTableData();
   };
+
+  const baseOnFilterChange = async () => {
+    if (applyFiltersTimerRef.current) {
+      clearTimeout(applyFiltersTimerRef.current);
+    }
+
+    setIsLoading(true);
+
+    applyFiltersTimerRef.current = setTimeout(async () => {
+      await applyFilters();
+
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const recruitersFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedRecruiters(selected);
+    baseOnFilterChange();
+  };
+
+  const processesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedProcesses(selected);
+    baseOnFilterChange();
+  };
+
+  const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedVacancies(selected);
+    baseOnFilterChange();
+  };
+
+  const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedProcessStatuses(selected);
+    baseOnFilterChange();
+  };
+
+  const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedVacancyStatuses(selected);
+    baseOnFilterChange();
+  };
+
+  const isAnyFilterActive = () =>
+    selectedRecruiters.length > 0 ||
+    selectedProcesses.length > 0 ||
+    selectedVacancies.length > 0 ||
+    dateStartFilter.length > 0 ||
+    dateEndFilter.length > 0 ||
+    selectedProcessStatuses.length > 0 ||
+    selectedVacancyStatuses.length > 0;
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -190,48 +276,82 @@ const Dashboard = () => {
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              opacity: isAnyFilterActive() ? 1 : 0,
+            },
+          ]}
+          disabled={!isAnyFilterActive()}
+          accessible={isAnyFilterActive()}
+          onPress={clearFilters}
+        >
+          <Text style={styles.buttonText}>Limpar filtros</Text>
+        </TouchableOpacity>
         <MultiSelectFilter
+          ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
-          onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
+          onChange={(selected: Suggestion[]) =>
+            recruitersFilterOnChange(selected)
+          }
         />
         <MultiSelectFilter
+          ref={processesMultiSelectFilterRef}
           placeholder={'Processos Seletivos'}
           getSuggestions={getSuggestionsProcesses}
-          onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
+          onChange={(selected: Suggestion[]) =>
+            processesFilterOnChange(selected)
+          }
         />
         <MultiSelectFilter
+          ref={vacanciesMultiSelectFilterRef}
           placeholder={'Vagas'}
           getSuggestions={getSuggestionsVacancies}
-          onChange={(selected: Suggestion[]) => setSelectedVacancies(selected)}
+          onChange={(selected: Suggestion[]) =>
+            vacanciesFilterOnChange(selected)
+          }
         />
         <Filter
+          ref={dateStartFilterRef}
           placeholder="Data Inicial"
           type="date"
           onChange={date => setDateStartFilter(date)}
         />
         <Filter
+          ref={dateEndFilterRef}
           placeholder="Data Final"
           type="date"
           onChange={date => setDateEndFilter(date)}
         />
         <MultiSelectFilter
+          ref={processStatusesMultiSelectFilterRef}
           placeholder={'Status do Processo'}
-          getSuggestions={() => Promise.resolve(vacancyStatuses)}
+          getSuggestions={() => vacancyStatuses}
           onChange={(selected: Suggestion[]) =>
-            setSelectedProcessStatuses(selected)
+            processStatusesFilterOnChange(selected)
           }
         />
         <MultiSelectFilter
+          ref={vacancyStatusesMultiSelectFilterRef}
           placeholder={'Status da Vaga'}
-          getSuggestions={() => Promise.resolve(processStatuses)}
+          getSuggestions={() => processStatuses}
           onChange={(selected: Suggestion[]) =>
-            setSelectedVacancyStatuses(selected)
+            vacancyStatusesFilterOnChange(selected)
           }
         />
-        <TouchableOpacity style={styles.button} onPress={handleFilter}>
-          <Text style={styles.buttonText}>Filtrar</Text>
-        </TouchableOpacity>
+        <View
+          style={[
+            styles.loading,
+            {
+              opacity: isLoading ? 1 : 0,
+            },
+          ]}
+        >
+          <Text>Carregando...</Text>
+          <ActivityIndicator size="small" color={styles.loading.color} />
+        </View>
       </View>
 
       <View style={styles.cardSection}>
@@ -342,6 +462,10 @@ const styles = StyleSheet.create({
   tableSection: {
     width: '100%',
     paddingTop: '1%',
+  },
+  loading: {
+    color: '#4f8ef7',
+    alignSelf: 'center',
   },
 });
 
