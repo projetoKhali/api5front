@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { Link } from 'react-router-dom';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GoGraph, GoHome } from "react-icons/go";
-import { HiOutlineDocumentReport } from "react-icons/hi";
-import { LuPanelLeftClose } from "react-icons/lu";
+import { GoGraph, GoHome } from 'react-icons/go';
+import { HiOutlineDocumentReport } from 'react-icons/hi';
+import { LuPanelLeftClose } from 'react-icons/lu';
 
 interface SidebarProps {
   closeSidebar: () => void;
@@ -27,7 +34,10 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
       </View>
 
       <View style={styles.image}>
-        <Image source={require('../../assets/images/Logo-pro4tech.png')} style={styles.logo} />
+        <Image
+          source={require('../../assets/images/Logo-pro4tech.png')}
+          style={styles.logo}
+        />
       </View>
 
       <View style={styles.menu}>
@@ -89,7 +99,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     gap: 20,
-    paddingLeft: 20
+    paddingLeft: 20,
   },
   link: {
     display: 'flex',

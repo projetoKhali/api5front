@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
+  Button,
   ActivityIndicator,
 } from 'react-native';
 import Filter, { FilterRef } from '../components/filter';
@@ -26,6 +27,8 @@ import {
 } from '../service/Suggestions';
 import { DashboardFilter } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+
+const PAGE_SIZE = 5;
 
 const Dashboard = () => {
   const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
@@ -90,8 +93,22 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const applyFiltersTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [page] = useState<number>(1);
-  const [pageSize] = useState<number>(5);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(prev => prev + 1);
+      fetchTableData();
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(prev => prev - 1);
+      fetchTableData();
+    }
+  };
 
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
@@ -148,7 +165,7 @@ const Dashboard = () => {
       processStatus: selectedProcessStatuses?.map(status => status.id) ?? [],
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
-      pageSize: pageSize,
+      pageSize: PAGE_SIZE,
     };
   };
 
@@ -176,9 +193,10 @@ const Dashboard = () => {
   };
 
   const fetchTableData = async () => {
-    setTableData(
-      (await getDashboardTableData(createFilterBody())).factHiringProcess || [],
-    );
+    const response = await getDashboardTableData(createFilterBody());
+
+    setTableData(response.factHiringProcess || []);
+    setTotalPages(response.numMaxPages || 1);
   };
 
   const capitalize = (text: string) =>
@@ -268,10 +286,15 @@ const Dashboard = () => {
         fetchProcesses(),
         fetchVacancies(),
       ]);
+      fetchTableData();
     };
 
     initializeDashboard();
   }, []);
+
+  useEffect(() => {
+    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+  }, [page]);
 
   return (
     <View style={styles.container}>
@@ -391,6 +414,21 @@ const Dashboard = () => {
           ) : (
             <Text>Nenhum dado disponível</Text>
           )}
+          <View style={styles.pagination}>
+            <Button
+              title="Anterior"
+              onPress={handlePreviousPage}
+              disabled={page === 1}
+            />
+            <Text>
+              Página {page} de {totalPages}
+            </Text>
+            <Button
+              title="Próxima"
+              onPress={handleNextPage}
+              disabled={page === totalPages}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -462,6 +500,13 @@ const styles = StyleSheet.create({
   tableSection: {
     width: '100%',
     paddingTop: '1%',
+  },
+  pagination: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    marginVertical: 10,
   },
   loading: {
     color: '#4f8ef7',

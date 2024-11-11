@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
 import Report from './pages/Report';
 import Login from './pages/Login';
-import { CiMenuBurger } from "react-icons/ci";
+import { CiMenuBurger } from 'react-icons/ci';
 
 export default function App() {
   const [isAuthenticated, setAuthenticated] = useState(false);
@@ -25,7 +30,7 @@ export default function App() {
       <View style={styles.container}>
         {isAuthenticated ? (
           <>
-            { !isSidebarVisible && (
+            {!isSidebarVisible && (
               <View style={styles.buttonBackground}>
                 <TouchableOpacity style={styles.button} onPress={toggleSidebar}>
                   <CiMenuBurger />
@@ -65,9 +70,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonBackground: {
-    display: "flex",
-    width: "3%",
-    height: "4%",
+    display: 'flex',
+    width: '3%',
+    height: '4%',
     backgroundColor: '#F18523',
     position: 'absolute',
     top: '1%',
@@ -77,9 +82,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     minWidth: 40,
-    minHeight: 20
+    minHeight: 20,
   },
   button: {
-    backgroundColor: '#F18523'
+    backgroundColor: '#F18523',
   },
 });
