@@ -4,33 +4,32 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Dimensions,
   Button,
   ActivityIndicator,
 } from 'react-native';
 import Filter, { FilterRef } from '../components/filter';
-import Card from '../components/Card';
-import BarChart from '../components/barChart';
-import { getDashboardData } from '../service/Dashboard';
-import PieChart from '../components/PieChart';
-import DynamicTable from '../components/DynamicTable';
-import { getDashboardTableData } from '../service/TableDashboard';
 import { Suggestion } from '../schemas/Suggestion';
-import MultiSelectFilter, {
-  MultiSelectFilterRef,
-} from '../components/MultiSelectFilter';
-import { FormattedFactHiringProcessItem } from '../schemas/TableDashboard';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
+import {
+  fetchAllPagesData,
+  generateCSV,
+  getDashboardTableData,
+} from '../service/TableDashboard';
+import { FormattedFactHiringProcessItem } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
+import DynamicTable from '../components/DynamicTable';
+import MultiSelectFilter, {
+  MultiSelectFilterRef,
+} from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const PAGE_SIZE = 5;
 
-const Dashboard = () => {
+const Report = () => {
   const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
   const processesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
   const vacanciesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
@@ -110,28 +109,6 @@ const Dashboard = () => {
     }
   };
 
-  const [chartData, setChartData] = useState<
-    { month: string; duration: number }[]
-  >([]);
-
-  const [cardsData, setCardsData] = useState<{
-    processOpen: string;
-    processOverdue: string;
-    processCloseToExpiring: string;
-    processClosed: string;
-    totalCandidates: string;
-  } | null>(null);
-
-  const [pieData, setPieData] = useState<{
-    abertos: number;
-    emAnálise: number;
-    fechados: number;
-  }>({
-    abertos: 0,
-    emAnálise: 0,
-    fechados: 0,
-  });
-
   const [tableData, setTableData] = useState<FormattedFactHiringProcessItem[]>(
     [],
   );
@@ -169,29 +146,6 @@ const Dashboard = () => {
     };
   };
 
-  const fetchDashboard = async () => {
-    const dashboardData = await getDashboardData(createFilterBody());
-    const { averageHiringTime, cards, vacancyStatus } = dashboardData;
-    const formattedChartData = Object.keys(averageHiringTime).map(month => ({
-      month: capitalize(month),
-      duration: averageHiringTime[month as keyof typeof averageHiringTime],
-    }));
-
-    setChartData(formattedChartData);
-    setCardsData({
-      processOpen: cards.open.toString(),
-      processOverdue: cards.inProgress.toString(),
-      processCloseToExpiring: cards.approachingDeadline.toString(),
-      processClosed: cards.closed.toString(),
-      totalCandidates: cards.averageHiringTime.toString(),
-    });
-    setPieData({
-      abertos: vacancyStatus.open,
-      emAnálise: vacancyStatus.analyzing,
-      fechados: vacancyStatus.closed,
-    });
-  };
-
   const fetchTableData = async () => {
     const response = await getDashboardTableData(createFilterBody());
 
@@ -199,8 +153,22 @@ const Dashboard = () => {
     setTotalPages(response.numMaxPages || 1);
   };
 
-  const capitalize = (text: string) =>
-    text.charAt(0).toUpperCase() + text.slice(1);
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      await Promise.all([
+        fetchTableData(),
+        fetchRecruiters(),
+        fetchProcesses(),
+        fetchVacancies(),
+      ]);
+    };
+
+    initializeDashboard();
+  }, []);
+
+  useEffect(() => {
+    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+  }, [page]);
 
   const clearFilters = async () => {
     if (!isAnyFilterActive()) return;
@@ -225,7 +193,6 @@ const Dashboard = () => {
   };
 
   const applyFilters = async () => {
-    await fetchDashboard();
     await fetchTableData();
   };
 
@@ -277,24 +244,16 @@ const Dashboard = () => {
     selectedProcessStatuses.length > 0 ||
     selectedVacancyStatuses.length > 0;
 
-  useEffect(() => {
-    const initializeDashboard = async () => {
-      await Promise.all([
-        fetchDashboard(),
-        fetchTableData(),
-        fetchRecruiters(),
-        fetchProcesses(),
-        fetchVacancies(),
-      ]);
-      fetchTableData();
-    };
+  const [allData, setAllData] = useState<FormattedFactHiringProcessItem[]>([]);
 
-    initializeDashboard();
-  }, []);
-
-  useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
-  }, [page]);
+  const handleExportCSV = async () => {
+    setAllData(await fetchAllPagesData(createFilterBody()));
+    if (allData.length > 0) {
+      generateCSV(allData);
+    } else {
+      console.warn('Nenhum dado disponível para exportar.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -375,67 +334,37 @@ const Dashboard = () => {
           <Text>Carregando...</Text>
           <ActivityIndicator size="small" color={styles.loading.color} />
         </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleExportCSV}>
+          <Text style={styles.buttonText}>Exportar CSV</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.cardSection}>
-        <Card
-          titleCard="Processos Abertos"
-          valueCard={cardsData?.processOpen ?? ''}
-        />
-        <Card
-          titleCard="Processos Vencidos"
-          valueCard={cardsData?.processOverdue ?? ''}
-        />
-        <Card
-          titleCard="Processos a Vencer"
-          valueCard={cardsData?.processCloseToExpiring ?? ''}
-        />
-        <Card
-          titleCard="Processos Encerrados"
-          valueCard={cardsData?.processClosed ?? ''}
-        />
-        <Card
-          titleCard="Tempo médio contratação (Dias)"
-          valueCard={cardsData?.totalCandidates ?? ''}
-        />
-      </View>
-
-      <View style={styles.chartSection}>
-        <View style={styles.graph}>
-          <BarChart data={chartData} />
-        </View>
-        <View style={styles.pieChart}>
-          <PieChart title={'Status das vagas'} data={pieData} />
-        </View>
-
-        <View style={styles.tableSection}>
-          {tableData && tableData.length > 0 ? (
-            <DynamicTable tableData={tableData} />
-          ) : (
-            <Text>Nenhum dado disponível</Text>
-          )}
-          <View style={styles.pagination}>
-            <Button
-              title="Anterior"
-              onPress={handlePreviousPage}
-              disabled={page === 1}
-            />
-            <Text>
-              Página {page} de {totalPages}
-            </Text>
-            <Button
-              title="Próxima"
-              onPress={handleNextPage}
-              disabled={page === totalPages}
-            />
-          </View>
+      <View style={styles.tableSection}>
+        {tableData && tableData.length > 0 ? (
+          <DynamicTable tableData={tableData} />
+        ) : (
+          <Text>Nenhum dado disponível</Text>
+        )}
+        <View style={styles.pagination}>
+          <Button
+            title="Anterior"
+            onPress={handlePreviousPage}
+            disabled={page === 1}
+          />
+          <Text>
+            Página {page} de {totalPages}
+          </Text>
+          <Button
+            title="Próxima"
+            onPress={handleNextPage}
+            disabled={page === totalPages}
+          />
         </View>
       </View>
     </View>
   );
 };
-
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -446,6 +375,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   filterSection: {
+    display: 'flex',
     flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: '#EDE7E7',
@@ -453,7 +383,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
-    width: width,
+    width: '100%',
     paddingVertical: 10,
     zIndex: 10,
   },
@@ -463,7 +393,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginHorizontal: 5,
-    width: 100,
+    width: '8%',
+    minWidth: 120,
   },
   buttonText: {
     color: '#fff',
@@ -498,8 +429,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   tableSection: {
+    display: 'flex',
     width: '100%',
-    paddingTop: '1%',
+    padding: '1%',
   },
   pagination: {
     flexDirection: 'row',
@@ -514,4 +446,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Dashboard;
+export default Report;

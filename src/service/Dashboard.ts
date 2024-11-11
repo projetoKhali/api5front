@@ -6,17 +6,12 @@ const API_URL: string = 'http://localhost:8080';
 export async function getDashboardData(
   params: DashboardFilter,
 ): Promise<DashboardResponse> {
-  try {
-    const response = await axios.post<DashboardResponse>(
-      `${API_URL}/api/v1/hiring-process/dashboard`,
-      params,
-    );
+  const response = await axios.post<DashboardResponse>(
+    `${API_URL}/api/v1/hiring-process/dashboard`,
+    params,
+  );
 
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar dados do dashboard:', error);
-    throw error;
-  }
+  return response.data || [];
 }
 
 export async function getMockDashboardData(): Promise<DashboardResponse> {
@@ -27,10 +22,10 @@ export async function getMockDashboardData(): Promise<DashboardResponse> {
       closed: Math.round(Math.random() * 100),
     },
     cards: {
-      openProcess: Math.round(Math.random() * 100),
-      expirededProcess: Math.round(Math.random() * 100),
-      approachingDeadlineProcess: Math.round(Math.random() * 100),
-      closeProcess: Math.round(Math.random() * 100),
+      open: Math.round(Math.random() * 100),
+      inProgress: Math.round(Math.random() * 100),
+      approachingDeadline: Math.round(Math.random() * 100),
+      closed: Math.round(Math.random() * 100),
       averageHiringTime: Math.round(Math.random() * 100),
     },
     averageHiringTime: {

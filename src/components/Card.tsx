@@ -8,20 +8,13 @@ interface CardProps {
 }
 
 const Card = ({ titleCard, valueCard }: CardProps) => {
-  const numericValue = parseFloat(valueCard);
-  if (isNaN(numericValue)) {
-    console.warn('O valor do card não é um número válido:', numericValue);
-    return null;
-  }
-
-  if (numericValue < 0) {
-    console.warn('O valor do card não pode ser menor do que zero');
-    return null;
-  }
+  const numericValue = parseFloat(valueCard || '0');
 
   return (
     <View style={styles.cardContainer}>
-      <Text style={styles.value}>{valueCard}</Text>
+      <Text style={styles.value}>
+        {numericValue % 1 === 0 ? numericValue : numericValue.toFixed(2)}
+      </Text>
       <Text style={styles.title}>{titleCard}</Text>
     </View>
   );
