@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   Dimensions,
   Button,
+  ActivityIndicator,
 } from 'react-native';
-import Filter from '../components/filter';
+import Filter, { FilterRef } from '../components/filter';
 import Card from '../components/Card';
 import BarChart from '../components/barChart';
 import { getDashboardData } from '../service/Dashboard';
@@ -15,26 +16,104 @@ import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
 import { Suggestion } from '../schemas/Suggestion';
-import MultiselectFilter from '../components/MultiselectFilter';
-import { FormattedDashboardTableRow } from '../schemas/TableDashboard';
+import MultiSelectFilter, {
+  MultiSelectFilterRef,
+} from '../components/MultiSelectFilter';
+import { FormattedFactHiringProcessItem } from '../schemas/TableDashboard';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
 import { DashboardFilter } from '../schemas/Dashboard';
+import { processStatuses, vacancyStatuses } from '../schemas/Status';
+
+const PAGE_SIZE = 5;
 
 const Dashboard = () => {
+  const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const processesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const vacanciesMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
+  const processStatusesMultiSelectFilterRef =
+    useRef<MultiSelectFilterRef>(null);
+  const vacancyStatusesMultiSelectFilterRef =
+    useRef<MultiSelectFilterRef>(null);
+  const dateStartFilterRef = useRef<FilterRef>(null);
+  const dateEndFilterRef = useRef<FilterRef>(null);
+
   const [recruiters, setRecruiters] = useState<Suggestion[]>([]);
   const [processes, setProcesses] = useState<Suggestion[]>([]);
   const [vacancies, setVacancies] = useState<Suggestion[]>([]);
+
+  const [selectedRecruiters, setSelectedRecruiters] = useState<Suggestion[]>(
+    [],
+  );
+  const [selectedProcesses, setSelectedProcesses] = useState<Suggestion[]>([]);
+  const [selectedVacancies, setSelectedVacancies] = useState<Suggestion[]>([]);
+
+  const [selectedProcessStatuses, setSelectedProcessStatuses] = useState<
+    Suggestion[]
+  >([]);
+  const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
+    Suggestion[]
+  >([]);
+
+  type SuggestionsGetter = () => Suggestion[];
+  const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
+    useState<SuggestionsGetter>(() => () => recruiters);
+  const [getSuggestionsProcesses, setGetSuggestionsProcesses] =
+    useState<SuggestionsGetter>(() => () => processes);
+  const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
+    useState<SuggestionsGetter>(() => () => vacancies);
+
+  useEffect(() => {
+    setGetSuggestionsRecruiters(() => () => recruiters);
+  }, [recruiters]);
+
+  useEffect(() => {
+    setGetSuggestionsProcesses(() => () => processes);
+  }, [processes]);
+
+  useEffect(() => {
+    setGetSuggestionsVacancies(() => () => vacancies);
+  }, [vacancies]);
+
+  useEffect(() => {
+    fetchProcesses();
+    fetchVacancies();
+  }, [selectedRecruiters]);
+
+  useEffect(() => {
+    fetchVacancies();
+  }, [selectedProcesses]);
+
   const [dateStartFilter, setDateStartFilter] = useState<string>('');
   const [dateEndFilter, setDateEndFilter] = useState<string>('');
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const applyFiltersTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(5);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(prev => prev + 1);
+      fetchTableData();
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(prev => prev - 1);
+      fetchTableData();
+    }
+  };
+
   const [chartData, setChartData] = useState<
     { month: string; duration: number }[]
   >([]);
+
   const [cardsData, setCardsData] = useState<{
     processOpen: string;
     processOverdue: string;
@@ -52,8 +131,10 @@ const Dashboard = () => {
     emAnálise: 0,
     fechados: 0,
   });
-  const [tableData, setTableData] = useState<FormattedDashboardTableRow[]>([]);
-  const [totalPages, setTotalPages] = useState<number>(0);
+
+  const [tableData, setTableData] = useState<FormattedFactHiringProcessItem[]>(
+    [],
+  );
 
   const fetchRecruiters = async () => {
     setRecruiters(await getSuggestionsRecruiter());
@@ -61,48 +142,30 @@ const Dashboard = () => {
 
   const fetchProcesses = async () => {
     setProcesses(
-      await getSuggestionsProcess(recruiters?.map(recruiter => recruiter.id)),
+      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
     );
   };
 
   const fetchVacancies = async () => {
     setVacancies(
-      await getSuggestionsVacancy(
-        processes?.map(hiringProcess => hiringProcess.id),
-      ),
+      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
     );
-  };
-
-  const handleRecruiterSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setRecruiters(selectedOptions);
-
-    fetchProcesses();
-    fetchVacancies();
-  };
-
-  const handleProcessSuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setProcesses(selectedOptions);
-
-    fetchVacancies();
-  };
-
-  const handleVacancySuggestionsChange = (selectedOptions: Suggestion[]) => {
-    setVacancies(selectedOptions);
   };
 
   const createFilterBody = (): DashboardFilter => {
     return {
-      recruiters: recruiters?.map(recruiter => recruiter.id),
-      processes: processes?.map(hiringProcess => hiringProcess.id),
-      vacancies: vacancies?.map(vacancy => vacancy.id),
+      recruiters: selectedRecruiters?.map(recruiter => recruiter.id) ?? [],
+      processes:
+        selectedProcesses?.map(hiringProcess => hiringProcess.id) ?? [],
+      vacancies: selectedVacancies?.map(vacancy => vacancy.id) ?? [],
       dateRange: {
         startDate: dateStartFilter,
         endDate: dateEndFilter,
       },
-      processStatus: [],
-      vacancyStatus: [],
+      processStatus: selectedProcessStatuses?.map(status => status.id) ?? [],
+      vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
-      pageSize: pageSize
+      pageSize: PAGE_SIZE,
     };
   };
 
@@ -116,10 +179,10 @@ const Dashboard = () => {
 
     setChartData(formattedChartData);
     setCardsData({
-      processOpen: cards.openProcess.toString(),
-      processOverdue: cards.expirededProcess.toString(),
-      processCloseToExpiring: cards.approachingDeadlineProcess.toString(),
-      processClosed: cards.closeProcess.toString(),
+      processOpen: cards.open.toString(),
+      processOverdue: cards.inProgress.toString(),
+      processCloseToExpiring: cards.approachingDeadline.toString(),
+      processClosed: cards.closed.toString(),
       totalCandidates: cards.averageHiringTime.toString(),
     });
     setPieData({
@@ -130,47 +193,89 @@ const Dashboard = () => {
   };
 
   const fetchTableData = async () => {
-    try {
-      const response = await getDashboardTableData(createFilterBody());
+    const response = await getDashboardTableData(createFilterBody());
 
-      if (response && response.formattedRows) {
-        setTableData(response.formattedRows);
-        setTotalPages(response.numMaxPages)
-
-      } else {
-        console.warn('Resposta inválida ou dados ausentes:', response);
-        setTableData([]);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar dados da tabela:', error);
-    }
+    setTableData(response.factHiringProcess || []);
+    setTotalPages(response.numMaxPages || 1);
   };
 
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1);
 
-  const handleFilter = async () => {
-    try {
-      await fetchDashboard();
-      await fetchTableData();
-    } catch (error) {
-      console.error('Erro ao aplicar filtro:', error);
-    }
+  const clearFilters = async () => {
+    if (!isAnyFilterActive()) return;
+
+    setSelectedRecruiters([]);
+    setSelectedProcesses([]);
+    setSelectedVacancies([]);
+    setSelectedProcessStatuses([]);
+    setSelectedVacancyStatuses([]);
+    setDateStartFilter('');
+    setDateEndFilter('');
+
+    recruitersMultiSelectFilterRef.current?.clear();
+    processesMultiSelectFilterRef.current?.clear();
+    vacanciesMultiSelectFilterRef.current?.clear();
+    processStatusesMultiSelectFilterRef.current?.clear();
+    vacancyStatusesMultiSelectFilterRef.current?.clear();
+    dateStartFilterRef.current?.clear();
+    dateEndFilterRef.current?.clear();
+
+    await applyFilters();
   };
 
-  const handleNextPage = () => {
-    if (page < totalPages) {
-      setPage(prev => prev + 1);
-      fetchTableData();
-    }
+  const applyFilters = async () => {
+    await fetchDashboard();
+    await fetchTableData();
   };
 
-  const handlePreviousPage = () => {
-    if (page > 1) {
-      setPage(prev => prev - 1);
-      fetchTableData();
+  const baseOnFilterChange = async () => {
+    if (applyFiltersTimerRef.current) {
+      clearTimeout(applyFiltersTimerRef.current);
     }
+
+    setIsLoading(true);
+
+    applyFiltersTimerRef.current = setTimeout(async () => {
+      await applyFilters();
+
+      setIsLoading(false);
+    }, 1000);
   };
+
+  const recruitersFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedRecruiters(selected);
+    baseOnFilterChange();
+  };
+
+  const processesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedProcesses(selected);
+    baseOnFilterChange();
+  };
+
+  const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedVacancies(selected);
+    baseOnFilterChange();
+  };
+
+  const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedProcessStatuses(selected);
+    baseOnFilterChange();
+  };
+
+  const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
+    setSelectedVacancyStatuses(selected);
+    baseOnFilterChange();
+  };
+
+  const isAnyFilterActive = () =>
+    selectedRecruiters.length > 0 ||
+    selectedProcesses.length > 0 ||
+    selectedVacancies.length > 0 ||
+    dateStartFilter.length > 0 ||
+    dateEndFilter.length > 0 ||
+    selectedProcessStatuses.length > 0 ||
+    selectedVacancyStatuses.length > 0;
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -181,7 +286,7 @@ const Dashboard = () => {
         fetchProcesses(),
         fetchVacancies(),
       ]);
-      fetchTableData(); 
+      fetchTableData();
     };
 
     initializeDashboard();
@@ -194,45 +299,82 @@ const Dashboard = () => {
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-        {[
-          {
-            title: 'Recrutadores',
-            getOptions: () => recruiters,
-            onChange: handleRecruiterSuggestionsChange,
-          },
-          {
-            title: 'Processos Seletivos',
-            getOptions: () => processes,
-            onChange: handleProcessSuggestionsChange,
-          },
-          {
-            title: 'Vagas',
-            getOptions: () => vacancies,
-            onChange: handleVacancySuggestionsChange,
-          },
-        ].map((filter, index) => (
-          <MultiselectFilter
-            key={index}
-            placeholder={filter.title}
-            getOptions={filter.getOptions}
-            onChange={selectedOptions => {
-              filter.onChange(selectedOptions);
-            }}
-          />
-        ))}
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              opacity: isAnyFilterActive() ? 1 : 0,
+            },
+          ]}
+          disabled={!isAnyFilterActive()}
+          accessible={isAnyFilterActive()}
+          onPress={clearFilters}
+        >
+          <Text style={styles.buttonText}>Limpar filtros</Text>
+        </TouchableOpacity>
+        <MultiSelectFilter
+          ref={recruitersMultiSelectFilterRef}
+          placeholder={'Recrutadores'}
+          getSuggestions={getSuggestionsRecruiters}
+          onChange={(selected: Suggestion[]) =>
+            recruitersFilterOnChange(selected)
+          }
+        />
+        <MultiSelectFilter
+          ref={processesMultiSelectFilterRef}
+          placeholder={'Processos Seletivos'}
+          getSuggestions={getSuggestionsProcesses}
+          onChange={(selected: Suggestion[]) =>
+            processesFilterOnChange(selected)
+          }
+        />
+        <MultiSelectFilter
+          ref={vacanciesMultiSelectFilterRef}
+          placeholder={'Vagas'}
+          getSuggestions={getSuggestionsVacancies}
+          onChange={(selected: Suggestion[]) =>
+            vacanciesFilterOnChange(selected)
+          }
+        />
         <Filter
+          ref={dateStartFilterRef}
           placeholder="Data Inicial"
           type="date"
           onChange={date => setDateStartFilter(date)}
         />
         <Filter
+          ref={dateEndFilterRef}
           placeholder="Data Final"
           type="date"
           onChange={date => setDateEndFilter(date)}
         />
-        <TouchableOpacity style={styles.button} onPress={handleFilter}>
-          <Text style={styles.buttonText}>Filtrar</Text>
-        </TouchableOpacity>
+        <MultiSelectFilter
+          ref={processStatusesMultiSelectFilterRef}
+          placeholder={'Status do Processo'}
+          getSuggestions={() => vacancyStatuses}
+          onChange={(selected: Suggestion[]) =>
+            processStatusesFilterOnChange(selected)
+          }
+        />
+        <MultiSelectFilter
+          ref={vacancyStatusesMultiSelectFilterRef}
+          placeholder={'Status da Vaga'}
+          getSuggestions={() => processStatuses}
+          onChange={(selected: Suggestion[]) =>
+            vacancyStatusesFilterOnChange(selected)
+          }
+        />
+        <View
+          style={[
+            styles.loading,
+            {
+              opacity: isLoading ? 1 : 0,
+            },
+          ]}
+        >
+          <Text>Carregando...</Text>
+          <ActivityIndicator size="small" color={styles.loading.color} />
+        </View>
       </View>
 
       <View style={styles.cardSection}>
@@ -273,9 +415,19 @@ const Dashboard = () => {
             <Text>Nenhum dado disponível</Text>
           )}
           <View style={styles.pagination}>
-            <Button title="Anterior" onPress={handlePreviousPage} disabled={page === 1} />
-            <Text>Página {page} de {totalPages}</Text>
-            <Button title="Próxima" onPress={handleNextPage} disabled={page === totalPages} />
+            <Button
+              title="Anterior"
+              onPress={handlePreviousPage}
+              disabled={page === 1}
+            />
+            <Text>
+              Página {page} de {totalPages}
+            </Text>
+            <Button
+              title="Próxima"
+              onPress={handleNextPage}
+              disabled={page === totalPages}
+            />
           </View>
         </View>
       </View>
@@ -355,6 +507,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 10,
     marginVertical: 10,
+  },
+  loading: {
+    color: '#4f8ef7',
+    alignSelf: 'center',
   },
 });
 

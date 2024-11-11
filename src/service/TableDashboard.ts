@@ -1,95 +1,78 @@
 import axios from 'axios';
 import {
-  DashboardTableRow,
-  FormattedDashboardTableRow,
+  DashboardTablePage,
+  FactHiringProcessItem,
+  FormattedDashboardTablePage,
+  FormattedFactHiringProcessItem,
 } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
 
 const API_URL: string = 'http://localhost:8080';
 
-export interface DashboardTableData {
-  formattedRows: FormattedDashboardTableRow[];
-  numMaxPages: number;
-}
+const formatFactHiringProcessItem = (
+  row: FactHiringProcessItem,
+): FormattedFactHiringProcessItem => ({
+  Processo: row.processTitle,
+  Vaga: row.vacancyTitle,
+  'Total das vagas': row.numPositions,
+  'Total de candidatos': row.numCandidates,
+  'Taxa de concorrencia': row.competitionRate,
+  'Total de entrevistados': row.numInterviewed,
+  'Total contratados': row.numHired,
+  'Tempo médio de contratação': parseFloat(
+    row.averageHiringTime?.toFixed(2) || '0',
+  ),
+  'Total de feedbacks': row.numFeedback,
+});
 
 export async function getDashboardTableData(
   tableRequest: DashboardFilter,
-): Promise<DashboardTableData> {
-  try {
-    const response = await axios.post<DashboardTableRow>(
-      `${API_URL}/api/v1/hiring-process/table`,
-      tableRequest,
-    );
-    console.log('Dados recebidos da API:', response.data);
+): Promise<FormattedDashboardTablePage> {
+  const response = await axios.post<DashboardTablePage>(
+    `${API_URL}/api/v1/hiring-process/table`,
+    tableRequest,
+  );
 
-    const formattedRows = response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
-      'Nome do Processo' : item.processTitle,
-      'Nome da vaga': item.vacancyTitle,
-      'Total das vagas': item.numPositions,
-      'Total de candidatos': item.numCandidates,
-      'Taxa de concorrencia': item.competitionRate,
-      'Total de entrevistados': item.numInterviewed,
-      'Total contratados': item.numHired,
-      'Tempo médio de contratação': item.averageHiringTime != null 
-        ? parseFloat(item.averageHiringTime.toFixed(2))
-        : 0,
-      'Total de feedbacks': item.numFeedback,
-    }));
-    return {
-      formattedRows,
-      numMaxPages: response.data.numMaxPages,
-    };
-  } catch (error) {
-    console.error('Erro ao buscar dados da tabela:', error);
-    throw error;
-  }
+  return {
+    ...response.data,
+    factHiringProcess:
+      response.data?.factHiringProcess?.map(formatFactHiringProcessItem) || [],
+  };
 }
 
 export async function fetchAllPagesData(
-  tableRequest: DashboardFilter
-): Promise<FormattedDashboardTableRow[]> {
+  tableRequest: DashboardFilter,
+): Promise<FormattedFactHiringProcessItem[]> {
   let currentPage = 1;
-  const allData: FormattedDashboardTableRow[] = [];
+  let allData: FormattedFactHiringProcessItem[] = [];
 
-  try {
-    while (true) {
-      const pageRequest = { ...tableRequest, page: currentPage };
-      const response = await axios.post<DashboardTableRow>(`${API_URL}/api/v1/hiring-process/table`, pageRequest);
-      
-      allData.push(
-        ...response.data.factHiringProcess.map((item): FormattedDashboardTableRow => ({
-          'Nome do Processo': item.processTitle,
-          'Nome da vaga': item.vacancyTitle,
-          'Total das vagas': item.numPositions,
-          'Total de candidatos': item.numCandidates,
-          'Taxa de concorrencia': item.competitionRate,
-          'Total de entrevistados': item.numInterviewed,
-          'Total contratados': item.numHired,
-          'Tempo médio de contratação': item.averageHiringTime != null
-            ? parseFloat(item.averageHiringTime.toFixed(2))
-            : 0,
-          'Total de feedbacks': item.numFeedback,
-        }))
-      );
+  while (true) {
+    const pageRequest = { ...tableRequest, page: currentPage };
+    const response = await axios.post<DashboardTablePage>(
+      `${API_URL}/api/v1/hiring-process/table`,
+      pageRequest,
+    );
 
-      if (currentPage >= response.data.numMaxPages) break;
-      
-      currentPage++;
-    }
-  } catch (error) {
-    console.error('Erro ao buscar todas as páginas:', error);
-    throw error;
+    allData = allData.concat(
+      response.data.factHiringProcess.map(formatFactHiringProcessItem),
+    );
+
+    if (currentPage >= response.data.numMaxPages) break;
+
+    currentPage++;
   }
 
   return allData;
 }
 
 // Função para gerar o arquivo CSV a partir dos dados
-export function generateCSV(data: FormattedDashboardTableRow[]): void {
+export function generateCSV(data: FormattedFactHiringProcessItem[]): void {
   const csvRows: string[] = [];
 
   // Cria o cabeçalho do CSV
-  const headers = Object.keys(data[0]) as Array<keyof FormattedDashboardTableRow>;
+  const headers = Object.keys(data[0]) as Array<
+    keyof FormattedFactHiringProcessItem
+  >;
   csvRows.push(headers.join(','));
 
   // Adiciona cada linha dos dados no formato CSV
@@ -102,7 +85,7 @@ export function generateCSV(data: FormattedDashboardTableRow[]): void {
   const csvString = csvRows.join('\n');
   const blob = new Blob([csvString], { type: 'text/csv' });
   const url = window.URL.createObjectURL(blob);
-  
+
   // Cria um link temporário para download
   const link = document.createElement('a');
   link.href = url;
