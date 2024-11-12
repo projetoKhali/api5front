@@ -10,6 +10,7 @@ import { Suggestion } from '../schemas/Suggestion';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 export type MultiSelectFilterRef = {
+  update: () => void;
   clear: () => void;
 };
 
@@ -17,6 +18,7 @@ export type MultiselectFilterProps = {
   placeholder: string;
   getSuggestions: () => Suggestion[];
   onChange: (selectedOptions: Suggestion[]) => void;
+  onUpdate?: () => void;
 };
 
 type DisplaySuggestion = Suggestion & { selected: boolean };
@@ -24,7 +26,7 @@ type DisplaySuggestion = Suggestion & { selected: boolean };
 const MultiSelectFilter = forwardRef<
   MultiSelectFilterRef,
   MultiselectFilterProps
->(({ placeholder, getSuggestions, onChange }, ref) => {
+>(({ placeholder, getSuggestions, onChange, onUpdate }, ref) => {
   const [searchText, setSearchText] = useState<string>('');
   const [displayText, setDisplayText] = useState<string>('');
 
@@ -79,6 +81,8 @@ const MultiSelectFilter = forwardRef<
     updateSelectedOptions(newSuggestions);
     updateSuggestions(newSuggestions);
     updateActiveSuggestions();
+
+    if (onUpdate) onUpdate();
   };
 
   function addSelectedOption(option: Suggestion) {
@@ -326,7 +330,6 @@ const toDisplayList = (
   selected: boolean,
 ): DisplaySuggestion[] =>
   list.map(option => toDisplaySuggestion(option, selected));
-
 
 MultiSelectFilter.displayName = 'MultiSelectFilter';
 export default MultiSelectFilter;
