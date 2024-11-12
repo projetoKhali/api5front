@@ -66,6 +66,18 @@ const Dashboard = () => {
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
     useState<SuggestionsGetter>(() => () => vacancies);
 
+  const updateProcessesFilter = async () => {
+    if (processesMultiSelectFilterRef.current) {
+      await processesMultiSelectFilterRef.current.update();
+    }
+  };
+
+  const updateVacanciesFilter = async () => {
+    if (vacanciesMultiSelectFilterRef.current) {
+      await vacanciesMultiSelectFilterRef.current.update();
+    }
+  };
+
   useEffect(() => {
     setGetSuggestionsRecruiters(() => () => recruiters);
   }, [recruiters]);
@@ -77,6 +89,14 @@ const Dashboard = () => {
   useEffect(() => {
     setGetSuggestionsVacancies(() => () => vacancies);
   }, [vacancies]);
+
+  useEffect(() => {
+    updateProcessesFilter();
+  }, [getSuggestionsProcess]);
+
+  useEffect(() => {
+    updateVacanciesFilter();
+  }, [getSuggestionsVacancy]);
 
   useEffect(() => {
     fetchProcesses();
@@ -220,16 +240,9 @@ const Dashboard = () => {
     vacancyStatusesMultiSelectFilterRef.current?.clear();
     dateStartFilterRef.current?.clear();
     dateEndFilterRef.current?.clear();
-
-    await applyFilters();
   };
 
-  const applyFilters = async () => {
-    await fetchDashboard();
-    await fetchTableData();
-  };
-
-  const baseOnFilterChange = async () => {
+  const applyFiltersDelayed = async () => {
     if (applyFiltersTimerRef.current) {
       clearTimeout(applyFiltersTimerRef.current);
     }
@@ -237,36 +250,24 @@ const Dashboard = () => {
     setIsLoading(true);
 
     applyFiltersTimerRef.current = setTimeout(async () => {
-      await applyFilters();
+      await fetchDashboard();
+      await fetchTableData();
 
       setIsLoading(false);
     }, 1000);
   };
 
-  const recruitersFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedRecruiters(selected);
-    baseOnFilterChange();
-  };
-
-  const processesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcesses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancies(selected);
-    baseOnFilterChange();
-  };
-
-  const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcessStatuses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancyStatuses(selected);
-    baseOnFilterChange();
-  };
+  useEffect(() => {
+    applyFiltersDelayed();
+  }, [
+    selectedRecruiters,
+    selectedProcesses,
+    selectedVacancies,
+    dateStartFilter,
+    dateEndFilter,
+    selectedProcessStatuses,
+    selectedVacancyStatuses,
+  ]);
 
   const isAnyFilterActive = () =>
     selectedRecruiters.length > 0 ||
@@ -316,25 +317,19 @@ const Dashboard = () => {
           ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
-          onChange={(selected: Suggestion[]) =>
-            recruitersFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
         />
         <MultiSelectFilter
           ref={processesMultiSelectFilterRef}
           placeholder={'Processos Seletivos'}
           getSuggestions={getSuggestionsProcesses}
-          onChange={(selected: Suggestion[]) =>
-            processesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
         />
         <MultiSelectFilter
           ref={vacanciesMultiSelectFilterRef}
           placeholder={'Vagas'}
           getSuggestions={getSuggestionsVacancies}
-          onChange={(selected: Suggestion[]) =>
-            vacanciesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedVacancies(selected)}
         />
         <Filter
           ref={dateStartFilterRef}
@@ -353,7 +348,7 @@ const Dashboard = () => {
           placeholder={'Status do Processo'}
           getSuggestions={() => vacancyStatuses}
           onChange={(selected: Suggestion[]) =>
-            processStatusesFilterOnChange(selected)
+            setSelectedProcessStatuses(selected)
           }
         />
         <MultiSelectFilter
@@ -361,7 +356,7 @@ const Dashboard = () => {
           placeholder={'Status da Vaga'}
           getSuggestions={() => processStatuses}
           onChange={(selected: Suggestion[]) =>
-            vacancyStatusesFilterOnChange(selected)
+            setSelectedVacancyStatuses(selected)
           }
         />
         <View

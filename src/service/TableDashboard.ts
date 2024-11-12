@@ -34,9 +34,9 @@ export async function getDashboardTableData(
   );
 
   return {
-    ...response.data,
     factHiringProcess:
       response.data?.factHiringProcess?.map(formatFactHiringProcessItem) || [],
+    numMaxPages: response.data.numMaxPages,
   };
 }
 

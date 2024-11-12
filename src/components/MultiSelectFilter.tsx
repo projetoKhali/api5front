@@ -80,6 +80,10 @@ const MultiSelectFilter = forwardRef<
 
       update();
     },
+    update: async () => {
+      update();
+      await updateDisplayText();
+    },
   }));
 
   useEffect(() => {
@@ -165,7 +169,8 @@ const MultiSelectFilter = forwardRef<
     update();
     await updateDisplayText();
     setIsEditing(true);
-    setTimeout(() => setIsListOpen(true), 100);
+    setIsListOpen(true);
+    // setTimeout(() => setIsListOpen(true), 100);
   };
 
   const inputOnBlur = async () => {
