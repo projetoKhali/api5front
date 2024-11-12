@@ -68,13 +68,13 @@ const Dashboard = () => {
 
   const updateProcessesFilter = async () => {
     if (processesMultiSelectFilterRef.current) {
-      await processesMultiSelectFilterRef.current.update();
+      processesMultiSelectFilterRef.current.update();
     }
   };
 
   const updateVacanciesFilter = async () => {
     if (vacanciesMultiSelectFilterRef.current) {
-      await vacanciesMultiSelectFilterRef.current.update();
+      vacanciesMultiSelectFilterRef.current.update();
     }
   };
 
