@@ -21,32 +21,6 @@ export type MultiselectFilterProps = {
 
 type DisplaySuggestion = Suggestion & { selected: boolean };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const listContainsWith = <T extends Record<string, any>>(
-  list: T[],
-  element: T,
-  key: string,
-) => list.some((item: T) => item[key] === element[key]);
-
-const sort = (list: Suggestion[]): Suggestion[] =>
-  list.sort((a, b) =>
-    a?.title.localeCompare(b?.title, 'en', { numeric: true }),
-  );
-
-const toDisplaySuggestion = (
-  option: Suggestion,
-  selected: boolean,
-): DisplaySuggestion => ({
-  ...option,
-  selected,
-});
-
-const toDisplayList = (
-  list: Suggestion[],
-  selected: boolean,
-): DisplaySuggestion[] =>
-  list.map(option => toDisplaySuggestion(option, selected));
-
 const MultiSelectFilter = forwardRef<
   MultiSelectFilterRef,
   MultiselectFilterProps
@@ -326,6 +300,33 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
   },
 });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const listContainsWith = <T extends Record<string, any>>(
+  list: T[],
+  element: T,
+  key: string,
+) => list.some((item: T) => item[key] === element[key]);
+
+const sort = (list: Suggestion[]): Suggestion[] =>
+  list.sort((a, b) =>
+    a?.title.localeCompare(b?.title, 'en', { numeric: true }),
+  );
+
+const toDisplaySuggestion = (
+  option: Suggestion,
+  selected: boolean,
+): DisplaySuggestion => ({
+  ...option,
+  selected,
+});
+
+const toDisplayList = (
+  list: Suggestion[],
+  selected: boolean,
+): DisplaySuggestion[] =>
+  list.map(option => toDisplaySuggestion(option, selected));
+
 
 MultiSelectFilter.displayName = 'MultiSelectFilter';
 export default MultiSelectFilter;
