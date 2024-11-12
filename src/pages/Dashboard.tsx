@@ -80,23 +80,25 @@ const Dashboard = () => {
 
   useEffect(() => {
     setGetSuggestionsRecruiters(() => () => recruiters);
+    // updateProcessesFilter();
   }, [recruiters]);
 
   useEffect(() => {
     setGetSuggestionsProcesses(() => () => processes);
+    // updateVacanciesFilter();
   }, [processes]);
 
   useEffect(() => {
     setGetSuggestionsVacancies(() => () => vacancies);
   }, [vacancies]);
 
-  useEffect(() => {
-    updateProcessesFilter();
-  }, [getSuggestionsProcess]);
+  // useEffect(() => {
+  //   updateProcessesFilter();
+  // }, [getSuggestionsRecruiters]);
 
-  useEffect(() => {
-    updateVacanciesFilter();
-  }, [getSuggestionsVacancy]);
+  // useEffect(() => {
+  //   updateVacanciesFilter();
+  // }, [getSuggestionsProcess]);
 
   useEffect(() => {
     fetchProcesses();
@@ -318,12 +320,14 @@ const Dashboard = () => {
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
           onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
+          onUpdate={updateProcessesFilter}
         />
         <MultiSelectFilter
           ref={processesMultiSelectFilterRef}
           placeholder={'Processos Seletivos'}
           getSuggestions={getSuggestionsProcesses}
           onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
+          onUpdate={updateVacanciesFilter}
         />
         <MultiSelectFilter
           ref={vacanciesMultiSelectFilterRef}
