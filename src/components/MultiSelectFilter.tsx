@@ -6,17 +6,24 @@ import React, {
 } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Dimensions, Pressable, Text, TextInput, View } from 'react-native';
-import { Suggestion } from '../schemas/Suggestion';
+import {
+  PaginatedSuggestionsGetter,
+  Suggestion,
+  SuggestionsGetter,
+  StaticSuggestionsGetter,
+} from '../schemas/Misc';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 export type MultiSelectFilterRef = {
+  update: () => void;
   clear: () => void;
 };
 
 export type MultiselectFilterProps = {
   placeholder: string;
-  getSuggestions: () => Suggestion[];
+  getSuggestions: SuggestionsGetter;
   onChange: (selectedOptions: Suggestion[]) => void;
+  onClear?: () => void;
 };
 
 type DisplaySuggestion = Suggestion & { selected: boolean };
@@ -50,12 +57,15 @@ const toDisplayList = (
 const MultiSelectFilter = forwardRef<
   MultiSelectFilterRef,
   MultiselectFilterProps
->(({ placeholder, getSuggestions, onChange }, ref) => {
+>(({ placeholder, getSuggestions, onChange, onClear }, ref) => {
   const [searchText, setSearchText] = useState<string>('');
   const [displayText, setDisplayText] = useState<string>('');
 
   const [isListOpen, setIsListOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [activeSuggestions, setActiveSuggestions] = useState<Suggestion[]>([]);
@@ -64,28 +74,64 @@ const MultiSelectFilter = forwardRef<
 
   const [displayList, setDisplayList] = useState<DisplaySuggestion[]>([]);
 
+  const [triggerSafeUpdate, setTriggerSafeUpdate] = useState<boolean>(false);
+  const [triggerClearSideEffects, setTriggerClearSideEffects] =
+    useState<boolean>(false);
+
   useImperativeHandle(ref, () => ({
-    clear: () => {
-      setSearchText('');
-      setDisplayText('');
-
-      setIsListOpen(false);
-      setIsEditing(false);
-
-      setSuggestions([]);
-      setActiveSuggestions([]);
-      setSelectedOptions([]);
-
-      setDisplayList([]);
-
-      update();
-    },
+    update: async () => setTriggerSafeUpdate(true),
+    clear,
   }));
 
   useEffect(() => {
-    update();
-    updateDisplayText();
+    Promise.all([
+      async () => {
+        await update();
+        await updateDisplayText();
+      },
+    ]);
   }, [getSuggestions]);
+
+  useEffect(() => {
+    if (!triggerSafeUpdate) return;
+
+    Promise.all([
+      async () => {
+        await update();
+        await updateDisplayText();
+
+        setTriggerSafeUpdate(false);
+      },
+    ]);
+  }, [triggerSafeUpdate]);
+
+
+  const clear = () => {
+    setSearchText('');
+    setDisplayText('');
+
+    setIsListOpen(false);
+    setIsEditing(false);
+
+    setSuggestions([]);
+    activeSuggestions.concat(...selectedOptions);
+    setSelectedOptions([]);
+
+    setTriggerClearSideEffects(true);
+  };
+
+  useEffect(() => {
+    if (!triggerClearSideEffects) return;
+
+    Promise.all([
+      async () => {
+        await update();
+        if (onClear) onClear();
+
+        setTriggerClearSideEffects(false);
+      },
+    ]);
+  }, [triggerClearSideEffects]);
 
   useEffect(() => {
     setDisplayList(
@@ -93,15 +139,37 @@ const MultiSelectFilter = forwardRef<
         toDisplayList(activeSuggestions, false),
       ),
     );
-  }, [selectedOptions, activeSuggestions]);
+  }, [suggestions, selectedOptions, activeSuggestions]);
 
-  const update = () => {
-    const newSuggestions = getSuggestions();
+  const update = async () => {
+    if (!getSuggestions) return;
+
+    let newSuggestions: Suggestion[];
+
+    switch (!!getSuggestions.length) {
+      case true: {
+        const page = await (getSuggestions as PaginatedSuggestionsGetter)(
+          currentPage,
+        );
+
+        newSuggestions = page.items;
+        setTotalPages(page.numMaxPages);
+        break;
+      }
+      default: {
+        console.log('getSuggestions:', getSuggestions);
+        newSuggestions = await (getSuggestions as StaticSuggestionsGetter)();
+      }
+    }
 
     updateSelectedOptions(newSuggestions);
     updateSuggestions(newSuggestions);
     updateActiveSuggestions();
   };
+
+  useEffect(() => {
+    setTriggerSafeUpdate(true);
+  }, [currentPage]);
 
   function addSelectedOption(option: Suggestion) {
     selectedOptions.push(option);
@@ -162,7 +230,7 @@ const MultiSelectFilter = forwardRef<
   };
 
   const inputOnFocus = async () => {
-    update();
+    await update();
     await updateDisplayText();
     setIsEditing(true);
     setTimeout(() => setIsListOpen(true), 100);
@@ -192,7 +260,7 @@ const MultiSelectFilter = forwardRef<
       removeSelectedOption(option);
     }
 
-    update();
+    await update();
 
     setSearchText('');
 
@@ -236,9 +304,10 @@ const MultiSelectFilter = forwardRef<
           style={[
             styles.textInput,
             {
+              zIndex: isListOpen ? 103 : 1,
+              elevation: isListOpen ? 103 : 1,
               backgroundColor: 'white',
               padding: '0.5rem',
-              borderRadius: 8,
               borderColor: '#ddd',
               borderWidth: 2,
             },
@@ -251,41 +320,138 @@ const MultiSelectFilter = forwardRef<
         />
         {isListOpen && (
           <View
-            id="suggestionsList"
             style={[
               styles.suggestionsList,
               {
+                zIndex: isListOpen ? 102 : 1,
+                elevation: isListOpen ? 102 : 1,
                 position: 'absolute',
                 transform: [{ translateY: `2rem` }],
                 width: '100%',
                 backgroundColor: '#ccc',
-                paddingHorizontal: '1em',
                 paddingVertical: '0.25em',
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 1,
+                  height: 2,
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 8,
               },
             ]}
           >
             {(displayList &&
               displayList.length > 0 &&
-              displayList.map(option => (
+              [
                 <Pressable
-                  id="suggestionPressable"
-                  style={styles.suggestionPressable}
-                  key={`${option.selected ? 'S_' : ''}${option.id}`}
+                  key="clear-button"
+                  style={[
+                    styles.suggestionPressableClear,
+                    {
+                      cursor: selectedOptions.length
+                        ? 'pointer'
+                        : 'not-allowed',
+                      backgroundColor: selectedOptions.length
+                        ? 'white'
+                        : '#bbb',
+                      paddingVertical: '0.125rem',
+                      margin: '0.25rem',
+                      marginBottom: '0.5rem',
+                      borderWidth: 1,
+                      borderBottomWidth: 2,
+                      borderColor: '#ccc',
+                      borderBottomColor: '#bbb',
+                      borderRadius: 6,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                    },
+                  ]}
+                  onPress={clear}
+                  disabled={!selectedOptions.length}
                 >
-                  <BouncyCheckbox
-                    id="bouncyCheckbox"
-                    style={styles.suggestionCheckbox}
-                    textStyle={{ color: 'black', textDecorationLine: 'none' }}
-                    isChecked={option.selected}
-                    text={`${option.title}`}
-                    size={16}
-                    fillColor="green"
-                    unFillColor="white"
-                    innerIconStyle={{ borderWidth: 2 }}
-                    onPress={() => handleOptionChange(option)}
-                  />
-                </Pressable>
-              ))) || (
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      color: selectedOptions.length ? 'black' : '#888',
+                    }}
+                  >
+                    Limpar seleção
+                  </Text>
+                </Pressable>,
+              ]
+                .concat(
+                  displayList.map(option => (
+                    <Pressable
+                      key={`${option.selected ? 'S_' : ''}${option.id}`}
+                      focusable={false}
+                      tabIndex={-1}
+                    >
+                      <BouncyCheckbox
+                        style={[
+                          styles.suggestionPressable,
+                          {
+                            paddingHorizontal: '1em',
+                          },
+                        ]}
+                        textStyle={{
+                          color: 'black',
+                          textDecorationLine: 'none',
+                        }}
+                        isChecked={option.selected}
+                        text={`${option.title}`}
+                        size={16}
+                        fillColor="green"
+                        unFillColor="white"
+                        innerIconStyle={{ borderWidth: 2 }}
+                        onPress={() => handleOptionChange(option)}
+                      />
+                    </Pressable>
+                  )),
+                )
+                .concat(
+                  (totalPages > 1 && [
+                    <View
+                      key="pagination"
+                      style={[
+                        styles.pagination,
+                        {
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          padding: '1em',
+                        },
+                      ]}
+                    >
+                      <Pressable
+                        onPress={() =>
+                          currentPage > 1
+                            ? setCurrentPage(Math.max(currentPage - 1, 1))
+                            : {}
+                        }
+                        disabled={currentPage === 1}
+                      >
+                        <Text>&lt;</Text>
+                      </Pressable>
+                      <Text>
+                        {currentPage} / {totalPages}
+                      </Text>
+                      <Pressable
+                        onPress={() =>
+                          currentPage < totalPages
+                            ? setCurrentPage(
+                                Math.min(currentPage + 1, totalPages),
+                              )
+                            : {}
+                        }
+                        disabled={currentPage === totalPages}
+                      >
+                        <Text>&gt;</Text>
+                      </Pressable>
+                    </View>,
+                  ]) ||
+                    [],
+                )) || (
               <View style={styles.suggestionPressable}>
                 <Text>Nenhum dado disponível</Text>
               </View>
@@ -320,6 +486,7 @@ const styles = EStyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
   },
+  pagination: {},
 });
 
 MultiSelectFilter.displayName = 'MultiSelectFilter';
