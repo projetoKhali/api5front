@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import HomePage from './pages/HomePage';
 import Report from './pages/Report';
 import Login from './pages/Login';
 import { CiMenuBurger } from 'react-icons/ci';
@@ -39,8 +38,7 @@ export default function App() {
             )}
             <View style={styles.content}>
               <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" index element={<Dashboard />} />
                 <Route path="/report" element={<Report />} />
               </Routes>
             </View>
