@@ -12,13 +12,13 @@ export interface DashboardFilter {
   pageSize: number;
 }
 
-interface DashboardVacancyStatus {
+export interface DashboardVacancyStatus {
   open: number;
   analyzing: number;
   closed: number;
 }
 
-interface DashboardCardsInfo {
+export interface DashboardCardsInfo {
   open: number;
   inProgress: number;
   closed: number;
@@ -26,7 +26,7 @@ interface DashboardCardsInfo {
   averageHiringTime: number;
 }
 
-interface DashboardAverageHiringTime {
+export interface DashboardAverageHiringTime {
   january: number;
   february: number;
   march: number;

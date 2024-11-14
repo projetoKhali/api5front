@@ -1,13 +1,10 @@
-import axios from 'axios';
 import {
-  DashboardTablePage,
   FactHiringProcessItem,
   FormattedDashboardTablePage,
   FormattedFactHiringProcessItem,
 } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
-
-const API_URL: string = 'http://localhost:8080';
+import { processPaginatedRequest } from './base';
 
 const formatFactHiringProcessItem = (
   row: FactHiringProcessItem,
@@ -28,15 +25,14 @@ const formatFactHiringProcessItem = (
 export async function getDashboardTableData(
   tableRequest: DashboardFilter,
 ): Promise<FormattedDashboardTablePage> {
-  const response = await axios.post<DashboardTablePage>(
-    `${API_URL}/api/v1/hiring-process/table`,
+  const response = await processPaginatedRequest<FactHiringProcessItem>(
+    'hiring-process/table',
     tableRequest,
   );
 
   return {
-    ...response.data,
-    factHiringProcess:
-      response.data?.factHiringProcess?.map(formatFactHiringProcessItem) || [],
+    ...response,
+    items: response?.items?.map(formatFactHiringProcessItem) || [],
   };
 }
 
@@ -47,17 +43,14 @@ export async function fetchAllPagesData(
   let allData: FormattedFactHiringProcessItem[] = [];
 
   while (true) {
-    const pageRequest = { ...tableRequest, page: currentPage };
-    const response = await axios.post<DashboardTablePage>(
-      `${API_URL}/api/v1/hiring-process/table`,
-      pageRequest,
-    );
+    const { items: pageItems, numMaxPages } = await getDashboardTableData({
+      ...tableRequest,
+      page: currentPage,
+    });
 
-    allData = allData.concat(
-      response.data.factHiringProcess.map(formatFactHiringProcessItem),
-    );
+    allData = allData.concat(pageItems);
 
-    if (currentPage >= response.data.numMaxPages) break;
+    if (currentPage >= numMaxPages) break;
 
     currentPage++;
   }
