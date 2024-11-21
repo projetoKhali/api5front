@@ -27,7 +27,7 @@ import MultiSelectFilter, {
 } from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 9;
 
 const Report = () => {
   const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
@@ -160,6 +160,7 @@ const Report = () => {
         fetchRecruiters(),
         fetchProcesses(),
         fetchVacancies(),
+        setAllData(await fetchAllPagesData(createFilterBody()))
       ]);
     };
 
@@ -167,7 +168,7 @@ const Report = () => {
   }, []);
 
   useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+    fetchTableData();
   }, [page]);
 
   const clearFilters = async () => {
@@ -189,11 +190,12 @@ const Report = () => {
     dateStartFilterRef.current?.clear();
     dateEndFilterRef.current?.clear();
 
-    await applyFilters();
+    await fetchTableData();
   };
 
   const applyFilters = async () => {
     await fetchTableData();
+    setAllData(await fetchAllPagesData(createFilterBody()))
   };
 
   const baseOnFilterChange = async () => {
@@ -205,12 +207,12 @@ const Report = () => {
 
     applyFiltersTimerRef.current = setTimeout(async () => {
       await applyFilters();
-
       setIsLoading(false);
     }, 1000);
   };
 
   const recruitersFilterOnChange = async (selected: Suggestion[]) => {
+    await applyFilters()
     setSelectedRecruiters(selected);
     baseOnFilterChange();
   };
@@ -218,21 +220,25 @@ const Report = () => {
   const processesFilterOnChange = async (selected: Suggestion[]) => {
     setSelectedProcesses(selected);
     baseOnFilterChange();
+    await applyFilters();
   };
 
   const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
     setSelectedVacancies(selected);
     baseOnFilterChange();
+    await applyFilters();
   };
 
   const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
     setSelectedProcessStatuses(selected);
     baseOnFilterChange();
+    await applyFilters();
   };
 
   const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
     setSelectedVacancyStatuses(selected);
     baseOnFilterChange();
+    await applyFilters();
   };
 
   const isAnyFilterActive = () =>
@@ -258,25 +264,15 @@ const Report = () => {
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              opacity: isAnyFilterActive() ? 1 : 0,
-            },
-          ]}
-          disabled={!isAnyFilterActive()}
-          accessible={isAnyFilterActive()}
-          onPress={clearFilters}
-        >
-          <Text style={styles.buttonText}>Limpar filtros</Text>
-        </TouchableOpacity>
         <MultiSelectFilter
           ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
-          onChange={(selected: Suggestion[]) =>
-            recruitersFilterOnChange(selected)
+          onChange={async (selected: Suggestion[]) =>
+          {
+            recruitersFilterOnChange(selected);
+            await applyFilters()
+          }
           }
         />
         <MultiSelectFilter
@@ -295,18 +291,6 @@ const Report = () => {
             vacanciesFilterOnChange(selected)
           }
         />
-        <Filter
-          ref={dateStartFilterRef}
-          placeholder="Data Inicial"
-          type="date"
-          onChange={date => setDateStartFilter(date)}
-        />
-        <Filter
-          ref={dateEndFilterRef}
-          placeholder="Data Final"
-          type="date"
-          onChange={date => setDateEndFilter(date)}
-        />
         <MultiSelectFilter
           ref={processStatusesMultiSelectFilterRef}
           placeholder={'Status do Processo'}
@@ -323,6 +307,18 @@ const Report = () => {
             vacancyStatusesFilterOnChange(selected)
           }
         />
+        <Filter
+          ref={dateStartFilterRef}
+          placeholder="Data Inicial"
+          type="date"
+          onChange={date => setDateStartFilter(date)}
+        />
+        <Filter
+          ref={dateEndFilterRef}
+          placeholder="Data Final"
+          type="date"
+          onChange={date => setDateEndFilter(date)}
+        />
         <View
           style={[
             styles.loading,
@@ -334,10 +330,27 @@ const Report = () => {
           <Text>Carregando...</Text>
           <ActivityIndicator size="small" color={styles.loading.color} />
         </View>
-
-        <TouchableOpacity style={styles.button} onPress={handleExportCSV}>
-          <Text style={styles.buttonText}>Exportar CSV</Text>
-        </TouchableOpacity>
+        <View style={styles.filterSectionButton}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                opacity: isAnyFilterActive() ? 1 : 0,
+              },
+            ]}
+            disabled={!isAnyFilterActive()}
+            accessible={isAnyFilterActive()}
+            onPress={clearFilters}
+          >
+            <Text style={styles.buttonText}>Limpar filtros</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleExportCSV}>
+            <Text style={styles.buttonText}>Exportar CSV</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={applyFilters}>
+            <Text style={styles.buttonText}>Filtrar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.tableSection}>
@@ -356,6 +369,7 @@ const Report = () => {
             Página {page} de {totalPages}
           </Text>
           <Button
+
             title="Próxima"
             onPress={handleNextPage}
             disabled={page === totalPages}
@@ -384,8 +398,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    paddingVertical: 10,
-    zIndex: 10,
+    zIndex: 10
+  },
+  filterSectionButton:{
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: '',
+    width: '24%',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
   button: {
     backgroundColor: '#F28727',

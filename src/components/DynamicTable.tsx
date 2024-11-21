@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'white',
     borderRadius: 10,
+    paddingBottom: '0.5%'
   },
   body: {
     width: '200%',

@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     width: '12%',
     paddingHorizontal: 10,
     elevation: 2,
-    minWidth: 300,
+    minWidth: 320,
     zIndex: 2,
     display: 'flex',
     alignContent: 'flex-start',

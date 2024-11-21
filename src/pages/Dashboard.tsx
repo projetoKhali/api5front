@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Dimensions,
   Button,
   ActivityIndicator,
 } from 'react-native';
@@ -28,7 +27,7 @@ import {
 import { DashboardFilter } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 7;
 
 const Dashboard = () => {
   const recruitersMultiSelectFilterRef = useRef<MultiSelectFilterRef>(null);
@@ -221,7 +220,7 @@ const Dashboard = () => {
     dateStartFilterRef.current?.clear();
     dateEndFilterRef.current?.clear();
 
-    await applyFilters();
+    applyFilters();
   };
 
   const applyFilters = async () => {
@@ -299,19 +298,6 @@ const Dashboard = () => {
   return (
     <View style={styles.container}>
       <View style={styles.filterSection}>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              opacity: isAnyFilterActive() ? 1 : 0,
-            },
-          ]}
-          disabled={!isAnyFilterActive()}
-          accessible={isAnyFilterActive()}
-          onPress={clearFilters}
-        >
-          <Text style={styles.buttonText}>Limpar filtros</Text>
-        </TouchableOpacity>
         <MultiSelectFilter
           ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
@@ -336,18 +322,6 @@ const Dashboard = () => {
             vacanciesFilterOnChange(selected)
           }
         />
-        <Filter
-          ref={dateStartFilterRef}
-          placeholder="Data Inicial"
-          type="date"
-          onChange={date => setDateStartFilter(date)}
-        />
-        <Filter
-          ref={dateEndFilterRef}
-          placeholder="Data Final"
-          type="date"
-          onChange={date => setDateEndFilter(date)}
-        />
         <MultiSelectFilter
           ref={processStatusesMultiSelectFilterRef}
           placeholder={'Status do Processo'}
@@ -364,6 +338,18 @@ const Dashboard = () => {
             vacancyStatusesFilterOnChange(selected)
           }
         />
+        <Filter
+          ref={dateStartFilterRef}
+          placeholder="Data Inicial"
+          type="date"
+          onChange={date => setDateStartFilter(date)}
+        />
+        <Filter
+          ref={dateEndFilterRef}
+          placeholder="Data Final"
+          type="date"
+          onChange={date => setDateEndFilter(date)}
+        />
         <View
           style={[
             styles.loading,
@@ -374,6 +360,24 @@ const Dashboard = () => {
         >
           <Text>Carregando...</Text>
           <ActivityIndicator size="small" color={styles.loading.color} />
+        </View>
+        <View style={styles.filterSectionButton}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                opacity: isAnyFilterActive() ? 1 : 0,
+              },
+            ]}
+            disabled={!isAnyFilterActive()}
+            accessible={isAnyFilterActive()}
+            onPress={clearFilters}
+          >
+            <Text style={styles.buttonText}>Limpar filtros</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={applyFilters}>
+            <Text style={styles.buttonText}>Filtrar</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -435,8 +439,6 @@ const Dashboard = () => {
   );
 };
 
-const { width } = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#DCDADA',
@@ -446,6 +448,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   filterSection: {
+    display: 'flex',
     flexWrap: 'wrap',
     flexDirection: 'row',
     backgroundColor: '#EDE7E7',
@@ -453,9 +456,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     alignItems: 'center',
     justifyContent: 'center',
-    width: width,
-    paddingVertical: 10,
+    width: '100%',
     zIndex: 10,
+  },
+  filterSectionButton:{
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: '',
+    width: '23%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   button: {
     backgroundColor: '#F28727',
@@ -463,7 +473,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginHorizontal: 5,
-    width: 100,
+    width: 120,
   },
   buttonText: {
     color: '#fff',
