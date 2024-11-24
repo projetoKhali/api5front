@@ -1,13 +1,12 @@
 import axios from 'axios';
 import DashboardResponse, { DashboardFilter } from '../schemas/Dashboard';
-
-const API_URL: string = 'http://localhost:8080';
+import { getApiUrl } from '../Env';
 
 export async function getDashboardData(
   params: DashboardFilter,
 ): Promise<DashboardResponse> {
   const response = await axios.post<DashboardResponse>(
-    `${API_URL}/api/v1/hiring-process/dashboard`,
+    `${getApiUrl()}/api/v1/hiring-process/dashboard`,
     params,
   );
 

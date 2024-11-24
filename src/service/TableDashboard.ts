@@ -6,8 +6,7 @@ import {
   FormattedFactHiringProcessItem,
 } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
-
-const API_URL: string = 'http://localhost:8080';
+import { getApiUrl } from '../Env';
 
 const formatFactHiringProcessItem = (
   row: FactHiringProcessItem,
@@ -29,7 +28,7 @@ export async function getDashboardTableData(
   tableRequest: DashboardFilter,
 ): Promise<FormattedDashboardTablePage> {
   const response = await axios.post<DashboardTablePage>(
-    `${API_URL}/api/v1/hiring-process/table`,
+    `${getApiUrl()}/api/v1/hiring-process/table`,
     tableRequest,
   );
 
@@ -49,7 +48,7 @@ export async function fetchAllPagesData(
   while (true) {
     const pageRequest = { ...tableRequest, page: currentPage };
     const response = await axios.post<DashboardTablePage>(
-      `${API_URL}/api/v1/hiring-process/table`,
+      `${getApiUrl()}/api/v1/hiring-process/table`,
       pageRequest,
     );
 
