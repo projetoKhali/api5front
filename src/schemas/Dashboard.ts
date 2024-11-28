@@ -8,23 +8,25 @@ export interface DashboardFilter {
   };
   processStatus: number[];
   vacancyStatus: number[];
+  page: number;
+  pageSize: number;
 }
 
-interface vacancyStatus {
+interface DashboardVacancyStatus {
   open: number;
   analyzing: number;
   closed: number;
 }
 
-interface cards {
-  openProcess: number;
-  expirededProcess: number;
-  approachingDeadlineProcess: number;
-  closeProcess: number;
+interface DashboardCardsInfo {
+  open: number;
+  inProgress: number;
+  closed: number;
+  approachingDeadline: number;
   averageHiringTime: number;
 }
 
-interface averageHiringTime {
+interface DashboardAverageHiringTime {
   january: number;
   february: number;
   march: number;
@@ -40,7 +42,7 @@ interface averageHiringTime {
 }
 
 export default interface DashboardResponse {
-  vacancyStatus: vacancyStatus;
-  cards: cards;
-  averageHiringTime: averageHiringTime;
+  vacancyStatus: DashboardVacancyStatus;
+  cards: DashboardCardsInfo;
+  averageHiringTime: DashboardAverageHiringTime;
 }

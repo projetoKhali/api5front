@@ -1,14 +1,14 @@
-name: Build Node.js
+name: Unit Tests
 
 on:
   push:
     branches: [ "*" ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ "dev", "main" ]
 
 jobs:
-  build:
-    name: Build App
+  build-and-test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,6 +22,6 @@ jobs:
         run: |
           npm install
 
-      - name: Build Project
+      - name: Run Unit Tests
         run: |
-          npx expo export
+          npm run test

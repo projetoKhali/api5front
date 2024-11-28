@@ -1,77 +1,98 @@
 import axios from 'axios';
 import {
-  DashboardTableRow,
-  FormattedDashboardTableRow,
+  DashboardTablePage,
+  FactHiringProcessItem,
+  FormattedDashboardTablePage,
+  FormattedFactHiringProcessItem,
 } from '../schemas/TableDashboard';
 import { DashboardFilter } from '../schemas/Dashboard';
+import { getApiUrl } from '../Env';
 
-const API_URL: string = 'http://localhost:8080';
+const formatFactHiringProcessItem = (
+  row: FactHiringProcessItem,
+): FormattedFactHiringProcessItem => ({
+  Processo: row.processTitle,
+  Vaga: row.vacancyTitle,
+  'Total das vagas': row.numPositions,
+  'Total de candidatos': row.numCandidates,
+  'Taxa de concorrencia': row.competitionRate,
+  'Total de entrevistados': row.numInterviewed,
+  'Total contratados': row.numHired,
+  'Tempo médio de contratação': parseFloat(
+    row.averageHiringTime?.toFixed(2) || '0',
+  ),
+  'Total de feedbacks': row.numFeedback,
+});
 
 export async function getDashboardTableData(
   tableRequest: DashboardFilter,
-): Promise<FormattedDashboardTableRow[]> {
-  try {
-    const response = await axios.post<DashboardTableRow[]>(
-      `${API_URL}/api/v1/hiring-process/table`,
-      tableRequest,
-    );
-    console.log('Dados recebidos da API:', response.data);
+): Promise<FormattedDashboardTablePage> {
+  const response = await axios.post<DashboardTablePage>(
+    `${getApiUrl()}/api/v1/hiring-process/table`,
+    tableRequest,
+  );
 
-    return response.data.map(row => ({
-      'Nome da vaga': row.title,
-      'Total das vagas': row.numPositions,
-      'Total de candidatos': row.numCandidates,
-      'Taxa de concorrencia': row.competitionRate,
-      'Total de entrevistados': row.numInterviewed,
-      'Total contratados': row.numHired,
-      'Tempo médio de contratação': row.averageHiringTime,
-      'Total de feedbacks': row.numFeedback,
-    }));
-  } catch (error) {
-    console.error('Erro ao buscar dados da tabela:', error);
-    throw error;
-  }
+  return {
+    ...response.data,
+    factHiringProcess:
+      response.data?.factHiringProcess?.map(formatFactHiringProcessItem) || [],
+  };
 }
 
-export async function getMockDashboardTableData(): Promise<
-  FormattedDashboardTableRow[]
-> {
-  const mockResponse: FormattedDashboardTableRow[] = [
-    {
-      'Nome da vaga': 'Desenvolvedor Frontend',
-      'Total das vagas': 5,
-      'Total de candidatos': 50,
-      'Taxa de concorrencia': 10,
-      'Total de entrevistados': 20,
-      'Total contratados': 3,
-      'Tempo médio de contratação': 30, // em dias
-      'Total de feedbacks': 15,
-    },
-    {
-      'Nome da vaga': 'Gerente de Projetos',
-      'Total das vagas': 2,
-      'Total de candidatos': 15,
-      'Taxa de concorrencia': 7.5,
-      'Total de entrevistados': 10,
-      'Total contratados': 1,
-      'Tempo médio de contratação': 45, // em dias
-      'Total de feedbacks': 8,
-    },
-    {
-      'Nome da vaga': 'Analista de Dados',
-      'Total das vagas': 3,
-      'Total de candidatos': 30,
-      'Taxa de concorrencia': 10,
-      'Total de entrevistados': 12,
-      'Total contratados': 2,
-      'Tempo médio de contratação': 40, // em dias
-      'Total de feedbacks': 10,
-    },
-  ];
+export async function fetchAllPagesData(
+  tableRequest: DashboardFilter,
+): Promise<FormattedFactHiringProcessItem[]> {
+  let currentPage = 1;
+  let allData: FormattedFactHiringProcessItem[] = [];
 
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(mockResponse);
-    }, 500);
+  while (true) {
+    const pageRequest = { ...tableRequest, page: currentPage };
+    const response = await axios.post<DashboardTablePage>(
+      `${getApiUrl()}/api/v1/hiring-process/table`,
+      pageRequest,
+    );
+
+    allData = allData.concat(
+      response.data.factHiringProcess.map(formatFactHiringProcessItem),
+    );
+
+    if (currentPage >= response.data.numMaxPages) break;
+
+    currentPage++;
+  }
+
+  return allData;
+}
+
+// Função para gerar o arquivo CSV a partir dos dados
+export function generateCSV(data: FormattedFactHiringProcessItem[]): void {
+  const csvRows: string[] = [];
+
+  // Cria o cabeçalho do CSV
+  const headers = Object.keys(data[0]) as Array<
+    keyof FormattedFactHiringProcessItem
+  >;
+  csvRows.push(headers.join(','));
+
+  // Adiciona cada linha dos dados no formato CSV
+  data.forEach(row => {
+    const values = headers.map(header => JSON.stringify(row[header]));
+    csvRows.push(values.join(','));
   });
+
+  // Cria o blob CSV e inicia o download
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+
+  // Cria um link temporário para download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'dashboard_data.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Libera o objeto de URL
+  window.URL.revokeObjectURL(url);
 }
