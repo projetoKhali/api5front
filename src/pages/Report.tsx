@@ -26,6 +26,8 @@ import MultiSelectFilter, {
   MultiSelectFilterRef,
 } from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -56,6 +58,9 @@ const Report = () => {
   const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
     Suggestion[]
   >([]);
+  const userGroup: number[] | null = useSelector((state: RootState) =>
+    state.auth.user?.departments?.map(department => department.id) || null
+  );
 
   type SuggestionsGetter = () => Suggestion[];
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
@@ -143,6 +148,7 @@ const Report = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      groupAccess: userGroup ? userGroup : null,
     };
   };
 

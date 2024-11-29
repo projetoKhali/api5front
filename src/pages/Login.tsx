@@ -19,7 +19,7 @@ const Login = () => {
       try {
         const response = await postLogin({ email, password });
         // Associa o usuário retornado ao Redux
-        dispatch(login({ email: response.user.email }));
+        dispatch(login(response.user));
       } catch (error) {
         console.error(error);
         setErrorMessage('Credenciais inválidas. Tente novamente.');

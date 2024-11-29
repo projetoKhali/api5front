@@ -27,6 +27,8 @@ import {
 } from '../service/Suggestions';
 import { DashboardFilter } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -65,6 +67,9 @@ const Dashboard = () => {
     useState<SuggestionsGetter>(() => () => processes);
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
     useState<SuggestionsGetter>(() => () => vacancies);
+  const userGroup: number[] | null = useSelector((state: RootState) =>
+      state.auth.user?.departments?.map(department => department.id) || null
+    );
 
   useEffect(() => {
     setGetSuggestionsRecruiters(() => () => recruiters);
@@ -166,7 +171,10 @@ const Dashboard = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      groupAccess: userGroup ? userGroup : null,
+
     };
+    
   };
 
   const fetchDashboard = async () => {
@@ -190,6 +198,7 @@ const Dashboard = () => {
       emAnálise: vacancyStatus.analyzing,
       fechados: vacancyStatus.closed,
     });
+    console.log("userGroup:", userGroup, "Tipo:", typeof userGroup);
   };
 
   const fetchTableData = async () => {
