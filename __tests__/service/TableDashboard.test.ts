@@ -2,11 +2,20 @@ import axios from 'axios';
 import { getDashboardTableData, fetchAllPagesData } from '../../src/service/TableDashboard'; // Ajuste o caminho conforme necessário
 import { DashboardFilter } from '../../src/schemas/Dashboard';
 import { DashboardTablePage, FormattedDashboardTablePage } from '../../src/schemas/TableDashboard';
+import * as Env from '../../src/Env'; // Ajuste o caminho conforme necessário
 
-// Simulando o axios
+// Simulando o axios e mockando a função getApiUrl
 jest.mock('axios');
+jest.mock('../../src/Env', () => ({
+  getApiUrl: jest.fn(),
+}));
 
 describe('Serviço de Dashboard', () => {
+  beforeEach(() => {
+    // Mockar a URL da API antes de cada teste
+    (Env.getApiUrl as jest.Mock).mockReturnValue('http://localhost:8080');
+  });
+
   describe('getDashboardTableData', () => {
     it('deve formatar os dados corretamente', async () => {
       const mockedResponse: DashboardTablePage = {
@@ -37,6 +46,7 @@ describe('Serviço de Dashboard', () => {
         vacancyStatus: [1],
         page: 1,
         pageSize: 10,
+        groupAccess: [1, 2],
       };
 
       const result: FormattedDashboardTablePage = await getDashboardTableData(tableRequest);
@@ -119,6 +129,7 @@ describe('Serviço de Dashboard', () => {
         vacancyStatus: [1],
         page: 1,
         pageSize: 10,
+        groupAccess: [1, 2],
       };
 
       const result = await fetchAllPagesData(tableRequest);
