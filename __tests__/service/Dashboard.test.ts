@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { getDashboardData, getMockDashboardData } from '../../src/service/Dashboard'; // Ajuste o caminho conforme necessário
 import DashboardResponse, { DashboardFilter } from '../../src/schemas/Dashboard'; // Ajuste o caminho conforme necessário
+import * as Env from '../../src/Env'; // Ajuste o caminho conforme necessário
+
 jest.mock('axios');
+jest.mock('../../src/Env', () => ({
+  getApiUrl: jest.fn(),
+}));
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const mockResponse: DashboardResponse = {
@@ -34,6 +40,11 @@ const mockResponse: DashboardResponse = {
 };
 
 describe('Dashboard Service', () => {
+  beforeEach(() => {
+    // Aqui, corrigimos o mock para retornar apenas a base da URL
+    (Env.getApiUrl as jest.Mock).mockReturnValue('http://localhost:8080');
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -51,10 +62,12 @@ describe('Dashboard Service', () => {
         vacancyStatus: [1, 2],
         page: 1,
         pageSize: 10,
+        groupAccess: [1, 2],
       };
 
       const result = await getDashboardData(params);
 
+      // A URL esperada agora é corrigida para o formato correto
       expect(mockedAxios.post).toHaveBeenCalledWith(
         'http://localhost:8080/api/v1/hiring-process/dashboard',
         params
@@ -74,6 +87,7 @@ describe('Dashboard Service', () => {
         vacancyStatus: [1, 2],
         page: 1,
         pageSize: 10,
+        groupAccess: [1, 2],
       };
 
       const result = await getDashboardData(params);
