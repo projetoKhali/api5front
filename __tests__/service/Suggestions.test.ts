@@ -1,9 +1,22 @@
 import axios from 'axios';
 import { getSuggestionsRecruiter, getSuggestionsProcess, getSuggestionsVacancy } from '../../src/service/Suggestions';
 import { Suggestion } from '../../src/schemas/Suggestion';
+import * as Env from '../../src/Env'; // Certifique-se de importar o módulo Env corretamente
 
 jest.mock('axios');
+jest.mock('../../src/Env', () => ({
+  getApiUrl: jest.fn(),
+}));
+
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+beforeEach(() => {
+  // Mock da variável de ambiente para os testes
+  process.env.API_URL = 'http://localhost:8080';  // Defina o valor correto da URL da API
+
+  // Mock da função getApiUrl para garantir que retorne a URL correta
+  (Env.getApiUrl as jest.Mock).mockReturnValue(process.env.API_URL);
+});
 
 const mockSuggestions: Suggestion[] = [
   { id: 1, title: 'Suggestion 1' },
