@@ -142,18 +142,27 @@ const Dashboard = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    setRecruiters(await getSuggestionsRecruiter(userGroup ? userGroup : []));
   };
 
   const fetchProcesses = async () => {
     setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
+      await getSuggestionsProcess({
+        filterIds: selectedRecruiters?.map(r => r.id) ?? [],
+        departments: userGroup ? userGroup : []
+       }
+      ),
     );
   };
 
   const fetchVacancies = async () => {
     setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
+      await getSuggestionsVacancy(
+        {
+          filterIds: selectedProcesses?.map(p => p.id) ?? [],
+          departments: userGroup ? userGroup : []
+         }  
+      ),
     );
   };
 
@@ -172,7 +181,6 @@ const Dashboard = () => {
       page: page,
       pageSize: PAGE_SIZE,
       groupAccess: userGroup ? userGroup : null,
-
     };
     
   };
