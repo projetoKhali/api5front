@@ -6,7 +6,6 @@ import {
 } from '../schemas/Misc';
 import { processPaginatedRequest } from './base';
 
-
 export async function getSuggestionsRecruiter(
   body: PageRequest,
 ): Promise<Page<Suggestion>> {
