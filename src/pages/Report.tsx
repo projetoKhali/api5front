@@ -167,7 +167,7 @@ const Report = () => {
   }, []);
 
   useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+    fetchTableData();
   }, [page]);
 
   const clearFilters = async () => {

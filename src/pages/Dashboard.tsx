@@ -266,7 +266,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+    fetchTableData();
   }, [page]);
 
   return (
