@@ -149,7 +149,7 @@ const Report = () => {
   const fetchTableData = async () => {
     const response = await getDashboardTableData(createFilterBody());
 
-    setTableData(response.factHiringProcess || []);
+    setTableData(response.items || []);
     setTotalPages(response.numMaxPages || 1);
   };
 
