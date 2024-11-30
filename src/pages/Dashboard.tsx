@@ -126,19 +126,32 @@ const Dashboard = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    const page = await getSuggestionsRecruiter({
+      page: 1,
+      pageSize: 20,
+    });
+
+    setRecruiters(page.items);
   };
 
   const fetchProcesses = async () => {
-    setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
-    );
+    const page = await getSuggestionsProcess({
+      page: 1,
+      pageSize: 20,
+      ids: selectedRecruiters?.map(r => r.id) ?? [],
+    });
+
+    setProcesses(page.items);
   };
 
   const fetchVacancies = async () => {
-    setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
-    );
+    const page = await getSuggestionsVacancy({
+      page: 1,
+      pageSize: 20,
+      ids: selectedProcesses?.map(p => p.id) ?? [],
+    });
+
+    setVacancies(page.items);
   };
 
   const createFilterBody = (): DashboardFilter => {
