@@ -15,7 +15,7 @@ import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion, SuggestionsGetter } from '../schemas/Misc';
 import MultiSelectFilter, {
   MultiSelectFilterRef,
 } from '../components/MultiSelectFilter';
@@ -25,7 +25,7 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { DashboardFilter } from '../schemas/Dashboard';
+import { DashboardCardsInfo, DashboardFilter, DashboardVacancyStatus } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const PAGE_SIZE = 5;
@@ -58,24 +58,23 @@ const Dashboard = () => {
     Suggestion[]
   >([]);
 
-  type SuggestionsGetter = () => Suggestion[];
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
-    useState<SuggestionsGetter>(() => () => recruiters);
+    useState<SuggestionsGetter>(() => async () => recruiters);
   const [getSuggestionsProcesses, setGetSuggestionsProcesses] =
-    useState<SuggestionsGetter>(() => () => processes);
+    useState<SuggestionsGetter>(() => async () => processes);
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
-    useState<SuggestionsGetter>(() => () => vacancies);
+    useState<SuggestionsGetter>(() => async () => vacancies);
 
   useEffect(() => {
-    setGetSuggestionsRecruiters(() => () => recruiters);
+    setGetSuggestionsRecruiters(() => async () => recruiters);
   }, [recruiters]);
 
   useEffect(() => {
-    setGetSuggestionsProcesses(() => () => processes);
+    setGetSuggestionsProcesses(() => async () => processes);
   }, [processes]);
 
   useEffect(() => {
-    setGetSuggestionsVacancies(() => () => vacancies);
+    setGetSuggestionsVacancies(() => async () => vacancies);
   }, [vacancies]);
 
   useEffect(() => {
@@ -114,22 +113,11 @@ const Dashboard = () => {
     { month: string; duration: number }[]
   >([]);
 
-  const [cardsData, setCardsData] = useState<{
-    processOpen: string;
-    processOverdue: string;
-    processCloseToExpiring: string;
-    processClosed: string;
-    totalCandidates: string;
-  } | null>(null);
-
-  const [pieData, setPieData] = useState<{
-    abertos: number;
-    emAnálise: number;
-    fechados: number;
-  }>({
-    abertos: 0,
-    emAnálise: 0,
-    fechados: 0,
+  const [cardsData, setCardsData] = useState<DashboardCardsInfo | null>(null);
+  const [pieData, setPieData] = useState<DashboardVacancyStatus>({
+    open: 0,
+    analyzing: 0,
+    closed: 0,
   });
 
   const [tableData, setTableData] = useState<FormattedFactHiringProcessItem[]>(
@@ -137,19 +125,32 @@ const Dashboard = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    const page = await getSuggestionsRecruiter({
+      page: 1,
+      pageSize: 20,
+    });
+
+    setRecruiters(page.items);
   };
 
   const fetchProcesses = async () => {
-    setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
-    );
+    const page = await getSuggestionsProcess({
+      page: 1,
+      pageSize: 20,
+      ids: selectedRecruiters?.map(r => r.id) ?? [],
+    });
+
+    setProcesses(page.items);
   };
 
   const fetchVacancies = async () => {
-    setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
-    );
+    const page = await getSuggestionsVacancy({
+      page: 1,
+      pageSize: 20,
+      ids: selectedProcesses?.map(p => p.id) ?? [],
+    });
+
+    setVacancies(page.items);
   };
 
   const createFilterBody = (): DashboardFilter => {
@@ -178,24 +179,14 @@ const Dashboard = () => {
     }));
 
     setChartData(formattedChartData);
-    setCardsData({
-      processOpen: cards.open.toString(),
-      processOverdue: cards.inProgress.toString(),
-      processCloseToExpiring: cards.approachingDeadline.toString(),
-      processClosed: cards.closed.toString(),
-      totalCandidates: cards.averageHiringTime.toString(),
-    });
-    setPieData({
-      abertos: vacancyStatus.open,
-      emAnálise: vacancyStatus.analyzing,
-      fechados: vacancyStatus.closed,
-    });
+    setCardsData(cards);
+    setPieData(vacancyStatus);
   };
 
   const fetchTableData = async () => {
     const response = await getDashboardTableData(createFilterBody());
 
-    setTableData(response.factHiringProcess || []);
+    setTableData(response.items || []);
     setTotalPages(response.numMaxPages || 1);
   };
 
@@ -271,6 +262,10 @@ const Dashboard = () => {
     };
 
     initializeDashboard();
+
+    recruitersMultiSelectFilterRef.current?.update();
+    processesMultiSelectFilterRef.current?.update();
+    vacanciesMultiSelectFilterRef.current?.update();
   }, []);
 
   useEffect(() => {
@@ -326,7 +321,7 @@ const Dashboard = () => {
         <MultiSelectFilter
           ref={processStatusesMultiSelectFilterRef}
           placeholder={'Status do Processo'}
-          getSuggestions={() => vacancyStatuses}
+          getSuggestions={async() => vacancyStatuses}
           onChange={(selected: Suggestion[]) =>
             setSelectedProcessStatuses(selected)
           }
@@ -334,7 +329,7 @@ const Dashboard = () => {
         <MultiSelectFilter
           ref={vacancyStatusesMultiSelectFilterRef}
           placeholder={'Status da Vaga'}
-          getSuggestions={() => processStatuses}
+          getSuggestions={async() => processStatuses}
           onChange={(selected: Suggestion[]) =>
             setSelectedVacancyStatuses(selected)
           }
@@ -355,23 +350,23 @@ const Dashboard = () => {
       <View style={styles.cardSection}>
         <Card
           titleCard="Processos Abertos"
-          valueCard={cardsData?.processOpen ?? ''}
+          valueCard={`${cardsData?.open ?? ''}`}
         />
         <Card
           titleCard="Processos Vencidos"
-          valueCard={cardsData?.processOverdue ?? ''}
+          valueCard={`${cardsData?.inProgress ?? ''}`}
         />
         <Card
           titleCard="Processos a Vencer"
-          valueCard={cardsData?.processCloseToExpiring ?? ''}
+          valueCard={`${cardsData?.approachingDeadline ?? ''}`}
         />
         <Card
           titleCard="Processos Encerrados"
-          valueCard={cardsData?.processClosed ?? ''}
+          valueCard={`${cardsData?.closed ?? ''}`}
         />
         <Card
           titleCard="Tempo médio contratação (Dias)"
-          valueCard={cardsData?.totalCandidates ?? ''}
+          valueCard={`${cardsData?.averageHiringTime ?? ''}`}
         />
       </View>
 
