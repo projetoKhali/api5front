@@ -11,7 +11,8 @@
     "web": "expo start --web",
     "test": "jest --config jest.config.js",
     "test-integration": "jest --config jest.integration.config.js",
-    "test:watch": "jest --watchAll",
+    "test:watch": "jest --watch --config jest.config.js",
+    "test-integration:watch": "jest --watch --config jest.integration.config.js",
     "lint": "expo lint",
     "hooks": "husky install",
     "postinstall": "pnpm hooks"
