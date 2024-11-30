@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { Page, PageRequest, emptyPage } from '../schemas/Misc';
-
-const API_URL: string = 'http://localhost:8080';
-const API_VERSION: number = 1;
+import { getApiUrl } from '../Env';
 
 const headers = {
   headers: {
@@ -11,7 +9,7 @@ const headers = {
 };
 
 export async function processRequest<R, T>(path: string, body: R): Promise<T> {
-  const url = `${API_URL}/api/v${API_VERSION}/${path}`;
+  const url = `${getApiUrl()}/${path}`;
   const response = await axios.post<T>(url, body, headers);
   return response.data;
 }
