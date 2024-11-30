@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Filter, { FilterRef } from '../components/filter';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,

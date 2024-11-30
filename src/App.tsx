@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import HomePage from './pages/HomePage';
 import Report from './pages/Report';
 import Login from './pages/Login';
 import { CiMenuBurger } from 'react-icons/ci';
@@ -30,18 +29,16 @@ export default function App() {
       <View style={styles.container}>
         {isAuthenticated ? (
           <>
-            {!isSidebarVisible && (
-              <View style={styles.buttonBackground}>
-                <TouchableOpacity style={styles.button} onPress={toggleSidebar}>
-                  <CiMenuBurger />
-                </TouchableOpacity>
-              </View>
+            {isSidebarVisible ? (
+              <Sidebar closeSidebar={toggleSidebar} />
+            ) : (
+              <Pressable style={styles.button} onPress={toggleSidebar}>
+                <CiMenuBurger />
+              </Pressable>
             )}
-            {isSidebarVisible && <Sidebar closeSidebar={toggleSidebar} />}
             <View style={styles.content}>
               <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" index element={<Dashboard />} />
                 <Route path="/report" element={<Report />} />
               </Routes>
             </View>
@@ -69,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  buttonBackground: {
+  button: {
     display: 'flex',
     width: '3%',
     height: '4%',
@@ -83,8 +80,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     minWidth: 40,
     minHeight: 20,
-  },
-  button: {
-    backgroundColor: '#F18523',
   },
 });
