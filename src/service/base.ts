@@ -9,7 +9,7 @@ const headers = {
 };
 
 export async function processRequest<R, T>(path: string, body: R): Promise<T> {
-  const url = `${getApiUrl()}/${path}`;
+  const url = `${getApiUrl()}/api/v1/${path}`;
   const response = await axios.post<T>(url, body, headers);
   return response.data;
 }
