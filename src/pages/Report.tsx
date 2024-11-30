@@ -209,7 +209,7 @@ const Report = () => {
     await fetchTableData();
   };
 
-  const baseOnFilterChange = async () => {
+  const applyFiltersDelayed = async () => {
     if (applyFiltersTimerRef.current) {
       clearTimeout(applyFiltersTimerRef.current);
     }
@@ -223,30 +223,17 @@ const Report = () => {
     }, 1000);
   };
 
-  const recruitersFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedRecruiters(selected);
-    baseOnFilterChange();
-  };
-
-  const processesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcesses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancies(selected);
-    baseOnFilterChange();
-  };
-
-  const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcessStatuses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancyStatuses(selected);
-    baseOnFilterChange();
-  };
+  useEffect(() => {
+    applyFiltersDelayed();
+  }, [
+    selectedRecruiters,
+    selectedProcesses,
+    selectedVacancies,
+    dateStartFilter,
+    dateEndFilter,
+    selectedProcessStatuses,
+    selectedVacancyStatuses,
+  ]);
 
   const isAnyFilterActive = () =>
     selectedRecruiters.length > 0 ||
@@ -288,25 +275,19 @@ const Report = () => {
           ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
-          onChange={(selected: Suggestion[]) =>
-            recruitersFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
         />
         <MultiSelectFilter
           ref={processesMultiSelectFilterRef}
           placeholder={'Processos Seletivos'}
           getSuggestions={getSuggestionsProcesses}
-          onChange={(selected: Suggestion[]) =>
-            processesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
         />
         <MultiSelectFilter
           ref={vacanciesMultiSelectFilterRef}
           placeholder={'Vagas'}
           getSuggestions={getSuggestionsVacancies}
-          onChange={(selected: Suggestion[]) =>
-            vacanciesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedVacancies(selected)}
         />
         <Filter
           ref={dateStartFilterRef}
@@ -325,7 +306,7 @@ const Report = () => {
           placeholder={'Status do Processo'}
           getSuggestions={() => vacancyStatuses}
           onChange={(selected: Suggestion[]) =>
-            processStatusesFilterOnChange(selected)
+            setSelectedProcessStatuses(selected)
           }
         />
         <MultiSelectFilter
@@ -333,7 +314,7 @@ const Report = () => {
           placeholder={'Status da Vaga'}
           getSuggestions={() => processStatuses}
           onChange={(selected: Suggestion[]) =>
-            vacancyStatusesFilterOnChange(selected)
+            setSelectedVacancyStatuses(selected)
           }
         />
         <View
