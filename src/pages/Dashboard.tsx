@@ -25,7 +25,11 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { DashboardCardsInfo, DashboardFilter, DashboardVacancyStatus } from '../schemas/Dashboard';
+import {
+  DashboardCardsInfo,
+  DashboardFilter,
+  DashboardVacancyStatus,
+} from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
 
 const PAGE_SIZE = 5;
