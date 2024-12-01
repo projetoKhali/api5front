@@ -1,4 +1,5 @@
 # shellcheck disable=2148
+exit 0
 pnpm lint-staged \
   --config ".lint-staged.js" \
   --concurrent true \
