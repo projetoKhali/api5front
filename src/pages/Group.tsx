@@ -1,41 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import DynamicTable from '../components/DynamicTable';
+import { getGroupAccesses, createGroupAccess } from '../service/GroupAccess';
+import { GroupAccessSchema, CreateGroupAccessSchema } from '../schemas/GroupAccess';
+import { Suggestion } from '../schemas/Suggestion';
+import { getSuggestionsDepartment } from '../service/Suggestions';
 
 type Group = {
   name: string;
-  departments: string[];
+  departments: string;
   actions: JSX.Element;
 };
 
-const fetchGroups = async () => [
-  {
-    id: 1,
-    name: 'ADM',
-    departments: ['Marketing', 'Rh', 'CX', 'CEO', 'Comer'],
-  },
-  {
-    id: 2,
-    name: 'RH',
-    departments: ['Marketing', 'Rh'],
-  },
-  {
-    id: 3,
-    name: 'Marketing',
-    departments: ['Marketing'],
-  },
-  {
-    id: 4,
-    name: 'Tech',
-    departments: ['Marketing', 'Rh', 'CX', 'CEO', 'Comer'],
-  },
-];
-
 const RolesManagementScreen: React.FC = () => {
   const [data, setData] = useState<Group[] | null>(null);
-  const [departments, setDepartments] = useState<string[]>(['Marketing', 'Rh', 'CX', 'CEO', 'Comer']);
+  const [departments, setDepartments] = useState<Suggestion[]>([]);
   const [groupName, setGroupName] = useState('');
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+  const [selectedDepartments, setSelectedDepartments] = useState<number[]>([]);
 
   // Funções de ação para os botões
   const handleEdit = (groupName: string) => {
@@ -54,10 +35,10 @@ const RolesManagementScreen: React.FC = () => {
     );
   };
 
-  const transformData = (groups: any[]): Group[] =>
+  const transformData = (groups: GroupAccessSchema[]): Group[] =>
     groups.map((group) => ({
       name: group.name,
-      departments: group.departments.join(', '),
+      departments: group.departments.map((dep) => dep.title).join(', '),
       actions: (
         <View style={styles.actions}>
           <TouchableOpacity
@@ -78,23 +59,54 @@ const RolesManagementScreen: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiData = await fetchGroups();
-      const transformedData = transformData(apiData);
-      setData(transformedData);
+      try {
+        const groups = await getGroupAccesses();
+        const transformedData = transformData(groups);
+        setData(transformedData);
+
+        const departmentSuggestions = await getSuggestionsDepartment();
+        setDepartments(departmentSuggestions);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        Alert.alert('Erro', 'Falha ao carregar os dados.');
+      }
     };
 
     fetchData();
   }, []);
 
   // Função para alternar a seleção de departamentos
-  const toggleDepartmentSelection = (department: string) => {
-    setSelectedDepartments(prevState => {
-      if (prevState.includes(department)) {
-        return prevState.filter(item => item !== department); // Desmarcar
-      } else {
-        return [...prevState, department]; // Marcar
-      }
-    });
+  const toggleDepartmentSelection = (departmentId: number) => {
+    setSelectedDepartments((prevState) =>
+      prevState.includes(departmentId)
+        ? prevState.filter((id) => id !== departmentId)
+        : [...prevState, departmentId]
+    );
+  };
+
+  // Função para criar um novo grupo
+  const handleSave = async () => {
+    if (!groupName || selectedDepartments.length === 0) {
+      Alert.alert('Erro', 'Preencha todos os campos.');
+      return;
+    }
+
+    const body: CreateGroupAccessSchema = {
+      name: groupName,
+      departments: selectedDepartments,
+    };
+
+    try {
+      const response = await createGroupAccess(body);
+      Alert.alert('Sucesso', `Grupo ${response.name} criado com sucesso!`);
+      setGroupName('');
+      setSelectedDepartments([]);
+      const updatedGroups = await getGroupAccesses();
+      setData(transformData(updatedGroups));
+    } catch (error) {
+      console.error('Erro ao criar grupo:', error);
+      Alert.alert('Erro', 'Falha ao criar o grupo.');
+    }
   };
 
   // Renderiza a tabela de dados existentes
@@ -128,31 +140,31 @@ const RolesManagementScreen: React.FC = () => {
           <Text style={styles.label}>Departamentos</Text>
           <FlatList
             data={departments}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.departmentItem}>
-                <Text>{item}</Text>
+                <Text>{item.title}</Text>
                 <TouchableOpacity
                   style={[
                     styles.checkbox,
-                    selectedDepartments.includes(item) && styles.selectedCheckbox,
+                    selectedDepartments.includes(item.id) && styles.selectedCheckbox,
                   ]}
-                  onPress={() => toggleDepartmentSelection(item)}
+                  onPress={() => toggleDepartmentSelection(item.id)}
                 >
-                  {selectedDepartments.includes(item) ? (
+                  {selectedDepartments.includes(item.id) ? (
                     <Text style={styles.selectedText}>✓</Text>
                   ) : (
                     <Text style={styles.unselectedText}>□</Text>
                   )}
                 </TouchableOpacity>
               </View>
-            )}/>
+            )}
+          />
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button title="Salvar" onPress={() => { }}/>
+          <Button title="Salvar" onPress={handleSave} />
         </View>
-
       </View>
 
       <View style={styles.tableContainer}>{renderTable()}</View>
@@ -162,6 +174,9 @@ const RolesManagementScreen: React.FC = () => {
 };
 
 export default RolesManagementScreen;
+
+// Estilização permanece igual
+
 
 const styles = StyleSheet.create({
   container: {
