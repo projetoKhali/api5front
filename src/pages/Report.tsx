@@ -26,6 +26,8 @@ import MultiSelectFilter, {
   MultiSelectFilterRef,
 } from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -56,6 +58,9 @@ const Report = () => {
   const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
     Suggestion[]
   >([]);
+  const userGroup: number[] | null = useSelector((state: RootState) =>
+    state.auth.user?.departments?.map(department => department.id) || null
+  );
 
   type SuggestionsGetter = () => Suggestion[];
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
@@ -114,18 +119,26 @@ const Report = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    setRecruiters(await getSuggestionsRecruiter(userGroup ? userGroup : []));
   };
 
   const fetchProcesses = async () => {
     setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
+      await getSuggestionsProcess({
+          filterIds: selectedRecruiters?.map(r => r.id) ?? [],
+          departments: userGroup ? userGroup : []
+         }
+      ),
     );
   };
 
   const fetchVacancies = async () => {
     setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
+      await getSuggestionsVacancy({
+          filterIds: selectedProcesses?.map(p => p.id) ?? [],
+          departments: userGroup ? userGroup : []
+         }  
+      ),
     );
   };
 
@@ -143,6 +156,7 @@ const Report = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      groupAccess: userGroup ? userGroup : null,
     };
   };
 

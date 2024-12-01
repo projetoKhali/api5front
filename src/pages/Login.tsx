@@ -1,27 +1,31 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Image,
-} from 'react-native';
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/slices/authSlice';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { postLogin } from '../service/Login';
 
-type LoginProps = {
-  onLogin: () => void;
-};
-
-const Login = ({ onLogin }: LoginProps) => {
+const Login = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    setErrorMessage(null);
     if (email && password) {
-      onLogin();
+      try {
+        const response = await postLogin({ email, password });
+        // Associa o usuário retornado ao Redux
+        dispatch(login(response.user));
+      } catch (error) {
+        console.error(error);
+        setErrorMessage('Credenciais inválidas. Tente novamente.');
+      }
+    } else {
+      setErrorMessage('Preencha todos os campos.');
     }
   };
 
@@ -33,11 +37,12 @@ const Login = ({ onLogin }: LoginProps) => {
           style={styles.logo}
         />
       </View>
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TextInput
         style={styles.input}
         placeholder="Insira seu E-mail"
         value={email}
-        onChangeText={text => setEmail(text)}
+        onChangeText={setEmail}
         keyboardType="email-address"
         placeholderTextColor="#bbb"
       />
@@ -47,7 +52,7 @@ const Login = ({ onLogin }: LoginProps) => {
           placeholder="Insira a senha"
           value={password}
           secureTextEntry={!showPassword}
-          onChangeText={text => setPassword(text)}
+          onChangeText={setPassword}
           placeholderTextColor="#bbb"
         />
         <TouchableOpacity
@@ -79,9 +84,6 @@ const styles = StyleSheet.create({
     width: '80%',
     maxWidth: 400,
     margin: 'auto',
-    elevation: 2,
-    display: 'flex',
-    minHeight: 300,
   },
   input: {
     height: 40,
@@ -93,16 +95,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     width: '100%',
     backgroundColor: '#fff',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  showPasswordButton: {
-    marginLeft: -30,
-    padding: 4,
-    paddingBottom: 18,
   },
   loginButton: {
     marginTop: 20,
@@ -127,6 +119,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  showPasswordButton: {
+    marginLeft: -30,
+    padding: 4,
+    paddingBottom: 18,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
 

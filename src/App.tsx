@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from './redux/store';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
@@ -14,15 +11,11 @@ import Login from './pages/Login';
 import { CiMenuBurger } from 'react-icons/ci';
 
 export default function App() {
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const [isSidebarVisible, setSidebarVisible] = useState(false);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const [isSidebarVisible, setSidebarVisible] = React.useState(false);
 
   const toggleSidebar = () => {
     setSidebarVisible(!isSidebarVisible);
-  };
-
-  const handleLogin = () => {
-    setAuthenticated(true);
   };
 
   return (
@@ -48,7 +41,7 @@ export default function App() {
           </>
         ) : (
           <Routes>
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         )}

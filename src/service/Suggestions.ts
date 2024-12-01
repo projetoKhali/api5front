@@ -1,16 +1,26 @@
 import axios from 'axios';
-import { Suggestion } from '../schemas/Suggestion';
+import { BodySuggestion, Suggestion } from '../schemas/Suggestion';
 import { getApiUrl } from '../Env';
 
-export async function getSuggestionsRecruiter(): Promise<Suggestion[]> {
-  const response = await axios.get<Suggestion[]>(
+export async function getSuggestionsRecruiter(
+  ids: number[],
+): Promise<Suggestion[]> {
+  const response = await axios.post<Suggestion[]>(
     `${getApiUrl()}/api/v1/suggestions/recruiter`,
+    ids,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
   );
   return response.data || [];
 }
 
+
+
 export async function getSuggestionsProcess(
-  ids: number[],
+  ids: BodySuggestion,
 ): Promise<Suggestion[]> {
   const response = await axios.post<Suggestion[]>(
     `${getApiUrl()}/api/v1/suggestions/process`,
@@ -25,11 +35,25 @@ export async function getSuggestionsProcess(
 }
 
 export async function getSuggestionsVacancy(
-  ids: number[],
+  ids: BodySuggestion,
 ): Promise<Suggestion[]> {
   const response = await axios.post<Suggestion[]>(
     `${getApiUrl()}/api/v1/suggestions/vacancy`,
     ids,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return response.data || [];
+}
+
+
+export async function getSuggestionsDepartment(
+): Promise<Suggestion[]> {
+  const response = await axios.get<Suggestion[]>(
+    `${getApiUrl()}/api/v1/suggestions/department`,
     {
       headers: {
         'Content-Type': 'application/json',
