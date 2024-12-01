@@ -53,7 +53,7 @@ export async function getSuggestionsVacancy(
 export async function getSuggestionsDepartment(
 ): Promise<Suggestion[]> {
   const response = await axios.get<Suggestion[]>(
-    `${getApiUrl()}/api/v1/suggestions/departments`,
+    `${getApiUrl()}/api/v1/suggestions/department`,
     {
       headers: {
         'Content-Type': 'application/json',

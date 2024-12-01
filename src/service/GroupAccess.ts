@@ -15,7 +15,7 @@ export async function getGroupAccesses(
   return response.data || [];
 }
 
-export async function getSuggestionsRecruiter(
+export async function createGroupAccess(
     body: CreateGroupAccessSchema,
   ): Promise<CreateGroupAccessResponse> {
     const response = await axios.post<CreateGroupAccessResponse>(
