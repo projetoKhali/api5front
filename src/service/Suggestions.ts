@@ -48,3 +48,17 @@ export async function getSuggestionsVacancy(
   );
   return response.data || [];
 }
+
+
+export async function getSuggestionsDepartment(
+): Promise<Suggestion[]> {
+  const response = await axios.get<Suggestion[]>(
+    `${getApiUrl()}/api/v1/suggestions/departments`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return response.data || [];
+}
