@@ -41,7 +41,7 @@ const UserManagementScreen: React.FC = () => {
       name: userName,
       email: userEmail,
       password: userPassword,
-      groupId: selectedGroupId,
+      groupId: selectedGroupId
     };
 
     try {
