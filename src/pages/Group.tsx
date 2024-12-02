@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { Department, GroupAccess } from '../schemas/Group';
-import { getDepartments } from '../service/Group';
-import { getGroupAccessList } from '../service/Group';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { GroupAccessSchema, CreateGroupAccessSchema, CreateGroupAccessResponse } from '../schemas/GroupAccess';
+import { getGroupAccesses, createGroupAccess  } from '../service/GroupAccess';
 import DynamicTable from '../components/DynamicTable';
+import { Suggestion } from '../schemas/Suggestion';
+import { getSuggestionsDepartment } from '../service/Suggestions';
 
 const RolesManagementScreen: React.FC = () => {
-  const [groupAccessList, setGroupAccessList] = useState<GroupAccess[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]); // Array de IDs selecionados
+  const [groupAccessList, setGroupAccessList] = useState<GroupAccessSchema[]>([]);
+  const [groupName, setGroupName] = useState('');
+  const [departments, setDepartments] = useState<Suggestion[]>([]);
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]); 
 
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const data = await getDepartments();
+        const data = await getSuggestionsDepartment();
         setDepartments(data);
       } catch (error) {
         console.error('Error fetching departments:', error);
@@ -22,7 +24,7 @@ const RolesManagementScreen: React.FC = () => {
 
     const fetchGroupAccess = async () => {
       try {
-        const data = await getGroupAccessList();
+        const data = await getGroupAccesses();
         setGroupAccessList(data);
       } catch (error) {
         console.error('Erro ao carregar os grupos de acesso:', error);
@@ -33,13 +35,38 @@ const RolesManagementScreen: React.FC = () => {
     fetchDepartments();
   }, []);
 
+  const handleSave = async () => {
+    if (!groupName || selectedDepartmentIds.length === 0) {
+      Alert.alert('Erro', 'Preencha todos os campos.');
+      return;
+    }
+
+    const body: CreateGroupAccessSchema = {
+      name: groupName,
+      departments: selectedDepartmentIds,
+    };
+
+    try {
+      const response = await createGroupAccess(body);
+      Alert.alert('Sucesso', `Grupo ${response.name} criado com sucesso!`);
+      setGroupName('');
+      setSelectedDepartmentIds([]);
+      const updatedGroups = await getGroupAccesses();
+      setGroupAccessList(updatedGroups);
+    } catch (error) {
+      console.error('Erro ao criar grupo:', error);
+      Alert.alert('Erro', 'Falha ao criar o grupo.');
+    }
+  };
+
+
   const handleSelectDepartment = (id: number) => {
     setSelectedDepartmentIds((prevIds) =>
       prevIds.includes(id) ? prevIds.filter((item) => item !== id) : [...prevIds, id]
     );
   };
 
-  const renderDepartment = ({ item }: { item: Department }) => {
+  const renderDepartment = ({ item }: { item: Suggestion }) => {
     const isSelected = selectedDepartmentIds.includes(item.id);
 
     return (
@@ -66,6 +93,8 @@ const RolesManagementScreen: React.FC = () => {
           <TextInput
             style={styles.input}
             placeholder="Nome do Grupo"
+            onChangeText={setGroupName}
+            value= {groupName}
           />
         </View>
 
@@ -84,20 +113,21 @@ const RolesManagementScreen: React.FC = () => {
         <View>
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={() => {
-              console.log('Departamentos selecionados:', selectedDepartmentIds);
-            }}
+            onPress={handleSave}
           >
             <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>
         </View>
+
       </View>
 
       <View style={styles.tableContainer}>
         <DynamicTable tableData={groupAccessList.map(group => ({
           name: group.name,
+          departments: group.departments?.map((item) => item.title).join(',') || '',
         }))} />
       </View>
+      
     </View>
   );
 };
