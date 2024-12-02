@@ -2,43 +2,51 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { VictoryPie } from 'victory-native';
 import { RFPercentage } from 'react-native-responsive-fontsize';
+import { DashboardVacancyStatus } from '../schemas/Dashboard';
 
 interface PieChartProps {
   title: string;
-  data: {
-    abertos: number;
-    emAnálise: number;
-    fechados: number;
-  };
+  data: DashboardVacancyStatus;
 }
 
-const PieChart = ({ title, data }: PieChartProps) => {
-  const formattedData = Object.entries(data)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .filter(([_, value]) => value > 0)
-    .map(([key, value]) => ({
-      x: key
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/(^\w|\b[A-Z])/g, char => char.toUpperCase()),
-      y: Math.max(value, 0),
-    }));
+interface FormattedDashboardVacancyStatus {
+  Abertos?: number;
+  'Em Análise'?: number;
+  Fechados?: number;
+}
 
-  const colors = {
-    abertos: '#4f8ef7',
-    emAnálise: '#f76c5e',
-    fechados: '#ffaf42',
-  };
+const formatDashboardVacancyStatus = (
+  item: DashboardVacancyStatus,
+): FormattedDashboardVacancyStatus => ({
+  ...(item.open > 0 && { Abertos: Math.max(item.open, 0) }),
+  ...(item.analyzing > 0 && { 'Em Análise': Math.max(item.analyzing, 0) }),
+  ...(item.closed > 0 && { Fechados: Math.max(item.closed, 0) }),
+});
 
-  const colorsArray = (Object.keys(data) as Array<keyof typeof data>)
-    .filter(key => data[key] > 0)
-    .map(key => colors[key]);
+const colors: Record<keyof FormattedDashboardVacancyStatus, string> = {
+  Abertos: '#4f8ef7',
+  'Em Análise': '#f76c5e',
+  Fechados: '#ffaf42',
+};
+
+const PieChart = ({ title, data: rawData }: PieChartProps) => {
+  const formattedData = formatDashboardVacancyStatus(rawData);
+
+  const data = Object.entries(formattedData).map(([key, value]) => ({
+    x: key,
+    y: value,
+  }));
+
+  const colorScale: string[] = Object.keys(formattedData).map(
+    key => colors[key as keyof FormattedDashboardVacancyStatus],
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <VictoryPie
-        data={formattedData}
-        colorScale={colorsArray}
+        data={data}
+        colorScale={colorScale}
         labels={({ datum }) => `${datum.x}: ${datum.y}`}
         width={400}
         height={250}
