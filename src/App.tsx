@@ -13,6 +13,8 @@ import Dashboard from './pages/Dashboard';
 import Report from './pages/Report';
 import Login from './pages/Login';
 import { CiMenuBurger } from 'react-icons/ci';
+import Group from './pages/Group';
+import Registration from './pages/Registration';
 
 export default function App() {
   const isAuthenticated = useSelector(
@@ -40,6 +42,9 @@ export default function App() {
               <Routes>
                 <Route path="/" index element={<Dashboard />} />
                 <Route path="/report" element={<Report />} />
+                <Route path="/group" element={<Group />} />
+                <Route path="/registration" element={<Registration />} />
+
               </Routes>
             </View>
           </>

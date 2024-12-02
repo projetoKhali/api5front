@@ -13,6 +13,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GoGraph } from 'react-icons/go';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { LuPanelLeftClose } from 'react-icons/lu';
+import { MdGroups2 } from 'react-icons/md';
+import { MdAppRegistration } from "react-icons/md";
+
 
 interface SidebarProps {
   closeSidebar: () => void;
@@ -50,6 +53,17 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
           <HiOutlineDocumentReport size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Relatório</Text>
         </Link>
+
+        <Link to="/group" onClick={closeSidebar} style={styles.link}>
+          <MdGroups2 size={24} style={styles.icon} />
+          <Text style={styles.menuItem}>Grupos</Text>
+        </Link>
+
+        <Link to="/registration" onClick={closeSidebar} style={styles.link}>
+          <MdAppRegistration size={24} style={styles.icon} />
+          <Text style={styles.menuItem}>Cadastro</Text>
+        </Link>
+
       </View>
     </LinearGradient>
   );

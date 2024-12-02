@@ -26,3 +26,17 @@ export async function getSuggestionsVacancy(
 ): Promise<Page<Suggestion>> {
   return processPaginatedRequest('suggestions/vacancy', body);
 }
+
+
+export async function getSuggestionsDepartment(
+): Promise<Suggestion[]> {
+  const response = await axios.get<Suggestion[]>(
+    `${getApiUrl()}/api/v1/suggestions/department`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return response.data || [];
+}
