@@ -10,6 +10,7 @@ export interface DashboardFilter {
   vacancyStatus: number[];
   page: number;
   pageSize: number;
+  groupAccess: number[] | null;
 }
 
 export interface DashboardVacancyStatus {

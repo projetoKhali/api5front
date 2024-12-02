@@ -31,6 +31,8 @@ import {
   DashboardVacancyStatus,
 } from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -69,6 +71,10 @@ const Dashboard = () => {
     useState<SuggestionsGetter>(() => () => processes);
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
     useState<SuggestionsGetter>(() => () => vacancies);
+  const userGroup: number[] | null = useSelector(
+    (state: RootState) =>
+      state.auth.user?.departments?.map(department => department.id) || null,
+  );
 
   useEffect(() => {
     setGetSuggestionsRecruiters(() => () => recruiters);
@@ -133,6 +139,7 @@ const Dashboard = () => {
     const page = await getSuggestionsRecruiter({
       page: 1,
       pageSize: 20,
+      departments: userGroup || [],
     });
 
     setRecruiters(page.items);
@@ -143,6 +150,7 @@ const Dashboard = () => {
       page: 1,
       pageSize: 20,
       ids: selectedRecruiters?.map(r => r.id) ?? [],
+      departments: userGroup || [],
     });
 
     setProcesses(page.items);
@@ -153,6 +161,7 @@ const Dashboard = () => {
       page: 1,
       pageSize: 20,
       ids: selectedProcesses?.map(p => p.id) ?? [],
+      departments: userGroup || [],
     });
 
     setVacancies(page.items);
@@ -172,6 +181,7 @@ const Dashboard = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      groupAccess: userGroup || null,
     };
   };
 
