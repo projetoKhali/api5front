@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice';
@@ -33,6 +32,7 @@ const Login = () => {
     <View style={styles.container}>
       <View style={styles.imageContainer}>
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require('../../assets/images/logo-p4t-navbar.png')}
           style={styles.logo}
         />
