@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getApiUrl } from '../Env';
 import { CreateUserResponse, CreateUserSchema, UserSchema } from '../schemas/User';
 
-export async function getGroupAccesses(
+export async function getUsers(
 ): Promise<UserSchema[]> {
   const response = await axios.get<UserSchema[]>(
     `${getApiUrl()}/api/v1/authentication/users`,
@@ -15,7 +15,7 @@ export async function getGroupAccesses(
   return response.data || [];
 }
 
-export async function getSuggestionsRecruiter(
+export async function createUser(
     body: CreateUserSchema,
   ): Promise<CreateUserResponse> {
     const response = await axios.post<CreateUserResponse>(
