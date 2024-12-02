@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   form: {
-    height: '43%',
+    height: '33%',
     width: '100%',
     flexDirection: 'column',
   },
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   departmentContainer: {
     marginLeft: '3%',
     marginBottom: 10,
-    height: '60%',
+    height: '30%',
   },
   columnWrapper: {
     justifyContent: 'center',
@@ -227,7 +227,8 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     alignItems: 'center',
-    height: '45%',
+    maxHeight: 300,
+    height: '50%',
     width: '85%',
   },
 });
