@@ -1,28 +1,27 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from './redux/store';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import HomePage from './pages/HomePage';
 import Report from './pages/Report';
 import Login from './pages/Login';
 import { CiMenuBurger } from 'react-icons/ci';
 
 export default function App() {
-  const [isAuthenticated, setAuthenticated] = useState(false);
-  const [isSidebarVisible, setSidebarVisible] = useState(false);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+  const [isSidebarVisible, setSidebarVisible] = React.useState(false);
 
   const toggleSidebar = () => {
     setSidebarVisible(!isSidebarVisible);
-  };
-
-  const handleLogin = () => {
-    setAuthenticated(true);
   };
 
   return (
@@ -30,25 +29,23 @@ export default function App() {
       <View style={styles.container}>
         {isAuthenticated ? (
           <>
-            {!isSidebarVisible && (
-              <View style={styles.buttonBackground}>
-                <TouchableOpacity style={styles.button} onPress={toggleSidebar}>
-                  <CiMenuBurger />
-                </TouchableOpacity>
-              </View>
+            {isSidebarVisible ? (
+              <Sidebar closeSidebar={toggleSidebar} />
+            ) : (
+              <Pressable style={styles.button} onPress={toggleSidebar}>
+                <CiMenuBurger />
+              </Pressable>
             )}
-            {isSidebarVisible && <Sidebar closeSidebar={toggleSidebar} />}
             <View style={styles.content}>
               <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" index element={<Dashboard />} />
                 <Route path="/report" element={<Report />} />
               </Routes>
             </View>
           </>
         ) : (
           <Routes>
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         )}
@@ -69,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
-  buttonBackground: {
+  button: {
     display: 'flex',
     width: '3%',
     height: '4%',
@@ -83,8 +80,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     minWidth: 40,
     minHeight: 20,
-  },
-  button: {
-    backgroundColor: '#F18523',
   },
 });

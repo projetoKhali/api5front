@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Link } from 'react-router-dom';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GoGraph, GoHome } from 'react-icons/go';
+import { GoGraph } from 'react-icons/go';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { LuPanelLeftClose } from 'react-icons/lu';
 
@@ -42,11 +42,6 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 
       <View style={styles.menu}>
         <Link to="/" onClick={closeSidebar} style={styles.link}>
-          <GoHome size={24} style={styles.icon} />
-          <Text style={styles.menuItem}>Home Page</Text>
-        </Link>
-
-        <Link to="/dashboard" onClick={closeSidebar} style={styles.link}>
           <GoGraph size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Dashboard</Text>
         </Link>
