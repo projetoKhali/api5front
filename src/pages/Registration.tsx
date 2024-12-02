@@ -10,127 +10,95 @@ import {
   Alert,
 } from 'react-native';
 import DynamicTable from '../components/DynamicTable';
-import { GroupAccess } from '../schemas/Group';
-import { getGroupAccessList } from '../service/Group';
+import { User } from '../schemas/Login';
+import { CreateUserSchema, UserSchema } from '../schemas/User';
+import { createUser, getUsers } from '../service/User';
+import { CreateGroupAccessResponse, GroupAccessSchema } from '../schemas/GroupAccess';
+import { Suggestion } from '../schemas/Suggestion';
+import { getGroupAccesses } from '../service/GroupAccess';
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  roles: number[]; // IDs dos Grupos de Permissão
-};
-
-type Group = {
-  id: number;
-  title: string;
-};
-
-const mockUsers: User[] = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', roles: [1, 2] },
-  { id: 2, name: 'Bob', email: 'bob@example.com', roles: [3] },
-  { id: 3, name: 'Charlie', email: 'charlie@example.com', roles: [4, 5] },
-  { id: 4, name: 'DoBrow', email: 'dobrow@example.com', roles: [5, 8] },
-  { id: 5, name: 'Macos', email: 'macos@example.com', roles: [7, 8] },
-  { id: 6, name: 'Malaq', email: 'Malaq@example.com', roles: [2, 5] },
-  { id: 7, name: 'Kurius', email: 'kurius@example.com', roles: [1, 7] },
-  { id: 8, name: 'Nifix', email: 'nifix@example.com', roles: [1, 5, 7, 8] },
-  { id: 3, name: 'Dom', email: 'dom@example.com', roles: [1, 2, 3, 4, 5, 6, 7, 8] },
-];
-
-const availableGroups: Group[] = [
-  { id: 1, title: 'Khali' },
-  { id: 2, title: 'Pixel' },
-  { id: 3, title: 'Codecats' },
-  { id: 4, title: 'Maqueb' },
-  { id: 5, title: 'TechsLouques' },
-  { id: 6, title: 'LigaWeb' },
-  { id: 7, title: 'VivendoeCodando' },
-  { id: 8, title: 'Vingacodes' },
-];
 
 const UserManagementScreen: React.FC = () => {
-  const [groupAccessList, setGroupAccessList] = useState<GroupAccess[]>([]);
 
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [groupAccessList, setGroupAccessList] = useState<GroupAccessSchema[]>([]);
+  const [userList, setUserList] = useState<UserSchema[]>([]);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [userPassword, setUserPassword] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchGroupAccess = async () => {
-      try {
-        const data = await getGroupAccessList();
-        setGroupAccessList(data);
-      } catch (error) {
-        console.error('Erro ao carregar os grupos de acesso:', error);
-      }
-    };
-
-    fetchGroupAccess();
-
-  }, []);
-
-
-  // Adicionar ou remover grupo
-  const toggleGroup = (id: number) => {
-    setSelectedGroupIds((prev) =>
-      prev.includes(id) ? prev.filter((groupId) => groupId !== id) : [...prev, id]
-    );
+  const handleSelectGroup = (id: number) => {
+    setSelectedGroupId((prevId) => (prevId === id ? null : id));
   };
 
-  // Salvar ou atualizar o usuário
-  const handleSaveUser = () => {
-    if (!userName || !userEmail) {
-      Alert.alert('Erro', 'Preencha todos os campos!');
+  const handleSave = async () => {
+    if (!userName || !userEmail || selectedGroupId === null) {
+      Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
-    if (selectedUser) {
-      // Atualizar usuário existente
-      const updatedUsers = users.map((user) =>
-        user.id === selectedUser.id
-          ? { ...user, name: userName, email: userEmail, roles: selectedGroupIds }
-          : user
-      );
-      setUsers(updatedUsers);
-      Alert.alert('Sucesso', 'Usuário atualizado!');
-    } else {
-      // Criar novo usuário
-      const newUser: User = {
-        id: users.length + 1,
-        name: userName,
-        email: userEmail,
-        roles: selectedGroupIds,
-      };
-      setUsers([...users, newUser]);
-      Alert.alert('Sucesso', 'Usuário criado!');
+    const body: CreateUserSchema = {
+      name: userName,
+      email: userEmail,
+      password: userPassword,
+      groupId: selectedGroupId
+    };
+
+    try {
+      const response = await createUser(body);
+      Alert.alert('Sucesso', `Usuário ${response.name} criado com sucesso!`);
+      setUserName('');
+      setUserEmail('');
+      setUserPassword('');
+      setSelectedGroupId(null);
+
+      const updatedUsers = await getUsers();
+      setUserList(updatedUsers);
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      Alert.alert('Erro', 'Falha ao criar o usuário.');
     }
-
-    clearForm();
   };
 
-  const clearForm = () => {
-    setUserName('');
-    setUserEmail('');
-    setSelectedGroupIds([]);
-    setSelectedUser(null);
-  };
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = await getGroupAccesses(); 
+        setGroupAccessList(groups);
+      } catch (error) {
+        console.error('Erro ao carregar grupos:', error);
+      }
+    };
 
-  const renderGroup = ({ item }: { item: Group }) => {
-    const isSelected = selectedGroupIds.includes(item.id);
+    const fetchUsers = async () => {
+      try {
+        const users = await getUsers();
+        setUserList(users);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+  
+    fetchGroups();
+    fetchUsers();
+  }, []);
+
+  const renderGroups = ({ item }: { item: GroupAccessSchema }) => {
+    const isSelected = selectedGroupId === item.id;
 
     return (
       <TouchableOpacity
-        style={[styles.groupItem, isSelected && styles.selectedGroup]}
-        onPress={() => toggleGroup(item.id)}
+        style={[styles.card, isSelected && styles.selectedCard]}
+        onPress={() => handleSelectGroup(item.id)}
       >
-        <Text style={[styles.groupText, isSelected && styles.selectedGroupText]}>
-          {item.title}
+        <Text style={[styles.cardText, isSelected && styles.selectedCardText]}>
+          {item.name  }
         </Text>
       </TouchableOpacity>
     );
   };
+
+
 
   return (
     <View style={styles.container}>
@@ -143,9 +111,9 @@ const UserManagementScreen: React.FC = () => {
           <Text style={styles.label}>Nome</Text>
           <TextInput
             style={styles.input}
-            value={userName}
-            onChangeText={setUserName}
             placeholder="Nome do usuário"
+            onChangeText={setUserName}
+            value={userName}
           />
         </View>
 
@@ -153,19 +121,29 @@ const UserManagementScreen: React.FC = () => {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
-            value={userEmail}
-            onChangeText={setUserEmail}
             placeholder="Email do usuário"
             keyboardType="email-address"
+            onChangeText={setUserEmail}
+            value={userEmail}
+          />
+        </View>
+
+        <View style={styles.passwordContainer}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Senha do usuário"
+            onChangeText={setUserPassword}
+            value={userPassword}
           />
         </View>
 
         <View style={styles.groupContainer}>
           <Text style={styles.label}>Grupos de Permissão</Text>
           <FlatList
-            data={availableGroups}
+            data={groupAccessList}
+            renderItem={renderGroups}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={renderGroup}
             numColumns={3}
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.grid}
@@ -175,20 +153,20 @@ const UserManagementScreen: React.FC = () => {
         <View>
           <TouchableOpacity
             style={styles.saveButton}
-            onPress={handleSaveUser}
+            onPress={handleSave}
           >
-            <Text style={styles.buttonText}>
-              {selectedUser ? 'Atualizar Usuário' : 'Criar Usuário'}
-            </Text>
+            <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>
         </View>
 
       </View>
 
       <View style={styles.tableContainer}>
-        <DynamicTable tableData={groupAccessList.map(group => ({
-          name: group.name,
-        }))} />
+        <DynamicTable tableData={userList.map(user => ({
+          name: user.name,
+          email: user.email,
+          groupId: user.group,
+          }))} />
       </View>
 
     </View>
@@ -249,6 +227,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  passwordContainer:{
+    marginLeft: '3%',
+    height: '20%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   groupContainer: {
     marginLeft: '3%',
     marginBottom: 10,
@@ -300,5 +284,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: '35%',
     width: '85%',
+  },
+
+  card: {
+    flexBasis: '18.5%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  selectedCard: {
+    backgroundColor: '#007bff',
+    borderColor: '#0056b3',
+  },
+  cardText: {
+    color: 'black',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  selectedCardText: {
+    color: 'white',
   },
 });
