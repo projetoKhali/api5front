@@ -1,36 +1,37 @@
-import axios from 'axios';
-import { Suggestion } from '../schemas/Suggestion';
+import { Page, PageFilterRequest, Suggestion } from '../schemas/Misc';
+import { processPaginatedRequest } from './base';
 
-const API_URL: string = 'http://localhost:8080';
+export type SuggestionsParams = {
+  departments: number[];
+};
 
-export async function getSuggestionsRecruiter(): Promise<Suggestion[]> {
-  const response = await axios.get<Suggestion[]>(
-    `${API_URL}/api/v1/suggestions/recruiter`,
-  );
-  return response.data || [];
+export type SuggestionsWithIdsParams = SuggestionsParams & {
+  ids: number[];
+};
+
+export async function getSuggestionsRecruiter(
+  body: PageFilterRequest<SuggestionsParams>,
+): Promise<Page<Suggestion>> {
+  return processPaginatedRequest('suggestions/recruiter', body);
 }
 
 export async function getSuggestionsProcess(
-  ids: number[],
-): Promise<Suggestion[]> {
-  const response = await axios.post<Suggestion[]>(
-    `${API_URL}/api/v1/suggestions/process`,
-    ids,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-  return response.data || [];
+  body: PageFilterRequest<SuggestionsWithIdsParams>,
+): Promise<Page<Suggestion>> {
+  return processPaginatedRequest('suggestions/process', body);
 }
 
 export async function getSuggestionsVacancy(
-  ids: number[],
+  body: PageFilterRequest<SuggestionsWithIdsParams>,
+): Promise<Page<Suggestion>> {
+  return processPaginatedRequest('suggestions/vacancy', body);
+}
+
+
+export async function getSuggestionsDepartment(
 ): Promise<Suggestion[]> {
-  const response = await axios.post<Suggestion[]>(
-    `${API_URL}/api/v1/suggestions/vacancy`,
-    ids,
+  const response = await axios.get<Suggestion[]>(
+    `${getApiUrl()}/api/v1/suggestions/department`,
     {
       headers: {
         'Content-Type': 'application/json',

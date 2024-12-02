@@ -1,12 +1,8 @@
-export interface DashboardTablePage {
-  factHiringProcess: FactHiringProcessItem[];
-  numMaxPages: number;
-}
+import { Page } from './Misc';
 
-export interface FormattedDashboardTablePage {
-  factHiringProcess: FormattedFactHiringProcessItem[];
-  numMaxPages: number;
-}
+export type DashboardTablePage = Page<FactHiringProcessItem>;
+
+export type FormattedDashboardTablePage = Page<FormattedFactHiringProcessItem>;
 
 export interface FactHiringProcessItem {
   processTitle: string;
