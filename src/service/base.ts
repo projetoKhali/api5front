@@ -8,6 +8,11 @@ const headers = {
   },
 };
 
+type Method = 'get' | 'post' | 'put' | 'delete';
+
+export const validateMethod = (method: Method): boolean =>
+  ['get', 'post', 'put', 'delete'].includes(method);
+
 export async function processRequest<R, T>(path: string, body: R): Promise<T> {
   const url = `${getApiUrl()}/api/v1/${path}`;
   const response = await axios.post<T>(url, body, headers);
