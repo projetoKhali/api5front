@@ -125,7 +125,7 @@ const RolesManagementScreen: React.FC = () => {
           <Text style={styles.buttonText}>Salvar</Text>
         </TouchableOpacity>
       </View>
-
+      <View style={styles.cont}>
       <View style={styles.tableContainer}>
         <DynamicTable
           tableData={accessGroupList.map(group => ({
@@ -134,6 +134,7 @@ const RolesManagementScreen: React.FC = () => {
               group.departments?.map(item => item.title).join(',') || '',
           }))}
         />
+      </View>
       </View>
     </View>
   );
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    padding: 15,
+    padding: 15
   },
   titleHeader: {
     backgroundColor: '#EDE7E7',
@@ -237,8 +238,13 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     alignItems: 'center',
-    maxHeight: 300,
-    height: '50%',
-    width: '100%',
+    maxHeight: 400,
+    height: '100%',
+    width: '36.5%',
   },
+  cont:{
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+  }
 });
