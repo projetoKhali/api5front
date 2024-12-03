@@ -11,9 +11,12 @@ import {
 } from 'react-native';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { postLogin } from '../service/Login';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -26,6 +29,7 @@ const Login = () => {
         const response = await postLogin({ email, password });
         // Associa o usuário retornado ao Redux
         dispatch(login(response.user));
+        navigate('/');
       } catch (error) {
         console.error(error);
         setErrorMessage('Credenciais inválidas. Tente novamente.');
