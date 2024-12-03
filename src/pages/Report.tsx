@@ -164,7 +164,7 @@ const Report = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
-      groupAccess: userGroup ? userGroup : null,
+      accessGroup: userGroup ? userGroup : null,
     };
   };
 

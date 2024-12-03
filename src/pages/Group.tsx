@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { GroupAccessSchema, CreateGroupAccessSchema, CreateGroupAccessResponse } from '../schemas/GroupAccess';
-import { getGroupAccesses, createGroupAccess  } from '../service/GroupAccess';
+import { AccessGroupSchema, CreateAccessGroupSchema, CreateAccessGroupResponse } from '../schemas/AccessGroup';
+import { getAccessGroupes, createAccessGroup  } from '../service/AccessGroup';
 import DynamicTable from '../components/DynamicTable';
 import { Suggestion } from '../schemas/Suggestion';
 import { getSuggestionsDepartment } from '../service/Suggestions';
 
 const RolesManagementScreen: React.FC = () => {
-  const [groupAccessList, setGroupAccessList] = useState<GroupAccessSchema[]>([]);
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>([]);
   const [groupName, setGroupName] = useState('');
   const [departments, setDepartments] = useState<Suggestion[]>([]);
-  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]); 
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -22,16 +22,16 @@ const RolesManagementScreen: React.FC = () => {
       }
     };
 
-    const fetchGroupAccess = async () => {
+    const fetchAccessGroup = async () => {
       try {
-        const data = await getGroupAccesses();
-        setGroupAccessList(data);
+        const data = await getAccessGroupes();
+        setAccessGroupList(data);
       } catch (error) {
         console.error('Erro ao carregar os grupos de acesso:', error);
       }
     };
 
-    fetchGroupAccess();
+    fetchAccessGroup();
     fetchDepartments();
   }, []);
 
@@ -41,18 +41,18 @@ const RolesManagementScreen: React.FC = () => {
       return;
     }
 
-    const body: CreateGroupAccessSchema = {
+    const body: CreateAccessGroupSchema = {
       name: groupName,
       departments: selectedDepartmentIds,
     };
 
     try {
-      const response = await createGroupAccess(body);
+      const response = await createAccessGroup(body);
       Alert.alert('Sucesso', `Grupo ${response.name} criado com sucesso!`);
       setGroupName('');
       setSelectedDepartmentIds([]);
-      const updatedGroups = await getGroupAccesses();
-      setGroupAccessList(updatedGroups);
+      const updatedGroups = await getAccessGroupes();
+      setAccessGroupList(updatedGroups);
     } catch (error) {
       console.error('Erro ao criar grupo:', error);
       Alert.alert('Erro', 'Falha ao criar o grupo.');
@@ -122,12 +122,12 @@ const RolesManagementScreen: React.FC = () => {
       </View>
 
       <View style={styles.tableContainer}>
-        <DynamicTable tableData={groupAccessList.map(group => ({
+        <DynamicTable tableData={accessGroupList.map(group => ({
           name: group.name,
           departments: group.departments?.map((item) => item.title).join(',') || '',
         }))} />
       </View>
-      
+
     </View>
   );
 };

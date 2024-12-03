@@ -46,7 +46,7 @@ describe('Serviço de Dashboard', () => {
         vacancyStatus: [1],
         page: 1,
         pageSize: 10,
-        groupAccess: [1, 2],
+        accessGroup: [1, 2],
       };
 
       const result: FormattedDashboardTablePage = await getDashboardTableData(tableRequest);
@@ -129,7 +129,7 @@ describe('Serviço de Dashboard', () => {
         vacancyStatus: [1],
         page: 1,
         pageSize: 10,
-        groupAccess: [1, 2],
+        accessGroup: [1, 2],
       };
 
       const result = await fetchAllPagesData(tableRequest);

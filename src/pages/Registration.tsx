@@ -13,14 +13,14 @@ import DynamicTable from '../components/DynamicTable';
 import { User } from '../schemas/Login';
 import { CreateUserSchema, UserSchema } from '../schemas/User';
 import { createUser, getUsers } from '../service/User';
-import { CreateGroupAccessResponse, GroupAccessSchema } from '../schemas/GroupAccess';
+import { CreateAccessGroupResponse, AccessGroupSchema } from '../schemas/AccessGroup';
 import { Suggestion } from '../schemas/Suggestion';
-import { getGroupAccesses } from '../service/GroupAccess';
+import { getAccessGroupes } from '../service/AccessGroup';
 
 
 const UserManagementScreen: React.FC = () => {
 
-  const [groupAccessList, setGroupAccessList] = useState<GroupAccessSchema[]>([]);
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>([]);
   const [userList, setUserList] = useState<UserSchema[]>([]);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -63,8 +63,8 @@ const UserManagementScreen: React.FC = () => {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const groups = await getGroupAccesses(); 
-        setGroupAccessList(groups);
+        const groups = await getAccessGroupes();
+        setAccessGroupList(groups);
       } catch (error) {
         console.error('Erro ao carregar grupos:', error);
       }
@@ -78,12 +78,12 @@ const UserManagementScreen: React.FC = () => {
         console.error('Error fetching users:', error);
       }
     };
-  
+
     fetchGroups();
     fetchUsers();
   }, []);
 
-  const renderGroups = ({ item }: { item: GroupAccessSchema }) => {
+  const renderGroups = ({ item }: { item: AccessGroupSchema }) => {
     const isSelected = selectedGroupId === item.id;
 
     return (
@@ -141,7 +141,7 @@ const UserManagementScreen: React.FC = () => {
         <View style={styles.groupContainer}>
           <Text style={styles.label}>Grupos de Permissão</Text>
           <FlatList
-            data={groupAccessList}
+            data={accessGroupList}
             renderItem={renderGroups}
             keyExtractor={(item) => item.id.toString()}
             numColumns={3}
