@@ -15,9 +15,7 @@ import { AccessGroupSchema } from '../schemas/AccessGroup';
 import { getAccessGroupes } from '../service/AccessGroup';
 
 const UserManagementScreen: React.FC = () => {
-  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>(
-    [],
-  );
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>([]);
   const [userList, setUserList] = useState<UserSchema[]>([]);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -72,7 +70,7 @@ const UserManagementScreen: React.FC = () => {
         const users = await getUsers();
         setUserList(users);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Erro ao buscar usuários:', error);
       }
     };
 
@@ -102,7 +100,7 @@ const UserManagementScreen: React.FC = () => {
       </View>
 
       <View style={styles.form}>
-        <View style={styles.nameContainer}>
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Nome</Text>
           <TextInput
             style={styles.input}
@@ -112,7 +110,7 @@ const UserManagementScreen: React.FC = () => {
           />
         </View>
 
-        <View style={styles.emailContainer}>
+        <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
@@ -123,8 +121,8 @@ const UserManagementScreen: React.FC = () => {
           />
         </View>
 
-        <View style={styles.passwordContainer}>
-          <Text style={styles.label}>Password</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Senha</Text>
           <TextInput
             style={styles.input}
             placeholder="Senha do usuário"
@@ -139,7 +137,7 @@ const UserManagementScreen: React.FC = () => {
             data={accessGroupList}
             renderItem={renderGroups}
             keyExtractor={item => item.id.toString()}
-            numColumns={3}
+            numColumns={5} // Alterado para 2 colunas para melhor distribuição
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.grid}
           />
@@ -169,134 +167,98 @@ export default UserManagementScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    backgroundColor: '#DCDADA',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    backgroundColor: '#F7F8FA',
+    padding: 16,
+    justifyContent: 'flex-start',
   },
   titleHeader: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    backgroundColor: '#EDE7E7',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#DDD',
+    paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '7%',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
   },
   form: {
-    height: '40%',
-    width: '100%',
-    flexDirection: 'column',
+    marginBottom: 20,
   },
-  nameContainer: {
-    marginLeft: '3%',
-    height: '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
+  inputContainer: {
+    marginBottom: 20,
   },
   label: {
-    fontSize: 20,
-    paddingRight: 25,
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 8,
   },
   input: {
+    height: 50,
     borderWidth: 1,
-    borderColor: '#ced4da',
-    borderRadius: 4,
-    padding: 8,
-    width: '30%',
+    borderColor: '#CED4DA',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    fontSize: 16,
     backgroundColor: '#fff',
-  },
-  emailContainer: {
-    marginLeft: '3%',
-    height: '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordContainer: {
-    marginLeft: '3%',
-    height: '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   groupContainer: {
-    marginLeft: '3%',
-    marginBottom: 10,
-    height: '40%',
-  },
-  groupItem: {
-    flexBasis: '18.5%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    marginBottom: 20,
   },
   columnWrapper: {
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Melhor espaçamento entre as colunas
     marginBottom: 10,
   },
-  grid: {},
-
-  selectedGroup: {
-    backgroundColor: '#007bff',
-    borderColor: '#0056b3',
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between', // Ajusta o espaço entre as células
   },
-  groupText: {
-    color: 'black',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  selectedGroupText: {
-    color: 'white',
-  },
-  saveButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    alignSelf: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-  },
-  tableContainer: {
-    alignItems: 'center',
-    height: '35%',
-    width: '85%',
-  },
-
   card: {
-    flexBasis: '18.5%',
+    flexBasis: '48%', // Ajusta o tamanho para 2 colunas
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: 5,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#DDD',
   },
   selectedCard: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#007BFF',
     borderColor: '#0056b3',
   },
   cardText: {
-    color: 'black',
+    color: '#333',
     fontSize: 16,
     textAlign: 'center',
   },
   selectedCardText: {
-    color: 'white',
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  saveButton: {
+    backgroundColor: '#FF8C00',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  tableContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+    height: '30%',
   },
 });
