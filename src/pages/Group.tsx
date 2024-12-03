@@ -18,14 +18,10 @@ import { Suggestion } from '../schemas/Misc';
 import { getSuggestionsDepartment } from '../service/Suggestions';
 
 const RolesManagementScreen: React.FC = () => {
-  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>(
-    [],
-  );
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>([]);
   const [groupName, setGroupName] = useState('');
   const [departments, setDepartments] = useState<Suggestion[]>([]);
-  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>(
-    [],
-  );
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -102,35 +98,32 @@ const RolesManagementScreen: React.FC = () => {
       <View style={styles.titleHeader}>
         <Text style={styles.title}>Gerenciamento de Grupo</Text>
       </View>
+      <View style={styles.formContainer}>
+        <View style={styles.form}>
+          <View style={styles.nameContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do Grupo"
+              onChangeText={setGroupName}
+              value={groupName}
+            />
+          </View>
 
-      <View style={styles.form}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.label}>Nome do Grupo</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nome do Grupo"
-            onChangeText={setGroupName}
-            value={groupName}
-          />
+          <View style={styles.departmentContainer}>
+            <Text style={styles.label}>Departamentos</Text>
+            <FlatList
+              data={departments}
+              renderItem={renderDepartment}
+              keyExtractor={item => item.id.toString()}
+              numColumns={4}
+              columnWrapperStyle={styles.columnWrapper}
+              contentContainerStyle={styles.grid}
+            />
+          </View>
         </View>
-
-        <View style={styles.departmentContainer}>
-          <Text style={styles.label}>Departamentos</Text>
-          <FlatList
-            data={departments}
-            renderItem={renderDepartment}
-            keyExtractor={item => item.id.toString()}
-            numColumns={4}
-            columnWrapperStyle={styles.columnWrapper}
-            contentContainerStyle={styles.grid}
-          />
-        </View>
-
-        <View>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.buttonText}>Salvar</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.buttonText}>Salvar</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.tableContainer}>
@@ -150,98 +143,102 @@ export default RolesManagementScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    backgroundColor: '#DCDADA',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    padding: 15,
   },
   titleHeader: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
     backgroundColor: '#EDE7E7',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    paddingVertical: 15,
+    borderRadius: 8,
+    marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
-    height: '7%',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  formContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   form: {
-    height: '33%',
-    width: '100%',
-    flexDirection: 'column',
+    marginBottom: 15,
   },
   nameContainer: {
-    marginLeft: '3%',
-    height: '20%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: 20,
   },
   label: {
-    fontSize: 20,
-    paddingRight: 25,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   input: {
+    height: 40,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#ced4da',
     borderRadius: 4,
-    padding: 8,
-    width: '30%',
-    backgroundColor: '#fff',
+    paddingLeft: 12,
+    fontSize: 16,
+    color: '#333',
   },
   departmentContainer: {
-    marginLeft: '3%',
-    marginBottom: 10,
-    height: '30%',
+    marginBottom: 20,
   },
   columnWrapper: {
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
-  grid: {},
+  grid: {
+    marginBottom: 10,
+  },
   card: {
-    flexBasis: '18.5%',
-    backgroundColor: '#fff',
+    flexBasis: '23%',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
+    margin: 5,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
+    alignItems: 'center',
   },
   selectedCard: {
-    backgroundColor: '#007bff',
-    borderColor: '#0056b3',
+    backgroundColor: '#FF8C00',
+    borderColor: 'white',
   },
   cardText: {
-    color: 'black',
+    color: '#333',
     fontSize: 16,
-    textAlign: 'center',
   },
   selectedCardText: {
-    color: 'white',
+    color: '#FFF',
   },
   saveButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
+    backgroundColor: '#FF8C00',
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
     alignSelf: 'center',
+    marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   tableContainer: {
     alignItems: 'center',
     maxHeight: 300,
     height: '50%',
-    width: '85%',
+    width: '100%',
   },
 });
