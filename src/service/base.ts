@@ -10,17 +10,24 @@ const headers = {
 
 type Method = 'get' | 'post' | 'put' | 'delete';
 
-export const validateMethod = (method: Method): boolean =>
+const validateMethod = (method: Method): boolean =>
   ['get', 'post', 'put', 'delete'].includes(method);
 
-export async function processRequest<R, T>(path: string, body: R): Promise<T> {
+export async function processRequest<R, T>(
+  method: Method,
+  path: string,
+  body?: R,
+): Promise<T> {
+  if (!validateMethod(method)) throw new Error(`Invalid method: ${method}`);
   const url = `${getApiUrl()}/api/v1/${path}`;
-  const response = await axios.post<T>(url, body, headers);
+  const response = await axios[method]<T>(url, body, headers);
   return response.data;
 }
 
 export const processPaginatedRequest = async <T>(
+  method: Method,
   path: string,
-  body: PageRequest,
+  body?: PageRequest,
 ): Promise<Page<T>> =>
-  (await processRequest<PageRequest, Page<T>>(path, body)) || emptyPage();
+  (await processRequest<PageRequest, Page<T>>(method, path, body)) ||
+  emptyPage();
