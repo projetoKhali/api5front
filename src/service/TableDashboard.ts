@@ -26,6 +26,7 @@ export async function getDashboardTableData(
   tableRequest: DashboardFilter,
 ): Promise<FormattedDashboardTablePage> {
   const response = await processPaginatedRequest<FactHiringProcessItem>(
+    'post',
     'hiring-process/table',
     tableRequest,
   );

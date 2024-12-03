@@ -1,9 +1,10 @@
 import { LoginRequest, LoginResponse } from '../schemas/Login';
 import { processRequest } from './base';
 
-export async function postLogin(payload: LoginRequest): Promise<LoginResponse> {
+export async function postLogin(body: LoginRequest): Promise<LoginResponse> {
   return processRequest<LoginRequest, LoginResponse>(
+    'post',
     'authentication/login',
-    payload,
+    body,
   );
 }
