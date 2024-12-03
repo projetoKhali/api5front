@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Dimensions, Pressable, Text, TextInput, View } from 'react-native';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 export type MultiSelectFilterRef = {

@@ -14,7 +14,6 @@ import { User } from '../schemas/Login';
 import { CreateUserSchema, UserSchema } from '../schemas/User';
 import { createUser, getUsers } from '../service/User';
 import { CreateAccessGroupResponse, AccessGroupSchema } from '../schemas/AccessGroup';
-import { Suggestion } from '../schemas/Suggestion';
 import { getAccessGroupes } from '../service/AccessGroup';
 
 

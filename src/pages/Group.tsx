@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, Alert } 
 import { AccessGroupSchema, CreateAccessGroupSchema, CreateAccessGroupResponse } from '../schemas/AccessGroup';
 import { getAccessGroupes, createAccessGroup  } from '../service/AccessGroup';
 import DynamicTable from '../components/DynamicTable';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import { getSuggestionsDepartment } from '../service/Suggestions';
 
 const RolesManagementScreen: React.FC = () => {
