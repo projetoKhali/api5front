@@ -15,4 +15,3 @@ export interface CreateAccessGroupResponse {
   id: number;
   name: string;
 }
-

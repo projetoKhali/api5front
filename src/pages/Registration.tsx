@@ -6,20 +6,18 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Button,
   Alert,
 } from 'react-native';
 import DynamicTable from '../components/DynamicTable';
-import { User } from '../schemas/Login';
 import { CreateUserSchema, UserSchema } from '../schemas/User';
 import { createUser, getUsers } from '../service/User';
-import { CreateAccessGroupResponse, AccessGroupSchema } from '../schemas/AccessGroup';
+import { AccessGroupSchema } from '../schemas/AccessGroup';
 import { getAccessGroupes } from '../service/AccessGroup';
 
-
 const UserManagementScreen: React.FC = () => {
-
-  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>([]);
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>(
+    [],
+  );
   const [userList, setUserList] = useState<UserSchema[]>([]);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -27,7 +25,7 @@ const UserManagementScreen: React.FC = () => {
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
 
   const handleSelectGroup = (id: number) => {
-    setSelectedGroupId((prevId) => (prevId === id ? null : id));
+    setSelectedGroupId(prevId => (prevId === id ? null : id));
   };
 
   const handleSave = async () => {
@@ -40,7 +38,7 @@ const UserManagementScreen: React.FC = () => {
       name: userName,
       email: userEmail,
       password: userPassword,
-      groupId: selectedGroupId
+      groupId: selectedGroupId,
     };
 
     try {
@@ -91,13 +89,11 @@ const UserManagementScreen: React.FC = () => {
         onPress={() => handleSelectGroup(item.id)}
       >
         <Text style={[styles.cardText, isSelected && styles.selectedCardText]}>
-          {item.name  }
+          {item.name}
         </Text>
       </TouchableOpacity>
     );
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -142,7 +138,7 @@ const UserManagementScreen: React.FC = () => {
           <FlatList
             data={accessGroupList}
             renderItem={renderGroups}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={item => item.id.toString()}
             numColumns={3}
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.grid}
@@ -150,24 +146,21 @@ const UserManagementScreen: React.FC = () => {
         </View>
 
         <View>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>
         </View>
-
       </View>
 
       <View style={styles.tableContainer}>
-        <DynamicTable tableData={userList.map(user => ({
-          name: user.name,
-          email: user.email,
-          groupId: user.group,
-          }))} />
+        <DynamicTable
+          tableData={userList.map(user => ({
+            name: user.name,
+            email: user.email,
+            groupId: user.group,
+          }))}
+        />
       </View>
-
     </View>
   );
 };
@@ -226,7 +219,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  passwordContainer:{
+  passwordContainer: {
     marginLeft: '3%',
     height: '20%',
     flexDirection: 'row',
@@ -252,9 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  grid: {
-  },
-
+  grid: {},
 
   selectedGroup: {
     backgroundColor: '#007bff',

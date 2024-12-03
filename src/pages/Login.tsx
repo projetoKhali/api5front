@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/slices/authSlice';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Image,
+} from 'react-native';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { postLogin } from '../service/Login';
 
