@@ -58,8 +58,9 @@ const Report = () => {
   const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
     Suggestion[]
   >([]);
-  const userGroup: number[] | null = useSelector((state: RootState) =>
-    state.auth.user?.departments?.map(department => department.id) || null
+  const userGroup: number[] | null = useSelector(
+    (state: RootState) =>
+      state.auth.user?.departments?.map(department => department.id) || null,
   );
 
   type SuggestionsGetter = () => Suggestion[];
@@ -164,7 +165,7 @@ const Report = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
-      groupAccess: userGroup ? userGroup : null,
+      accessGroup: userGroup ? userGroup : null,
     };
   };
 

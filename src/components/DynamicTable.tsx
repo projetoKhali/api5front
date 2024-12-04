@@ -1,5 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, FlatList, LayoutChangeEvent } from 'react-native';
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  FlatList,
+} from 'react-native';
 
 type TableProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,15 +55,13 @@ const DynamicTable = ({ tableData }: TableProps) => {
           />
         </View>
       </View>
-      
     </ScrollView>
-    
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
+    display: 'flex',
     height: '100%',
     width: '100%',
     backgroundColor: 'white',

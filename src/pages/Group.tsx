@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { GroupAccessSchema, CreateGroupAccessSchema, CreateGroupAccessResponse } from '../schemas/GroupAccess';
-import { getGroupAccesses, createGroupAccess  } from '../service/GroupAccess';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from 'react-native';
+import {
+  AccessGroupSchema,
+  CreateAccessGroupSchema,
+} from '../schemas/AccessGroup';
+import { getAccessGroupes, createAccessGroup } from '../service/AccessGroup';
 import DynamicTable from '../components/DynamicTable';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import { getSuggestionsDepartment } from '../service/Suggestions';
 
 const RolesManagementScreen: React.FC = () => {
-  const [groupAccessList, setGroupAccessList] = useState<GroupAccessSchema[]>([]);
+  const [accessGroupList, setAccessGroupList] = useState<AccessGroupSchema[]>(
+    [],
+  );
   const [groupName, setGroupName] = useState('');
   const [departments, setDepartments] = useState<Suggestion[]>([]);
-  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>([]); 
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>(
+    [],
+  );
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -22,16 +37,16 @@ const RolesManagementScreen: React.FC = () => {
       }
     };
 
-    const fetchGroupAccess = async () => {
+    const fetchAccessGroup = async () => {
       try {
-        const data = await getGroupAccesses();
-        setGroupAccessList(data);
+        const data = await getAccessGroupes();
+        setAccessGroupList(data);
       } catch (error) {
         console.error('Erro ao carregar os grupos de acesso:', error);
       }
     };
 
-    fetchGroupAccess();
+    fetchAccessGroup();
     fetchDepartments();
   }, []);
 
@@ -41,28 +56,29 @@ const RolesManagementScreen: React.FC = () => {
       return;
     }
 
-    const body: CreateGroupAccessSchema = {
+    const body: CreateAccessGroupSchema = {
       name: groupName,
       departments: selectedDepartmentIds,
     };
 
     try {
-      const response = await createGroupAccess(body);
+      const response = await createAccessGroup(body);
       Alert.alert('Sucesso', `Grupo ${response.name} criado com sucesso!`);
       setGroupName('');
       setSelectedDepartmentIds([]);
-      const updatedGroups = await getGroupAccesses();
-      setGroupAccessList(updatedGroups);
+      const updatedGroups = await getAccessGroupes();
+      setAccessGroupList(updatedGroups);
     } catch (error) {
       console.error('Erro ao criar grupo:', error);
       Alert.alert('Erro', 'Falha ao criar o grupo.');
     }
   };
 
-
   const handleSelectDepartment = (id: number) => {
-    setSelectedDepartmentIds((prevIds) =>
-      prevIds.includes(id) ? prevIds.filter((item) => item !== id) : [...prevIds, id]
+    setSelectedDepartmentIds(prevIds =>
+      prevIds.includes(id)
+        ? prevIds.filter(item => item !== id)
+        : [...prevIds, id],
     );
   };
 
@@ -94,7 +110,7 @@ const RolesManagementScreen: React.FC = () => {
             style={styles.input}
             placeholder="Nome do Grupo"
             onChangeText={setGroupName}
-            value= {groupName}
+            value={groupName}
           />
         </View>
 
@@ -103,7 +119,7 @@ const RolesManagementScreen: React.FC = () => {
           <FlatList
             data={departments}
             renderItem={renderDepartment}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={item => item.id.toString()}
             numColumns={4}
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.grid}
@@ -111,23 +127,21 @@ const RolesManagementScreen: React.FC = () => {
         </View>
 
         <View>
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSave}
-          >
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.buttonText}>Salvar</Text>
           </TouchableOpacity>
         </View>
-
       </View>
 
       <View style={styles.tableContainer}>
-        <DynamicTable tableData={groupAccessList.map(group => ({
-          name: group.name,
-          departments: group.departments?.map((item) => item.title).join(',') || '',
-        }))} />
+        <DynamicTable
+          tableData={accessGroupList.map(group => ({
+            name: group.name,
+            departments:
+              group.departments?.map(item => item.title).join(',') || '',
+          }))}
+        />
       </View>
-      
     </View>
   );
 };
@@ -189,8 +203,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  grid: {
-  },
+  grid: {},
   card: {
     flexBasis: '18.5%',
     backgroundColor: '#fff',
