@@ -181,7 +181,7 @@ const Dashboard = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
-      groupAccess: userGroup || null,
+      accessGroup: userGroup || null,
     };
   };
 

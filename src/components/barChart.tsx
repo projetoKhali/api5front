@@ -71,7 +71,7 @@ export default function BarChart({ data }: BarChartProps) {
             },
             grid: { stroke: 'none' },
           }}
-          tickFormat={(t) => translateMonth(t)}
+          tickFormat={t => translateMonth(t)}
         />
 
         <VictoryAxis

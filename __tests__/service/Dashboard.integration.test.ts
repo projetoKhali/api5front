@@ -62,7 +62,7 @@ describe('Dashboard Service', () => {
         vacancyStatus: [1, 2],
         page: 1,
         pageSize: 10,
-        groupAccess: [1, 2],
+        accessGroup: [1, 2],
       };
 
       const result = await getDashboardData(params);
@@ -87,7 +87,7 @@ describe('Dashboard Service', () => {
         vacancyStatus: [1, 2],
         page: 1,
         pageSize: 10,
-        groupAccess: [1, 2],
+        accessGroup: [1, 2],
       };
 
       const result = await getDashboardData(params);

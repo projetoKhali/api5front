@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import {
   View,
@@ -14,8 +13,7 @@ import { GoGraph } from 'react-icons/go';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { LuPanelLeftClose } from 'react-icons/lu';
 import { MdGroups2 } from 'react-icons/md';
-import { MdAppRegistration } from "react-icons/md";
-
+import { MdAppRegistration } from 'react-icons/md';
 
 interface SidebarProps {
   closeSidebar: () => void;
@@ -38,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 
       <View style={styles.image}>
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require('../../assets/images/Logo-pro4tech.png')}
           style={styles.logo}
         />
@@ -63,7 +62,6 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
           <MdAppRegistration size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Cadastro</Text>
         </Link>
-
       </View>
     </LinearGradient>
   );

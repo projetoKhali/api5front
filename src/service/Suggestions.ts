@@ -1,5 +1,5 @@
 import { Page, PageFilterRequest, Suggestion } from '../schemas/Misc';
-import { processPaginatedRequest } from './base';
+import { processPaginatedRequest, processRequest } from './base';
 
 export type SuggestionsParams = {
   departments: number[];
@@ -12,31 +12,21 @@ export type SuggestionsWithIdsParams = SuggestionsParams & {
 export async function getSuggestionsRecruiter(
   body: PageFilterRequest<SuggestionsParams>,
 ): Promise<Page<Suggestion>> {
-  return processPaginatedRequest('suggestions/recruiter', body);
+  return processPaginatedRequest('post', 'suggestions/recruiter', body);
 }
 
 export async function getSuggestionsProcess(
   body: PageFilterRequest<SuggestionsWithIdsParams>,
 ): Promise<Page<Suggestion>> {
-  return processPaginatedRequest('suggestions/process', body);
+  return processPaginatedRequest('post', 'suggestions/process', body);
 }
 
 export async function getSuggestionsVacancy(
   body: PageFilterRequest<SuggestionsWithIdsParams>,
 ): Promise<Page<Suggestion>> {
-  return processPaginatedRequest('suggestions/vacancy', body);
+  return processPaginatedRequest('post', 'suggestions/vacancy', body);
 }
 
-
-export async function getSuggestionsDepartment(
-): Promise<Suggestion[]> {
-  const response = await axios.get<Suggestion[]>(
-    `${getApiUrl()}/api/v1/suggestions/department`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-  return response.data || [];
+export async function getSuggestionsDepartment(): Promise<Suggestion[]> {
+  return processRequest('get', 'suggestions/department');
 }

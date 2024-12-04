@@ -44,7 +44,6 @@ export default function App() {
                 <Route path="/report" element={<Report />} />
                 <Route path="/group" element={<Group />} />
                 <Route path="/registration" element={<Registration />} />
-
               </Routes>
             </View>
           </>
