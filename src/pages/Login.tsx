@@ -78,20 +78,19 @@ const Login = () => {
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>Entrar</Text>
+        <Text style={styles.loginButtonText}>DEPLOY</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-// #226314, #f5f5f5
 const styles = StyleSheet.create({
   container: {
     height: '60%',
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#226314', 
+    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     width: '80%',
     maxWidth: 400,
