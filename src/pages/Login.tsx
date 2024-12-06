@@ -78,7 +78,7 @@ const Login = () => {
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>ENTRAR</Text>
+        <Text style={styles.loginButtonText}>deploy</Text>
       </TouchableOpacity>
     </View>
   );
