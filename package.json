@@ -24,6 +24,7 @@
     "@react-navigation/stack": "^6.4.1",
     "@reduxjs/toolkit": "^2.3.0",
     "@types/react-router-dom": "^5.3.3",
+    "api5-front": "file:",
     "axios": "^1.7.7",
     "axis": "^1.0.0",
     "date-fns": "^4.1.0",
