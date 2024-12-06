@@ -15,7 +15,7 @@ import { getDashboardData } from '../service/Dashboard';
 import PieChart from '../components/PieChart';
 import DynamicTable from '../components/DynamicTable';
 import { getDashboardTableData } from '../service/TableDashboard';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import MultiSelectFilter, {
   MultiSelectFilterRef,
 } from '../components/MultiSelectFilter';
@@ -25,8 +25,14 @@ import {
   getSuggestionsProcess,
   getSuggestionsVacancy,
 } from '../service/Suggestions';
-import { DashboardFilter } from '../schemas/Dashboard';
+import {
+  DashboardCardsInfo,
+  DashboardFilter,
+  DashboardVacancyStatus,
+} from '../schemas/Dashboard';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -65,6 +71,10 @@ const Dashboard = () => {
     useState<SuggestionsGetter>(() => () => processes);
   const [getSuggestionsVacancies, setGetSuggestionsVacancies] =
     useState<SuggestionsGetter>(() => () => vacancies);
+  const userGroup: number[] | null = useSelector(
+    (state: RootState) =>
+      state.auth.user?.departments?.map(department => department.id) || null,
+  );
 
   useEffect(() => {
     setGetSuggestionsRecruiters(() => () => recruiters);
@@ -114,22 +124,11 @@ const Dashboard = () => {
     { month: string; duration: number }[]
   >([]);
 
-  const [cardsData, setCardsData] = useState<{
-    processOpen: string;
-    processOverdue: string;
-    processCloseToExpiring: string;
-    processClosed: string;
-    totalCandidates: string;
-  } | null>(null);
-
-  const [pieData, setPieData] = useState<{
-    abertos: number;
-    emAnálise: number;
-    fechados: number;
-  }>({
-    abertos: 0,
-    emAnálise: 0,
-    fechados: 0,
+  const [cardsData, setCardsData] = useState<DashboardCardsInfo | null>(null);
+  const [pieData, setPieData] = useState<DashboardVacancyStatus>({
+    open: 0,
+    analyzing: 0,
+    closed: 0,
   });
 
   const [tableData, setTableData] = useState<FormattedFactHiringProcessItem[]>(
@@ -137,19 +136,35 @@ const Dashboard = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    const page = await getSuggestionsRecruiter({
+      page: 1,
+      pageSize: 20,
+      departments: userGroup || [],
+    });
+
+    setRecruiters(page.items);
   };
 
   const fetchProcesses = async () => {
-    setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
-    );
+    const page = await getSuggestionsProcess({
+      page: 1,
+      pageSize: 20,
+      ids: selectedRecruiters?.map(r => r.id) ?? [],
+      departments: userGroup || [],
+    });
+
+    setProcesses(page.items);
   };
 
   const fetchVacancies = async () => {
-    setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
-    );
+    const page = await getSuggestionsVacancy({
+      page: 1,
+      pageSize: 20,
+      ids: selectedProcesses?.map(p => p.id) ?? [],
+      departments: userGroup || [],
+    });
+
+    setVacancies(page.items);
   };
 
   const createFilterBody = (): DashboardFilter => {
@@ -166,6 +181,7 @@ const Dashboard = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      accessGroup: userGroup || null,
     };
   };
 
@@ -178,24 +194,14 @@ const Dashboard = () => {
     }));
 
     setChartData(formattedChartData);
-    setCardsData({
-      processOpen: cards.open.toString(),
-      processOverdue: cards.inProgress.toString(),
-      processCloseToExpiring: cards.approachingDeadline.toString(),
-      processClosed: cards.closed.toString(),
-      totalCandidates: cards.averageHiringTime.toString(),
-    });
-    setPieData({
-      abertos: vacancyStatus.open,
-      emAnálise: vacancyStatus.analyzing,
-      fechados: vacancyStatus.closed,
-    });
+    setCardsData(cards);
+    setPieData(vacancyStatus);
   };
 
   const fetchTableData = async () => {
     const response = await getDashboardTableData(createFilterBody());
 
-    setTableData(response.factHiringProcess || []);
+    setTableData(response.items || []);
     setTotalPages(response.numMaxPages || 1);
   };
 
@@ -274,7 +280,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+    fetchTableData();
   }, [page]);
 
   return (
@@ -355,23 +361,23 @@ const Dashboard = () => {
       <View style={styles.cardSection}>
         <Card
           titleCard="Processos Abertos"
-          valueCard={cardsData?.processOpen ?? ''}
+          valueCard={`${cardsData?.open ?? ''}`}
         />
         <Card
           titleCard="Processos Vencidos"
-          valueCard={cardsData?.processOverdue ?? ''}
+          valueCard={`${cardsData?.inProgress ?? ''}`}
         />
         <Card
           titleCard="Processos a Vencer"
-          valueCard={cardsData?.processCloseToExpiring ?? ''}
+          valueCard={`${cardsData?.approachingDeadline ?? ''}`}
         />
         <Card
           titleCard="Processos Encerrados"
-          valueCard={cardsData?.processClosed ?? ''}
+          valueCard={`${cardsData?.closed ?? ''}`}
         />
         <Card
           titleCard="Tempo médio contratação (Dias)"
-          valueCard={cardsData?.totalCandidates ?? ''}
+          valueCard={`${cardsData?.averageHiringTime ?? ''}`}
         />
       </View>
 

@@ -1,0 +1,15 @@
+.editorconfig
+.env.example
+eslint.config.mjs
+.git
+.github
+.gitignore
+.husky
+.lint-staged.js
+.markdownlint.yml
+node_modules
+pnpm-lock.yaml
+.prettierignore
+.prettierrc
+.yamllint.yml
+.env

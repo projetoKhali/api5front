@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import {
   View,
@@ -10,9 +9,11 @@ import {
 } from 'react-native';
 import { Link } from 'react-router-dom';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GoGraph, GoHome } from 'react-icons/go';
+import { GoGraph } from 'react-icons/go';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { LuPanelLeftClose } from 'react-icons/lu';
+import { MdGroups2 } from 'react-icons/md';
+import { MdAppRegistration } from 'react-icons/md';
 
 interface SidebarProps {
   closeSidebar: () => void;
@@ -35,6 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 
       <View style={styles.image}>
         <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require('../../assets/images/Logo-pro4tech.png')}
           style={styles.logo}
         />
@@ -42,11 +44,6 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
 
       <View style={styles.menu}>
         <Link to="/" onClick={closeSidebar} style={styles.link}>
-          <GoHome size={24} style={styles.icon} />
-          <Text style={styles.menuItem}>Home Page</Text>
-        </Link>
-
-        <Link to="/dashboard" onClick={closeSidebar} style={styles.link}>
           <GoGraph size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Dashboard</Text>
         </Link>
@@ -54,6 +51,16 @@ const Sidebar: React.FC<SidebarProps> = ({ closeSidebar }) => {
         <Link to="/report" onClick={closeSidebar} style={styles.link}>
           <HiOutlineDocumentReport size={24} style={styles.icon} />
           <Text style={styles.menuItem}>Relatório</Text>
+        </Link>
+
+        <Link to="/group" onClick={closeSidebar} style={styles.link}>
+          <MdGroups2 size={24} style={styles.icon} />
+          <Text style={styles.menuItem}>Grupos</Text>
+        </Link>
+
+        <Link to="/registration" onClick={closeSidebar} style={styles.link}>
+          <MdAppRegistration size={24} style={styles.icon} />
+          <Text style={styles.menuItem}>Cadastro</Text>
         </Link>
       </View>
     </LinearGradient>

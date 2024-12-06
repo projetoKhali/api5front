@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Filter, { FilterRef } from '../components/filter';
-import { Suggestion } from '../schemas/Suggestion';
+import { Suggestion } from '../schemas/Misc';
 import {
   getSuggestionsRecruiter,
   getSuggestionsProcess,
@@ -26,6 +26,8 @@ import MultiSelectFilter, {
   MultiSelectFilterRef,
 } from '../components/MultiSelectFilter';
 import { processStatuses, vacancyStatuses } from '../schemas/Status';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const PAGE_SIZE = 5;
 
@@ -56,6 +58,10 @@ const Report = () => {
   const [selectedVacancyStatuses, setSelectedVacancyStatuses] = useState<
     Suggestion[]
   >([]);
+  const userGroup: number[] | null = useSelector(
+    (state: RootState) =>
+      state.auth.user?.departments?.map(department => department.id) || null,
+  );
 
   type SuggestionsGetter = () => Suggestion[];
   const [getSuggestionsRecruiters, setGetSuggestionsRecruiters] =
@@ -114,19 +120,35 @@ const Report = () => {
   );
 
   const fetchRecruiters = async () => {
-    setRecruiters(await getSuggestionsRecruiter());
+    const page = await getSuggestionsRecruiter({
+      page: 1,
+      pageSize: 20,
+      departments: userGroup || [],
+    });
+
+    setRecruiters(page.items);
   };
 
   const fetchProcesses = async () => {
-    setProcesses(
-      await getSuggestionsProcess(selectedRecruiters?.map(r => r.id) ?? []),
-    );
+    const page = await getSuggestionsProcess({
+      page: 1,
+      pageSize: 20,
+      ids: selectedRecruiters?.map(r => r.id) ?? [],
+      departments: userGroup || [],
+    });
+
+    setProcesses(page.items);
   };
 
   const fetchVacancies = async () => {
-    setVacancies(
-      await getSuggestionsVacancy(selectedProcesses?.map(p => p.id) ?? []),
-    );
+    const page = await getSuggestionsVacancy({
+      page: 1,
+      pageSize: 20,
+      ids: selectedProcesses?.map(p => p.id) ?? [],
+      departments: userGroup || [],
+    });
+
+    setVacancies(page.items);
   };
 
   const createFilterBody = (): DashboardFilter => {
@@ -143,13 +165,14 @@ const Report = () => {
       vacancyStatus: selectedVacancyStatuses?.map(status => status.id) ?? [],
       page: page,
       pageSize: PAGE_SIZE,
+      accessGroup: userGroup ? userGroup : null,
     };
   };
 
   const fetchTableData = async () => {
     const response = await getDashboardTableData(createFilterBody());
 
-    setTableData(response.factHiringProcess || []);
+    setTableData(response.items || []);
     setTotalPages(response.numMaxPages || 1);
   };
 
@@ -167,7 +190,7 @@ const Report = () => {
   }, []);
 
   useEffect(() => {
-    fetchTableData(); // Atualiza os dados da tabela ao mudar de página
+    fetchTableData();
   }, [page]);
 
   const clearFilters = async () => {
@@ -196,7 +219,7 @@ const Report = () => {
     await fetchTableData();
   };
 
-  const baseOnFilterChange = async () => {
+  const applyFiltersDelayed = async () => {
     if (applyFiltersTimerRef.current) {
       clearTimeout(applyFiltersTimerRef.current);
     }
@@ -210,30 +233,17 @@ const Report = () => {
     }, 1000);
   };
 
-  const recruitersFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedRecruiters(selected);
-    baseOnFilterChange();
-  };
-
-  const processesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcesses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacanciesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancies(selected);
-    baseOnFilterChange();
-  };
-
-  const processStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedProcessStatuses(selected);
-    baseOnFilterChange();
-  };
-
-  const vacancyStatusesFilterOnChange = async (selected: Suggestion[]) => {
-    setSelectedVacancyStatuses(selected);
-    baseOnFilterChange();
-  };
+  useEffect(() => {
+    applyFiltersDelayed();
+  }, [
+    selectedRecruiters,
+    selectedProcesses,
+    selectedVacancies,
+    dateStartFilter,
+    dateEndFilter,
+    selectedProcessStatuses,
+    selectedVacancyStatuses,
+  ]);
 
   const isAnyFilterActive = () =>
     selectedRecruiters.length > 0 ||
@@ -275,25 +285,19 @@ const Report = () => {
           ref={recruitersMultiSelectFilterRef}
           placeholder={'Recrutadores'}
           getSuggestions={getSuggestionsRecruiters}
-          onChange={(selected: Suggestion[]) =>
-            recruitersFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedRecruiters(selected)}
         />
         <MultiSelectFilter
           ref={processesMultiSelectFilterRef}
           placeholder={'Processos Seletivos'}
           getSuggestions={getSuggestionsProcesses}
-          onChange={(selected: Suggestion[]) =>
-            processesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedProcesses(selected)}
         />
         <MultiSelectFilter
           ref={vacanciesMultiSelectFilterRef}
           placeholder={'Vagas'}
           getSuggestions={getSuggestionsVacancies}
-          onChange={(selected: Suggestion[]) =>
-            vacanciesFilterOnChange(selected)
-          }
+          onChange={(selected: Suggestion[]) => setSelectedVacancies(selected)}
         />
         <Filter
           ref={dateStartFilterRef}
@@ -312,7 +316,7 @@ const Report = () => {
           placeholder={'Status do Processo'}
           getSuggestions={() => vacancyStatuses}
           onChange={(selected: Suggestion[]) =>
-            processStatusesFilterOnChange(selected)
+            setSelectedProcessStatuses(selected)
           }
         />
         <MultiSelectFilter
@@ -320,7 +324,7 @@ const Report = () => {
           placeholder={'Status da Vaga'}
           getSuggestions={() => processStatuses}
           onChange={(selected: Suggestion[]) =>
-            vacancyStatusesFilterOnChange(selected)
+            setSelectedVacancyStatuses(selected)
           }
         />
         <View

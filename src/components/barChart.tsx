@@ -52,7 +52,7 @@ export default function BarChart({ data }: BarChartProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.chartTitle}>
-        Tempo médio de contratação (Em dias)
+        Tempo médio de contratação (Dias)
       </Text>
       <VictoryChart
         theme={VictoryTheme.material}
@@ -71,7 +71,7 @@ export default function BarChart({ data }: BarChartProps) {
             },
             grid: { stroke: 'none' },
           }}
-          tickFormat={(t) => translateMonth(t)}
+          tickFormat={t => translateMonth(t)}
         />
 
         <VictoryAxis
